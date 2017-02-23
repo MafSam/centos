@@ -1,0 +1,43 @@
+From cf10a0af2c72e9972fa436aa6c2420a00ac69e46 Mon Sep 17 00:00:00 2001
+From: Suganath Prabu Subramani <suganath-prabu.subramani@broadcom.com>
+Date: Wed, 26 Oct 2016 13:34:39 +0530
+Subject: [PATCH 08/11] scsi: mpt3sas: set EEDP-escape-flags for SAS35 devices.
+
+An UNMAP command on a PI formatted device will leave the Logical Block
+Application Tag and Logical Block Reference Tag as all F's (for those LBAs
+that are unmapped). To avoid IO errors if those LBAs are subsequently read
+before they are written with valid tag fields, the MPI SCSI IO requests
+need to set the EEDPFlags element EEDP Escape Mode field, Bits [7:6]
+appropriately. A value of 2 should be set to disable all PI checks if the
+Logical Block Application Tag is 0xFFFF for PI types 1 and 2.  A value
+of 3 should be set to disable all PI checks if the Logical Block
+Application Tag is 0xFFFF and the Logical Block Reference Tag is
+0xFFFFFFFF for PI type 3.
+
+Signed-off-by: Chaitra P B <chaitra.basappa@broadcom.com>
+Signed-off-by: Sathya Prakash <sathya.prakash@broadcom.com>
+Signed-off-by: Suganath Prabu S <suganath-prabu.subramani@broadcom.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Tomas Henzl <thenzl@redhat.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+---
+ drivers/scsi/mpt3sas/mpt3sas_scsih.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/scsi/mpt3sas/mpt3sas_scsih.c b/drivers/scsi/mpt3sas/mpt3sas_scsih.c
+index 980c69d..0ff2ed3 100644
+--- a/drivers/scsi/mpt3sas/mpt3sas_scsih.c
++++ b/drivers/scsi/mpt3sas/mpt3sas_scsih.c
+@@ -4040,6 +4040,9 @@ _scsih_setup_eedp(struct MPT3SAS_ADAPTER *ioc, struct scsi_cmnd *scmd,
+ 
+ 	mpi_request_3v->EEDPBlockSize =
+ 	    cpu_to_le16(scmd->device->sector_size);
++
++	if (ioc->is_gen35_ioc)
++		eedp_flags |= MPI25_SCSIIO_EEDPFLAGS_APPTAG_DISABLE_MODE;
+ 	mpi_request->EEDPFlags = cpu_to_le16(eedp_flags);
+ }
+ 
+-- 
+1.8.3.1
+

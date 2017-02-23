@@ -3,9 +3,9 @@
 
 Summary: The Linux kernel
 
-%define dist .el7
+%define dist .el7.centos.plus
 
-# % define buildid .local
+# % define buildid 
 
 # For a kernel released for public testing, released_kernel should be 1.
 # For internal testing builds during development, it should be 0.
@@ -36,7 +36,8 @@ Summary: The Linux kernel
 # kernel
 %define with_default   %{?_without_default:   0} %{?!_without_default:   1}
 # kernel-debug
-%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
+# %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
+%define with_debug 0
 # kernel-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
@@ -153,6 +154,9 @@ Summary: The Linux kernel
 %ifarch i686
 %define asmarch x86
 %define hdrarch i386
+%define all_arch_configs kernel-%{version}-i?86*.config
+%define image_install_path boot
+%define kernel_image arch/x86/boot/bzImage
 %endif
 
 %ifarch x86_64
@@ -208,7 +212,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i686 s390 ppc
+%define nobuildarches s390 ppc
 
 %ifarch %nobuildarches
 %define with_default 0
@@ -220,7 +224,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%define cpupowerarchs x86_64 ppc64 ppc64le
+%define cpupowerarchs i686 x86_64 ppc64 ppc64le
 
 #
 # Three sets of minimum package version requirements in the form of Conflicts:
@@ -359,33 +363,111 @@ Source16: centos-kpatch.x509
 Source18: check-kabi
 
 Source20: Module.kabi_x86_64
-Source21: Module.kabi_ppc64
-Source22: Module.kabi_ppc64le
-Source23: Module.kabi_s390x
+#Source21: Module.kabi_ppc64
+#Source22: Module.kabi_ppc64le
+#Source23: Module.kabi_s390x
 
 Source25: kernel-abi-whitelists-%{distro_build}.tar.bz2
 
 Source50: kernel-%{version}-x86_64.config
-Source51: kernel-%{version}-x86_64-debug.config
+#Source51: kernel-%{version}-x86_64-debug.config
 
-Source60: kernel-%{version}-ppc64.config
-Source61: kernel-%{version}-ppc64-debug.config
-Source62: kernel-%{version}-ppc64le.config
-Source63: kernel-%{version}-ppc64le-debug.config
+#Source60: kernel-%{version}-ppc64.config
+#Source61: kernel-%{version}-ppc64-debug.config
+#Source62: kernel-%{version}-ppc64le.config
+#Source63: kernel-%{version}-ppc64le-debug.config
 
-Source70: kernel-%{version}-s390x.config
-Source71: kernel-%{version}-s390x-debug.config
-Source72: kernel-%{version}-s390x-kdump.config
+#Source70: kernel-%{version}-s390x.config
+#Source71: kernel-%{version}-s390x-debug.config
+#Source72: kernel-%{version}-s390x-kdump.config
+Source80: kernel-%{version}-i686.config
+#Source81: kernel-%{version}-i686-debug.config
 
 # Sources for kernel-tools
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# empty final patch to facilitate testing of kernel patches
-Patch999999: linux-kernel-test.patch
+# centos patches
 Patch1000: debrand-single-cpu.patch
 Patch1001: debrand-rh_taint.patch
 Patch1002: debrand-rh-i686-cpu.patch
+
+# i686 mods
+#Patch1003: ignorewarnings.patch
+Patch1004: removejiffies.patch
+Patch1005: cpufreq.patch
+Patch1006: i386-audit-stop-scri-stack-frame.patch
+Patch1007: addmissing.patch
+Patch1008: undorhirqstat.patch
+# Patch1009: otherfixes.patch
+Patch1009: clear-32bit-Werror-warnings.patch
+Patch1010: upstream-32bit-fixes.patch
+Patch1011: morefixes.patch
+
+# centosplus patches
+Patch30010: centos-linux-3.10-hid-non-LogiTech-remote-bug5780.patch
+# Patch30050: centos-linux-3.10-ipc-fix-compat-msgrcv-bug7099.patch
+# Patch30051: centos-linux-3.10-fix-argument-list-too-long.patch
+# Patch30052: centos-linux-3.10-missing-Unifying-device-bug7340.patch
+# Patch30053: centos-linux-3.10-vxlan-fix-crash-when-interface-created-with-no-group-bug7454.patch
+# Patch30054: centos-linux-3.10-numa-remove-bugON-bug7474.patch
+# Patch30055: centos-linux-3.10-fix-wakingup-AMD-family-bug7645.patch
+# Patch30056: centos-linux-3.10-fix-nfs4_sequence_corruptor-bug7604.patch
+# Patch30057: centos-linux-3.10-tick-clear-broadcast-pending-bug7852.patch
+# Patch30058: centos-linux-3.10-bnx2x_fix_link_for_KR-bug7942.patch
+Patch30059: centos-linux-3.10-reiserfs-fix-redefine-error.patch
+Patch30060: centos-linux-3.10-fix-em28xx-cards-bug8285.patch
+# Patch30061: centos-linux-3.10-netfilter-nf_conntrack-fix-bug8341.patch
+Patch30062: centos-linux-3.10-fix-ecryptfs-error-bug7369.patch
+# Patch30063: centos-linux-3.10-fix-ioatdma-driver-bug8778.patch
+# Patch30064: centos-linux-3.10-fix-xfrm-input-bug9646.patch
+# Patch30065: centos-linux-3.10-3w-sas-fix-race-bug10073.patch
+# Patch20066: centos-linux-3.10-fix-dm-thin-metadata-bug10191.patch
+# Patch20067: centos-linux-3.10-namespaces-bug10320.patch
+# Patch20068: centos-linux-3.10-mpt3sas-SML-bug10516.patch
+# Patch20069: centos-linux-3.10-mpt3sas-fix-block-bug10516.patch
+Patch20070: centos-linux-3.10-support-MacBookPro-bug10447.patch
+# Patch20071: centos-linux-3.10-3w-xxxx-fix-race-bug10033.patch
+# Patch20072: centos-linux-3.10-3w-9xxx-fix-race-1of2-bug10033.patch
+# Patch20073: centos-linux-3.10-3w-9xxx-fix-race-2of2-bug10033.patch
+# Patch20074: centos-linux-3.10-e1000-Tx-fix-1-bug10767.patch
+# Patch20075: centos-linux-3.10-e1000-Tx-fix-2-bug10767.patch
+# Patch20076: centos-linux-3.10-fix-truncation-bug-EFI-bug10729.patch
+# Patch20077: centos-linux-3.10-md-fix-freeing-private-data-bug11184.patch
+Patch20078: centos-linux-3.10-pci-fix-regression-mlx4-bug12277.patch
+# Patch20079: centos-linux-3.10-x86smp-fix-max_logical_packages_values-bug12466.patch
+Patch20080: centos-linux-3.10-ixgbe-force-VLNCTRL_VFE-bug12653.patch
+### mpt3sas patches bug12600 ###
+Patch20081: centos-linux-3.10-0001-scsi-mpt3sas-Fix-for-improper-info-displayed-in-var-.patch
+Patch20082: centos-linux-3.10-0002-scsi-mpt3sas-Fix-for-incorrect-numbers-for-MSIX-vect.patch
+Patch20083: centos-linux-3.10-0003-scsi-mpt3sas-Implement-device_remove_in_progress-che.patch
+Patch20084: centos-linux-3.10-0004-scsi-mpt3sas-Remove-unused-macro-MPT_DEVICE_TLR_ON.patch
+Patch20085: centos-linux-3.10-0005-scsi-mpt3sas-Bump-driver-version-as-14.100.00.00.patch
+Patch20086: centos-linux-3.10-0006-scsi-mpt3sas-Added-Device-ID-s-for-SAS35-devices-and.patch
+Patch20087: centos-linux-3.10-0007-scsi-mpt3sas-Increased-Additional-MSIX-support-for-S.patch
+Patch20088: centos-linux-3.10-0008-scsi-mpt3sas-set-EEDP-escape-flags-for-SAS35-devices.patch
+Patch20089: centos-linux-3.10-0009-scsi-mpt3sas-Use-the-new-MPI-2.6-32-bit-Atomic-Reque.patch
+Patch20090: centos-linux-3.10-0010-scsi-mpt3sas-Fix-for-Endianness-issue.patch
+Patch20091: centos-linux-3.10-0011-scsi-mpt3sas-Bump-driver-version-as-14.101.00.00.patch
+### megaraid patches bug12601 ###
+Patch20092: centos-linux-3.10-0001-scsi-megaraid_sas-Add-new-pci-device-Ids-for-SAS3.5-.patch
+Patch20093: centos-linux-3.10-0002-scsi-megaraid_sas-128-MSIX-Support.patch
+Patch20094: centos-linux-3.10-0003-scsi-megaraid_sas-EEDP-Escape-Mode-Support-for-SAS3..patch
+Patch20095: centos-linux-3.10-0004-scsi-megaraid_sas-SAS3.5-Generic-Megaraid-Controller.patch
+Patch20096: centos-linux-3.10-0005-scsi-megaraid_sas-SAS3.5-Generic-Megaraid-Controller.patch
+Patch20097: centos-linux-3.10-0006-scsi-megaraid_sas-Dynamic-Raid-Map-Changes-for-SAS3..patch
+Patch20098: centos-linux-3.10-0007-scsi-megaraid_sas-Add-the-Support-for-SAS3.5-Generic.patch
+Patch20099: centos-linux-3.10-0008-scsi-megaraid_sas-Enable-or-Disable-Fast-path-based-.patch
+Patch20100: centos-linux-3.10-0009-scsi-megaraid_sas-ldio_outstanding-variable-is-not-d.patch
+Patch20101: centos-linux-3.10-0010-scsi-megaraid_sas-Implement-the-PD-Map-support-for-S.patch
+Patch20102: centos-linux-3.10-0011-scsi-megaraid_sas-driver-version-upgrade.patch
+### end of mpt3sas and megaraid patches ###
+Patch20103: centos-linux-3.10-ipv6refcnt-bug12711.patch
+Patch20104: centos-linux-scsi-storvsc-fix-bug12841.patch
+Patch20105: centos-linux-x86-perf-uncore-Avoid-kernel-panic-on-missing-topolo-bug12818.patch
+
+# empty final patch to facilitate testing of kernel patches
+Patch999999: linux-kernel-test.patch
 
 BuildRoot: %{_tmppath}/kernel-%{KVRA}-root
 
@@ -693,10 +775,90 @@ cd linux-%{KVRA}
 # Drop some necessary files from the source dir into the buildroot
 cp $RPM_SOURCE_DIR/kernel-%{version}-*.config .
 
-ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
+# CentOS Modification
 ApplyOptionalPatch debrand-rh_taint.patch
+ApplyOptionalPatch debrand-single-cpu.patch
 ApplyOptionalPatch debrand-rh-i686-cpu.patch
+
+# i686 mods
+%ifarch %{ix86}
+#ApplyOptionalPatch ignorewarnings.patch
+ApplyOptionalPatch removejiffies.patch
+ApplyOptionalPatch cpufreq.patch
+ApplyOptionalPatch i386-audit-stop-scri-stack-frame.patch
+ApplyOptionalPatch addmissing.patch
+ApplyOptionalPatch morefixes.patch
+#ApplyOptionalPatch undorhirqstat.patch
+#ApplyOptionalPatch otherfixes.patch
+ApplyOptionalPatch clear-32bit-Werror-warnings.patch
+ApplyOptionalPatch upstream-32bit-fixes.patch
+%endif
+
+### plus mod
+ApplyOptionalPatch centos-linux-3.10-hid-non-LogiTech-remote-bug5780.patch
+#ApplyOptionalPatch centos-linux-3.10-ipc-fix-compat-msgrcv-bug7099.patch
+#ApplyOptionalPatch centos-linux-3.10-fix-argument-list-too-long.patch
+## ApplyOptionalPatch centos-linux-3.10-missing-Unifying-device-bug7340.patch
+#ApplyOptionalPatch centos-linux-3.10-vxlan-fix-crash-when-interface-created-with-no-group-bug7454.patch
+#ApplyOptionalPatch centos-linux-3.10-numa-remove-bugON-bug7474.patch
+## ApplyOptionalPatch centos-linux-3.10-fix-wakingup-AMD-family-bug7645.patch
+#ApplyOptionalPatch centos-linux-3.10-fix-nfs4_sequence_corruptor-bug7604.patch
+#ApplyOptionalPatch centos-linux-3.10-tick-clear-broadcast-pending-bug7852.patch
+#ApplyOptionalPatch centos-linux-3.10-bnx2x_fix_link_for_KR-bug7942.patch
+ApplyOptionalPatch centos-linux-3.10-reiserfs-fix-redefine-error.patch
+ApplyOptionalPatch centos-linux-3.10-fix-em28xx-cards-bug8285.patch
+#ApplyOptionalPatch centos-linux-3.10-netfilter-nf_conntrack-fix-bug8341.patch
+#ApplyOptionalPatch centos-linux-3.10-futex-Ensure-get_futex_key_refs-bug8803.patch
+ApplyOptionalPatch centos-linux-3.10-fix-ecryptfs-error-bug7369.patch
+#ApplyOptionalPatch centos-linux-3.10-fix-ioatdma-driver-bug8778.patch
+## ApplyOptionalPatch centos-linux-3.10-fix-xfrm-input-bug9646.patch
+#ApplyOptionalPatch centos-linux-3.10-3w-sas-fix-race-bug10073.patch
+#ApplyOptionalPatch centos-linux-3.10-fix-dm-thin-metadata-bug10191.patch 
+#ApplyOptionalPatch centos-linux-3.10-namespaces-bug10320.patch
+## ApplyOptionalPatch centos-linux-3.10-mpt3sas-SML-bug10516.patch
+## ApplyOptionalPatch centos-linux-3.10-mpt3sas-fix-block-bug10516.patch
+ApplyOptionalPatch centos-linux-3.10-support-MacBookPro-bug10447.patch
+#ApplyOptionalPatch centos-linux-3.10-3w-xxxx-fix-race-bug10033.patch
+#ApplyOptionalPatch centos-linux-3.10-3w-9xxx-fix-race-1of2-bug10033.patch
+#ApplyOptionalPatch centos-linux-3.10-3w-9xxx-fix-race-2of2-bug10033.patch
+#ApplyOptionalPatch centos-linux-3.10-e1000-Tx-fix-1-bug10767.patch
+#ApplyOptionalPatch centos-linux-3.10-e1000-Tx-fix-2-bug10767.patch
+## ApplyOptionalPatch centos-linux-3.10-fix-truncation-bug-EFI-bug10729.patch
+## ApplyOptionalPatch centos-linux-3.10-md-fix-freeing-private-data-bug11184.patch
+ApplyOptionalPatch  centos-linux-3.10-pci-fix-regression-mlx4-bug12277.patch
+# ApplyOptionalPatch centos-linux-3.10-x86smp-fix-max_logical_packages_values-bug12466.patch 
+ApplyOptionalPatch centos-linux-3.10-ixgbe-force-VLNCTRL_VFE-bug12653.patch 
+### mpt3sas patches bug12600 ###
+ApplyOptionalPatch centos-linux-3.10-0001-scsi-mpt3sas-Fix-for-improper-info-displayed-in-var-.patch
+ApplyOptionalPatch centos-linux-3.10-0002-scsi-mpt3sas-Fix-for-incorrect-numbers-for-MSIX-vect.patch
+ApplyOptionalPatch centos-linux-3.10-0003-scsi-mpt3sas-Implement-device_remove_in_progress-che.patch
+ApplyOptionalPatch centos-linux-3.10-0004-scsi-mpt3sas-Remove-unused-macro-MPT_DEVICE_TLR_ON.patch
+ApplyOptionalPatch centos-linux-3.10-0005-scsi-mpt3sas-Bump-driver-version-as-14.100.00.00.patch
+ApplyOptionalPatch centos-linux-3.10-0006-scsi-mpt3sas-Added-Device-ID-s-for-SAS35-devices-and.patch
+ApplyOptionalPatch centos-linux-3.10-0007-scsi-mpt3sas-Increased-Additional-MSIX-support-for-S.patch
+ApplyOptionalPatch centos-linux-3.10-0008-scsi-mpt3sas-set-EEDP-escape-flags-for-SAS35-devices.patch
+ApplyOptionalPatch centos-linux-3.10-0009-scsi-mpt3sas-Use-the-new-MPI-2.6-32-bit-Atomic-Reque.patch
+ApplyOptionalPatch centos-linux-3.10-0010-scsi-mpt3sas-Fix-for-Endianness-issue.patch
+ApplyOptionalPatch centos-linux-3.10-0011-scsi-mpt3sas-Bump-driver-version-as-14.101.00.00.patch
+ApplyOptionalPatch centos-linux-3.10-0001-scsi-megaraid_sas-Add-new-pci-device-Ids-for-SAS3.5-.patch
+ApplyOptionalPatch centos-linux-3.10-0002-scsi-megaraid_sas-128-MSIX-Support.patch
+ApplyOptionalPatch centos-linux-3.10-0003-scsi-megaraid_sas-EEDP-Escape-Mode-Support-for-SAS3..patch
+ApplyOptionalPatch centos-linux-3.10-0004-scsi-megaraid_sas-SAS3.5-Generic-Megaraid-Controller.patch
+ApplyOptionalPatch centos-linux-3.10-0005-scsi-megaraid_sas-SAS3.5-Generic-Megaraid-Controller.patch
+ApplyOptionalPatch centos-linux-3.10-0006-scsi-megaraid_sas-Dynamic-Raid-Map-Changes-for-SAS3..patch
+ApplyOptionalPatch centos-linux-3.10-0007-scsi-megaraid_sas-Add-the-Support-for-SAS3.5-Generic.patch
+ApplyOptionalPatch centos-linux-3.10-0008-scsi-megaraid_sas-Enable-or-Disable-Fast-path-based-.patch
+ApplyOptionalPatch centos-linux-3.10-0009-scsi-megaraid_sas-ldio_outstanding-variable-is-not-d.patch
+ApplyOptionalPatch centos-linux-3.10-0010-scsi-megaraid_sas-Implement-the-PD-Map-support-for-S.patch
+ApplyOptionalPatch centos-linux-3.10-0011-scsi-megaraid_sas-driver-version-upgrade.patch
+ApplyOptionalPatch centos-linux-3.10-ipv6refcnt-bug12711.patch
+ApplyOptionalPatch centos-linux-scsi-storvsc-fix-bug12841.patch
+ApplyOptionalPatch centos-linux-x86-perf-uncore-Avoid-kernel-panic-on-missing-topolo-bug12818.patch
+
+### end of plus mod
+# End of CentOS Modification
+
+ApplyOptionalPatch linux-kernel-test.patch
 
 # Any further pre-build tree manipulations happen here.
 
@@ -876,7 +1038,6 @@ BuildKernel() {
 	# install gcov-needed files to $BUILDROOT/$BUILD/...:
 	#   gcov_info->filename is absolute path
 	#   gcno references to sources can use absolute paths (e.g. in out-of-tree builds)
-	#   sysfs symlink targets (set up at compile time) use absolute paths to BUILD dir
 	find . \( -name '*.gcno' -o -name '*.[chS]' \) -exec install -D '{}' "$RPM_BUILD_ROOT/$(pwd)/{}" \;
 %endif
     fi
@@ -1083,7 +1244,7 @@ make %{?cross_opts} %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
     make %{?_smp_mflags} centrino-decode powernow-k8-decode
     popd
 %endif
-%ifarch x86_64
+%ifarch x86_64 i686
    pushd tools/power/x86/x86_energy_perf_policy/
    make
    popd
@@ -1364,6 +1525,25 @@ then\
 fi\
 %{nil}
 
+### plus kernel mod ###
+### remove initramfs-xxxkdump.img upon kernel removal
+%postun
+# List out the initrds here, strip out version numbers
+# and search for corresponding kernel installs, if a kernel
+# is not found, remove the corresponding kdump initrd
+for i in `ls /boot/initramfs*kdump.img 2>/dev/null`
+do
+	KDVER=`echo $i | sed -e's/^.*initramfs-//' -e's/kdump.*$//'`
+	if [ ! -e /boot/vmlinuz-$KDVER ]
+	then
+		# We have found an initrd with no corresponding kernel
+		# so we should be able to remove it
+		rm -f $i
+	fi
+done
+
+### end of plus kernel mod ###
+
 %kernel_variant_preun
 %kernel_variant_post 
 
@@ -1550,8 +1730,37 @@ fi
 %kernel_variant_files %{with_kdump} kdump
 
 %changelog
-* Wed Feb 22 2017 CentOS Sources <bugs@centos.org> - 3.10.0-514.6.2.el7
+* Wed Feb 22 2017 Akemi Yagi <toracat@centos.org> [3.10.0-514.6.2.el7.centos.plus]
 - Apply debranding changes
+- Roll in i686 mods
+- Modify config file for x86_64 with extra features turned on including
+  some network adapters, BusLogic, ReiserFS, TOMOYO
+- Add in a patch that allows non-LogiTech remote to work [bug#5780]
+- JFS enabled [bug#7350]
+- NUMACHIP enabled [bug#7498]
+- AIC7xxx enabled [bug#7552]
+- Enabled via_velocity [bug#7877]
+- Add in a patch that fixes em28xx-cards [bug#8285]
+- Enabled ECRYPT_FS with a patch to fix build error [bug#7369]
+- Enabled Keyboard GPIO [bug#9063]
+- Enabled XEN_FBDEV_FRONTEND [bug#9463]
+- Enabled LINE6_USB [bug#9569]
+- Enabled I2C_MUX [bug#9592]
+- Enabled spidev [bug#9955]
+- Add in patches from bug 10191 [bug#10191]
+- Add in a patch from bug 10320 [bug#10320]
+- Add a patch [bug#10447]
+- Enable ATM drivers [bug#10845]
+- Add 9pfs config options [bug#10849]
+- Add in a patch [bug#12277]
+- Enable VFIO_PCI_VGA [bug#12435]
+- Add in a patch [bug#12653]
+- Add mpt3sas patches [big#12600]
+- Add megaraid patches [bug#12601]
+- Rremove initramfs-xxxkdump.img upon kernel removal [bug#12703]
+- Add a patch from [bug#12711]
+- Add a patch from [bug#12841]
+- Add a patch from [bug#12818]
 
 * Fri Feb 17 2017 Frantisek Hrbata <fhrbata@hrbata.com> [3.10.0-514.6.2.el7]
 - [net] dccp: fix freeing skb too early for IPV6_RECVPKTINFO (Hannes Frederic Sowa) [1423462 1423463]
