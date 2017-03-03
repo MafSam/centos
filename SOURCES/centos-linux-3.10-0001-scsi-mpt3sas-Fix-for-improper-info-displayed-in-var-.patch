@@ -1,0 +1,59 @@
+From 5c528134dc5242845930c8eb33abd97bb0ef5bc2 Mon Sep 17 00:00:00 2001
+From: Suganath Prabu Subramani <suganath-prabu.subramani@broadcom.com>
+Date: Wed, 26 Oct 2016 13:34:32 +0530
+Subject: [PATCH 01/11] scsi: mpt3sas: Fix for improper info displayed in var
+ log, while blocking or unblocking the device.
+
+Return value and Device_handle Arguments passed in correct order
+ to match with its format string.
+
+Signed-off-by: Chaitra P B <chaitra.basappa@broadcom.com>
+Signed-off-by: Sathya Prakash <sathya.prakash@broadcom.com>
+Signed-off-by: Suganath Prabu S <suganath-prabu.subramani@broadcom.com>
+Reviewed-by: Hannes Reinecke <hare@suse.com>
+Reviewed-by: Tomas Henzl <thenzl@redhat.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+---
+ drivers/scsi/mpt3sas/mpt3sas_scsih.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/scsi/mpt3sas/mpt3sas_scsih.c b/drivers/scsi/mpt3sas/mpt3sas_scsih.c
+index 1911152..9c61476 100644
+--- a/drivers/scsi/mpt3sas/mpt3sas_scsih.c
++++ b/drivers/scsi/mpt3sas/mpt3sas_scsih.c
+@@ -2888,7 +2888,7 @@ _scsih_internal_device_block(struct scsi_device *sdev,
+ 	if (r == -EINVAL)
+ 		sdev_printk(KERN_WARNING, sdev,
+ 		    "device_block failed with return(%d) for handle(0x%04x)\n",
+-		    sas_device_priv_data->sas_target->handle, r);
++		    r, sas_device_priv_data->sas_target->handle);
+ }
+ 
+ /**
+@@ -2918,20 +2918,20 @@ _scsih_internal_device_unblock(struct scsi_device *sdev,
+ 		sdev_printk(KERN_WARNING, sdev,
+ 		    "device_unblock failed with return(%d) for handle(0x%04x) "
+ 		    "performing a block followed by an unblock\n",
+-		    sas_device_priv_data->sas_target->handle, r);
++		    r, sas_device_priv_data->sas_target->handle);
+ 		sas_device_priv_data->block = 1;
+ 		r = scsi_internal_device_block(sdev);
+ 		if (r)
+ 			sdev_printk(KERN_WARNING, sdev, "retried device_block "
+ 			    "failed with return(%d) for handle(0x%04x)\n",
+-			    sas_device_priv_data->sas_target->handle, r);
++			    r, sas_device_priv_data->sas_target->handle);
+ 
+ 		sas_device_priv_data->block = 0;
+ 		r = scsi_internal_device_unblock(sdev, SDEV_RUNNING);
+ 		if (r)
+ 			sdev_printk(KERN_WARNING, sdev, "retried device_unblock"
+ 			    " failed with return(%d) for handle(0x%04x)\n",
+-			    sas_device_priv_data->sas_target->handle, r);
++			    r, sas_device_priv_data->sas_target->handle);
+ 	}
+ }
+ 
+-- 
+1.8.3.1
+
