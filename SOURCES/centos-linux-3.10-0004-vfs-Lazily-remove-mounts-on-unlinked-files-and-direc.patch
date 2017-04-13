@@ -1,0 +1,358 @@
+From 743848de574b660972f457c28c02cbb19c8aa439 Mon Sep 17 00:00:00 2001
+From: "T.kabe" <kabe@>
+Date: Fri, 3 Mar 2017 17:06:44 +0900
+Subject: [PATCH 4/4] vfs: Lazily remove mounts on unlinked files and directories.
+
+[upstream commit 8ed936b5671bfb33d89bc60bdcc7cf0470ba52fe]
+[upstream commit 7af1364ffa64db61e386628594836e13d2ef04b5]
+
+commit 8ed936b5671bfb33d89bc60bdcc7cf0470ba52fe
+Author: Eric W. Biederman <ebiederman@twitter.com>
+Date:   Tue Oct 1 18:33:48 2013 -0700
+
+    vfs: Lazily remove mounts on unlinked files and directories.
+
+    With the introduction of mount namespaces and bind mounts it became
+    possible to access files and directories that on some paths are mount
+    points but are not mount points on other paths.  It is very confusing
+    when rm -rf somedir returns -EBUSY simply because somedir is mounted
+    somewhere else.  With the addition of user namespaces allowing
+    unprivileged mounts this condition has gone from annoying to allowing
+    a DOS attack on other users in the system.
+
+    The possibility for mischief is removed by updating the vfs to support
+    rename, unlink and rmdir on a dentry that is a mountpoint and by
+    lazily unmounting mountpoints on deleted dentries.
+
+    In particular this change allows rename, unlink and rmdir system calls
+    on a dentry without a mountpoint in the current mount namespace to
+    succeed, and it allows rename, unlink, and rmdir performed on a
+    distributed filesystem to update the vfs cache even if when there is a
+    mount in some namespace on the original dentry.
+
+    There are two common patterns of maintaining mounts: Mounts on trusted
+    paths with the parent directory of the mount point and all ancestory
+    directories up to / owned by root and modifiable only by root
+    (i.e. /media/xxx, /dev, /dev/pts, /proc, /sys, /sys/fs/cgroup/{cpu,
+    cpuacct, ...}, /usr, /usr/local).  Mounts on unprivileged directories
+    maintained by fusermount.
+
+    In the case of mounts in trusted directories owned by root and
+    modifiable only by root the current parent directory permissions are
+    sufficient to ensure a mount point on a trusted path is not removed
+    or renamed by anyone other than root, even if there is a context
+    where the there are no mount points to prevent this.
+
+    In the case of mounts in directories owned by less privileged users
+    races with users modifying the path of a mount point are already a
+    danger.  fusermount already uses a combination of chdir,
+    /proc/<pid>/fd/NNN, and UMOUNT_NOFOLLOW to prevent these races.  The
+    removable of global rename, unlink, and rmdir protection really adds
+    nothing new to consider only a widening of the attack window, and
+    fusermount is already safe against unprivileged users modifying the
+    directory simultaneously.
+
+    In principle for perfect userspace programs returning -EBUSY for
+    unlink, rmdir, and rename of dentires that have mounts in the local
+    namespace is actually unnecessary.  Unfortunately not all userspace
+    programs are perfect so retaining -EBUSY for unlink, rmdir and rename
+    of dentries that have mounts in the current mount namespace plays an
+    important role of maintaining consistency with historical behavior and
+    making imperfect userspace applications hard to exploit.
+
+    v2: Remove spurious old_dentry.
+    v3: Optimized shrink_submounts_and_drop
+        Removed unsued afs label
+    v4: Simplified the changes to check_submounts_and_drop
+        Do not rename check_submounts_and_drop shrink_submounts_and_drop
+        Document what why we need atomicity in check_submounts_and_drop
+        Rely on the parent inode mutex to make d_revalidate and d_invalidate
+        an atomic unit.
+    v5: Refcount the mountpoint to detach in case of simultaneous
+        renames.
+
+    Reviewed-by: Miklos Szeredi <miklos@szeredi.hu>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+commit 7af1364ffa64db61e386628594836e13d2ef04b5
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Fri Oct 4 19:15:13 2013 -0700
+
+    vfs: Don't allow overwriting mounts in the current mount namespace
+
+    In preparation for allowing mountpoints to be renamed and unlinked
+    in remote filesystems and in other mount namespaces test if on a dentry
+    there is a mount in the local mount namespace before allowing it to
+    be renamed or unlinked.
+
+    The primary motivation here are old versions of fusermount unmount
+    which is not safe if the a path can be renamed or unlinked while it is
+    verifying the mount is safe to unmount.  More recent versions are simpler
+    and safer by simply using UMOUNT_NOFOLLOW when unmounting a mount
+    in a directory owned by an arbitrary user.
+
+    Miklos Szeredi <miklos@szeredi.hu> reports this is approach is good
+    enough to remove concerns about new kernels mixed with old versions
+    of fusermount.
+
+    A secondary motivation for restrictions here is that it removing empty
+    directories that have non-empty mount points on them appears to
+    violate the rule that rmdir can not remove empty directories.  As
+    Linus Torvalds pointed out this is useful for programs (like git) that
+    test if a directory is empty with rmdir.
+
+    Therefore this patch arranges to enforce the existing mount point
+    semantics for local mount namespace.
+
+    v2: Rewrote the test to be a drop in replacement for d_mountpoint
+    v3: Use bool instead of int as the return type of is_local_mountpoint
+
+    Reviewed-by: Miklos Szeredi <miklos@szeredi.hu>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+ fs/dcache.c    | 69 +++++++++++++++++++++++++++++++---------------------------
+ fs/mount.h     |  9 ++++++++
+ fs/namei.c     | 16 +++++++++-----
+ fs/namespace.c | 35 +++++++++++++++++++++++++++++
+ 4 files changed, 91 insertions(+), 38 deletions(-)
+
+diff --git a/fs/dcache.c b/fs/dcache.c
+index 5dabe0e..a3e9e7a 100644
+--- a/fs/dcache.c
++++ b/fs/dcache.c
+@@ -1285,36 +1285,38 @@ void shrink_dcache_parent(struct dentry *parent)
+ }
+ EXPORT_SYMBOL(shrink_dcache_parent);
+ 
+-static enum d_walk_ret check_and_collect(void *_data, struct dentry *dentry)
++struct detach_data {
++	struct select_data select;
++	struct dentry *mountpoint;
++};
++static enum d_walk_ret detach_and_collect(void *_data, struct dentry *dentry)
+ {
+-	struct select_data *data = _data;
+-
+-	if (d_mountpoint(dentry)) {
+-		data->found = -EBUSY;
+-		return D_WALK_QUIT;
+-	}
++	struct detach_data *data = _data;
+ 
+-	return select_collect(_data, dentry);
+-}
++ 	if (d_mountpoint(dentry)) {
++		__dget_dlock(dentry);
++		data->mountpoint = dentry;
++ 		return D_WALK_QUIT;
++ 	}
++	return select_collect(&data->select, dentry);
++ }
+ 
+ static void check_and_drop(void *_data)
+ {
+-	struct select_data *data = _data;
++	struct detach_data *data = _data;
+ 
+-	if (d_mountpoint(data->start))
+-		data->found = -EBUSY;
+-	if (!data->found)
+-		__d_drop(data->start);
++	if (!data->mountpoint && !data->select.found)
++		__d_drop(data->select.start);
+ }
+ 
+ /**
+- * check_submounts_and_drop - prune dcache, check for submounts and drop
++ * check_submounts_and_drop - detach submounts, prune dcache, and drop
+  *
+- * All done as a single atomic operation relative to has_unlinked_ancestor().
+- * Returns 0 if successfully unhashed @parent.  If there were submounts then
+- * return -EBUSY.
++ * The final d_drop is done as an atomic operation relative to
++ * rename_lock ensuring there are no races with d_set_mounted.  This
++ * ensures there are no unhashed dentries on the path to a mountpoint.
+  *
+- * @dentry: dentry to prune and drop
++ * @dentry: dentry to detach, prune and drop
+  */
+ int check_submounts_and_drop(struct dentry *dentry)
+ {
+@@ -1327,19 +1329,24 @@ int check_submounts_and_drop(struct dentry *dentry)
+ 	}
+ 
+ 	for (;;) {
+-		struct select_data data;
++		struct detach_data data;
+ 
+-		INIT_LIST_HEAD(&data.dispose);
+-		data.start = dentry;
+-		data.found = 0;
++		data.mountpoint = NULL;
++		INIT_LIST_HEAD(&data.select.dispose);
++		data.select.start = dentry;
++		data.select.found = 0;
+ 
+-		d_walk(dentry, &data, check_and_collect, check_and_drop);
+-		ret = data.found;
++		d_walk(dentry, &data, detach_and_collect, check_and_drop);
+ 
+-		if (!list_empty(&data.dispose))
+-			shrink_dentry_list(&data.dispose);
++		if (data.select.found)
++			shrink_dentry_list(&data.select.dispose);
+ 
+-		if (ret <= 0)
++		if (data.mountpoint) {
++			detach_mounts(data.mountpoint);
++			dput(data.mountpoint);
++		}
++
++		if (!data.mountpoint && !data.select.found)
+ 			break;
+ 
+ 		cond_resched();
+@@ -2554,10 +2561,8 @@ static struct dentry *__d_unalias(struct inode *inode,
+ 		goto out_err;
+ 	m2 = &alias->d_parent->d_inode->i_mutex;
+ out_unalias:
+-	if (likely(!d_mountpoint(alias))) {
+-		__d_move(alias, dentry, false);
+-		ret = alias;
+-	}
++	__d_move(alias, dentry, false);
++	ret = alias;
+ out_err:
+ 	spin_unlock(&inode->i_lock);
+ 	if (m2)
+diff --git a/fs/mount.h b/fs/mount.h
+index 9959119..a373c86 100644
+--- a/fs/mount.h
++++ b/fs/mount.h
+@@ -107,3 +107,12 @@ struct proc_mounts {
+ #define proc_mounts(p) (container_of((p), struct proc_mounts, m))
+ 
+ extern const struct seq_operations mounts_op;
++
++extern bool __is_local_mountpoint(struct dentry *dentry);
++static inline bool is_local_mountpoint(struct dentry *dentry)
++{
++	if (!d_mountpoint(dentry))
++		return false;
++
++	return __is_local_mountpoint(dentry);
++}
+diff --git a/fs/namei.c b/fs/namei.c
+index 872e5e5..ef70aa8 100644
+--- a/fs/namei.c
++++ b/fs/namei.c
+@@ -3691,8 +3691,8 @@ int vfs_rmdir(struct inode *dir, struct dentry *dentry)
+ 	mutex_lock(&dentry->d_inode->i_mutex);
+ 
+ 	error = -EBUSY;
+-	if (d_mountpoint(dentry))
+-		goto out;
++ 	if (is_local_mountpoint(dentry))
++ 		goto out;
+ 
+ 	error = security_inode_rmdir(dir, dentry);
+ 	if (error)
+@@ -3705,6 +3705,7 @@ int vfs_rmdir(struct inode *dir, struct dentry *dentry)
+ 
+ 	dentry->d_inode->i_flags |= S_DEAD;
+ 	dont_mount(dentry);
++	detach_mounts(dentry);
+ 
+ out:
+ 	mutex_unlock(&dentry->d_inode->i_mutex);
+@@ -3806,7 +3807,7 @@ int vfs_unlink(struct inode *dir, struct dentry *dentry, struct inode **delegate
+ 		return -EPERM;
+ 
+ 	mutex_lock(&target->i_mutex);
+-	if (d_mountpoint(dentry))
++	if (is_local_mountpoint(dentry))
+ 		error = -EBUSY;
+ 	else {
+ 		error = security_inode_unlink(dir, dentry);
+@@ -3815,8 +3816,10 @@ int vfs_unlink(struct inode *dir, struct dentry *dentry, struct inode **delegate
+ 			if (error)
+ 				goto out;
+ 			error = dir->i_op->unlink(dir, dentry);
+-			if (!error)
++			if (!error) {
+ 				dont_mount(dentry);
++				detach_mounts(dentry);
++			}
+ 		}
+ 	}
+ out:
+@@ -4254,8 +4257,8 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		mutex_lock(&target->i_mutex);
+ 
+ 	error = -EBUSY;
+-	if (d_mountpoint(old_dentry) || d_mountpoint(new_dentry))
+-		goto out;
++ 	if (is_local_mountpoint(old_dentry) || is_local_mountpoint(new_dentry))
++ 		goto out;
+ 
+ 	if (max_links && new_dir != old_dir) {
+ 		error = -EMLINK;
+@@ -4292,6 +4295,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
+ 		if (is_dir)
+ 			target->i_flags |= S_DEAD;
+ 		dont_mount(new_dentry);
++		detach_mounts(new_dentry);
+ 	}
+ 	if (!(old_dir->i_sb->s_type->fs_flags & FS_RENAME_DOES_D_MOVE)) {
+ 		if (!(flags & RENAME_EXCHANGE))
+diff --git a/fs/namespace.c b/fs/namespace.c
+index e48fed3..d633562 100644
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -625,6 +625,41 @@ static struct mountpoint *lookup_mountpoint(struct dentry *dentry)
+ 	return NULL;
+ }
+ 
++/*
++ * __is_local_mountpoint - Test to see if dentry is a mountpoint in the
++ *                         current mount namespace.
++ *
++ * The common case is dentries are not mountpoints at all and that
++ * test is handled inline.  For the slow case when we are actually
++ * dealing with a mountpoint of some kind, walk through all of the
++ * mounts in the current mount namespace and test to see if the dentry
++ * is a mountpoint.
++ *
++ * The mount_hashtable is not usable in the context because we
++ * need to identify all mounts that may be in the current mount
++ * namespace not just a mount that happens to have some specified
++ * parent mount.
++ */
++bool __is_local_mountpoint(struct dentry *dentry)
++{
++	struct mnt_namespace *ns = current->nsproxy->mnt_ns;
++	struct mount *mnt;
++	bool is_covered = false;
++
++	if (!d_mountpoint(dentry))
++		goto out;
++
++	down_read(&namespace_sem);
++	list_for_each_entry(mnt, &ns->list, mnt_list) {
++		is_covered = (mnt->mnt_mountpoint == dentry);
++		if (is_covered)
++			break;
++	}
++	up_read(&namespace_sem);
++out:
++	return is_covered;
++}
++
+ static struct mountpoint *new_mountpoint(struct dentry *dentry)
+ {
+ 	struct list_head *chain = mountpoint_hashtable + hash(NULL, dentry);
+-- 
+1.8.3.1
+

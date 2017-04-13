@@ -1,0 +1,32 @@
+From 50c9c8f47e8ab6e4bc5a3a374a8b3ac5833aab1f Mon Sep 17 00:00:00 2001
+From: Sasikumar Chandrasekaran <sasikumar.pc@broadcom.com>
+Date: Tue, 10 Jan 2017 18:20:53 -0500
+Subject: [PATCH 11/11] scsi: megaraid_sas: driver version upgrade
+
+Upgrade driver version.
+
+Signed-off-by: Sasikumar Chandrasekaran <sasikumar.pc@broadcom.com>
+Reviewed-by: Tomas Henzl <thenzl@redhat.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+---
+ drivers/scsi/megaraid/megaraid_sas.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/scsi/megaraid/megaraid_sas.h b/drivers/scsi/megaraid/megaraid_sas.h
+index a38dbe5..83886a5 100644
+--- a/drivers/scsi/megaraid/megaraid_sas.h
++++ b/drivers/scsi/megaraid/megaraid_sas.h
+@@ -35,8 +35,8 @@
+ /*
+  * MegaRAID SAS Driver meta data
+  */
+-#define MEGASAS_VERSION				"06.811.02.00-rh1"
+-#define MEGASAS_RELDATE				"April 12, 2016"
++#define MEGASAS_VERSION				"07.700.00.00-rc1"
++#define MEGASAS_RELDATE				"November 29, 2016"
+ 
+ /*
+  * Device IDs
+-- 
+1.8.3.1
+
