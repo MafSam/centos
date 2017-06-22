@@ -1,0 +1,99 @@
+From 9cc2c0f41c403a05989bc3ca2af650247d452f65 Mon Sep 17 00:00:00 2001
+From: "T.kabe" <kabe@>
+Date: Mon, 6 Mar 2017 15:18:55 +0900
+Subject: [PATCH 2/4] vfs: Keep a list of mounts on a mount point
+
+[upstream commit 0a5eb7c8189922e86a840972cd0b57e41de6f031]
+Author: Eric W. Biederman <ebiederman@twitter.com>
+Date:   Sun Sep 22 19:37:01 2013 -0700
+
+    vfs: Keep a list of mounts on a mount point
+
+    To spot any possible problems call BUG if a mountpoint
+    is put when it's list of mounts is not empty.
+
+    AV: use hlist instead of list_head
+
+    Reviewed-by: Miklos Szeredi <miklos@szeredi.hu>
+    Signed-off-by: Eric W. Biederman <ebiederman@twitter.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+ fs/mount.h     | 2 ++
+ fs/namespace.c | 6 ++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/fs/mount.h b/fs/mount.h
+index b870800..92fecbe 100644
+--- a/fs/mount.h
++++ b/fs/mount.h
+@@ -21,6 +21,7 @@ struct mnt_pcp {
+ struct mountpoint {
+ 	struct list_head m_hash;
+ 	struct dentry *m_dentry;
++	struct hlist_head m_list;
+ 	int m_count;
+ };
+ 
+@@ -47,6 +48,7 @@ struct mount {
+ 	struct mount *mnt_master;	/* slave is on master->mnt_slave_list */
+ 	struct mnt_namespace *mnt_ns;	/* containing namespace */
+ 	struct mountpoint *mnt_mp;	/* where is it mounted */
++	struct hlist_node mnt_mp_list;	/* list mounts with the same mountpoint */
+ #ifdef CONFIG_FSNOTIFY
+ 	struct hlist_head mnt_fsnotify_marks;
+ 	__u32 mnt_fsnotify_mask;
+diff --git a/fs/namespace.c b/fs/namespace.c
+index 0053bfc..c238481 100644
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -197,6 +197,7 @@ static struct mount *alloc_vfsmnt(const char *name)
+ 		INIT_LIST_HEAD(&mnt->mnt_share);
+ 		INIT_LIST_HEAD(&mnt->mnt_slave_list);
+ 		INIT_LIST_HEAD(&mnt->mnt_slave);
++		INIT_HLIST_NODE(&mnt->mnt_mp_list);
+ #ifdef CONFIG_FSNOTIFY
+ 		INIT_HLIST_HEAD(&mnt->mnt_fsnotify_marks);
+ #endif
+@@ -636,6 +637,7 @@ static struct mountpoint *new_mountpoint(struct dentry *dentry)
+ 	mp->m_dentry = dentry;
+ 	mp->m_count = 1;
+ 	list_add(&mp->m_hash, chain);
++	INIT_HLIST_HEAD(&mp->m_list);
+ 	return mp;
+ }
+ 
+@@ -643,6 +645,7 @@ static void put_mountpoint(struct mountpoint *mp)
+ {
+ 	if (!--mp->m_count) {
+ 		struct dentry *dentry = mp->m_dentry;
++		BUG_ON(!hlist_empty(&mp->m_list));
+ 		spin_lock(&dentry->d_lock);
+ 		dentry->d_flags &= ~DCACHE_MOUNTED;
+ 		spin_unlock(&dentry->d_lock);
+@@ -689,6 +692,7 @@ static void detach_mnt(struct mount *mnt, struct path *old_path)
+ 	mnt->mnt_mountpoint = mnt->mnt.mnt_root;
+ 	list_del_init(&mnt->mnt_child);
+ 	list_del_init(&mnt->mnt_hash);
++	hlist_del_init(&mnt->mnt_mp_list);
+ 	put_mountpoint(mnt->mnt_mp);
+ 	mnt->mnt_mp = NULL;
+ }
+@@ -705,6 +709,7 @@ void mnt_set_mountpoint(struct mount *mnt,
+ 	child_mnt->mnt_mountpoint = dget(mp->m_dentry);
+ 	child_mnt->mnt_parent = mnt;
+ 	child_mnt->mnt_mp = mp;
++	hlist_add_head(&child_mnt->mnt_mp_list, &mp->m_list);
+ }
+ 
+ /*
+@@ -1207,6 +1212,7 @@ void umount_tree(struct mount *mnt, int propagate)
+ 		__touch_mnt_namespace(p->mnt_ns);
+ 		p->mnt_ns = NULL;
+ 		if (mnt_has_parent(p)) {
++			hlist_del_init(&p->mnt_mp_list);
+ 			p->mnt_parent->mnt_ghosts++;
+ 			put_mountpoint(p->mnt_mp);
+ 			p->mnt_mp = NULL;
+-- 
+1.8.3.1
+

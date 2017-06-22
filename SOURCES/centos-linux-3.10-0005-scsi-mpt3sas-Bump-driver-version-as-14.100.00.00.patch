@@ -1,0 +1,31 @@
+From 0815c65e49489bdbfbd0f90e4a2b78184a603eea Mon Sep 17 00:00:00 2001
+From: Suganath Prabu Subramani <suganath-prabu.subramani@broadcom.com>
+Date: Wed, 26 Oct 2016 13:34:36 +0530
+Subject: [PATCH 05/11] scsi: mpt3sas: Bump driver version as "14.100.00.00"
+
+Signed-off-by: Chaitra P B <chaitra.basappa@broadcom.com>
+Signed-off-by: Sathya Prakash <sathya.prakash@broadcom.com>
+Signed-off-by: Suganath Prabu S <suganath-prabu.subramani@broadcom.com>
+Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+---
+ drivers/scsi/mpt3sas/mpt3sas_base.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/scsi/mpt3sas/mpt3sas_base.h b/drivers/scsi/mpt3sas/mpt3sas_base.h
+index f2fa742..66cfa0f 100644
+--- a/drivers/scsi/mpt3sas/mpt3sas_base.h
++++ b/drivers/scsi/mpt3sas/mpt3sas_base.h
+@@ -73,8 +73,8 @@
+ #define MPT3SAS_DRIVER_NAME		"mpt3sas"
+ #define MPT3SAS_AUTHOR "Avago Technologies <MPT-FusionLinux.pdl@avagotech.com>"
+ #define MPT3SAS_DESCRIPTION	"LSI MPT Fusion SAS 3.0 Device Driver"
+-#define MPT3SAS_DRIVER_VERSION		"13.100.00.00"
+-#define MPT3SAS_MAJOR_VERSION		13
++#define MPT3SAS_DRIVER_VERSION		"14.100.00.00"
++#define MPT3SAS_MAJOR_VERSION		14
+ #define MPT3SAS_MINOR_VERSION		100
+ #define MPT3SAS_BUILD_VERSION		0
+ #define MPT3SAS_RELEASE_VERSION	00
+-- 
+1.8.3.1
+
