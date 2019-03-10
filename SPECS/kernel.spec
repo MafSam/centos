@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 23
+%define stable_update 28
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2212,7 +2212,8 @@ fi
 #
 #
 %changelog
-* Sun Mar 10 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.23-301
+* Sun Mar 10 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.28-300
+- Linux v4.19.28
 - Rollback removal of kernel-tools
 
 * Fri Feb 15 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.23-300
