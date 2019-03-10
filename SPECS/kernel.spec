@@ -1892,6 +1892,15 @@ rm -f %{buildroot}%{_bindir}/trace
 # remove the perf-tips
 rm -rf %{buildroot}%{_docdir}/perf-tip
 
+# For both of the below, yes, this should be using a macro but right now
+# it's hard coded and we don't actually want it anyway right now.
+# Whoever wants examples can fix it up!
+
+# remove examples
+rm -rf %{buildroot}/usr/lib/perf/examples
+# remove the stray header file that somehow got packaged in examples
+rm -rf %{buildroot}/usr/lib/perf/include/bpf/
+
 # python-perf extension
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
 
