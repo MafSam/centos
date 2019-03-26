@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 30
+%define stable_update 31
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -623,11 +623,6 @@ Patch334: bcm2837-fix-eth-leds.patch
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
 Patch340: brcmfmac-Remove-firmware-loading-code-duplication.patch
-
-# Fix for AllWinner A64 Timer Errata, still not final
-# https://patchwork.kernel.org/patch/10392891/
-Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
-Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -2221,6 +2216,10 @@ fi
 #
 #
 %changelog
+* Tue Mar 26 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.31-300
+- Linux v4.19.31
+- Remove upstreamed patches
+
 * Sat Mar 23 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.30-300
 - Linux v4.19.30
 
