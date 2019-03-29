@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 31
+%define stable_update 32
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2216,6 +2216,9 @@ fi
 #
 #
 %changelog
+* Fri Mar 29 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.32-300
+- Linux v4.19.32
+
 * Tue Mar 26 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.31-300
 - Linux v4.19.31
 - Remove upstreamed patches
