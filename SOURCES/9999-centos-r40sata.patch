@@ -1602,3 +1602,69 @@ index a891a387e8f1..438b7b44dab3 100644
  &tcon_tv0 {
  	status = "okay";
  };
+From b9f6b80e04ad061ff4e12bdb72ea21af3518d79f Mon Sep 17 00:00:00 2001
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Date: Mon, 25 Mar 2019 14:52:44 +0100
+Subject: ARM: dts: sun8i: r40: Fix AHCI reset-names property
+
+The AHCI node was introduced with a typo in the reset-names property that
+got written resets-name instead.
+
+This was working because the reset is optional for that driver, and the
+controller was put out of reset by the bootloader.
+
+Fixes: 41c64d3318aa ("ARM: dts: sun8i: r40: add sata node")
+Acked-by: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+(limited to 'arch/arm/boot/dts/sun8i-r40.dtsi')
+
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index 1061d46efafd..9784c23346a8 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -562,7 +562,7 @@
+ 			interrupts = <GIC_SPI 56 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&ccu CLK_BUS_SATA>, <&ccu CLK_SATA>;
+ 			resets = <&ccu RST_BUS_SATA>;
+-			resets-name = "ahci";
++			reset-names = "ahci";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+ 			status = "disabled";
+-- 
+cgit 1.2-0.3.lf.el7
+
+From 327384569871e7e3ed637d89726abacda3902098 Mon Sep 17 00:00:00 2001
+From: Maxime Ripard <maxime.ripard@bootlin.com>
+Date: Mon, 25 Mar 2019 14:52:45 +0100
+Subject: ARM: dts: sun8i: r40: Remove useless AHCI properties
+
+The SATA controller never have any children nodes, so we don't need the
+address and size cells properties.
+
+Acked-by: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40.dtsi | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index 9784c23346a8..56c6885b02d1 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -563,8 +563,6 @@
+ 			clocks = <&ccu CLK_BUS_SATA>, <&ccu CLK_SATA>;
+ 			resets = <&ccu RST_BUS_SATA>;
+ 			reset-names = "ahci";
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+ 			status = "disabled";
+ 
+ 		};
+-- 
+cgit 1.2-0.3.lf.el7
+

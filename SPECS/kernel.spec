@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 32
+%define stable_update 34
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -652,12 +652,10 @@ Patch516: asus-fx503-keyb.patch
 # rhbz 1661961 patch merged upstream in 4.20
 Patch517: 0001-Bluetooth-btsdio-Do-not-bind-to-non-removable-BCM434.patch
 
-# CVE-2019-3459 and CVE-2019-3460 rbhz 1663176 1663179 1665925
-Patch519: CVE-2019-3459-and-CVE-2019-3460.patch
-
 ##centos
 Patch10002: 9999-centos-a83t-hdmi.patch
 Patch11002: 9999-centos-r40sata.patch
+Patch11003: 9999-centos-r40-v40-dts-update.patch
 ##end centos
 
 # END OF PATCH DEFINITIONS
@@ -2216,6 +2214,12 @@ fi
 #
 #
 %changelog
+* Sat Apr 13 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.34-300
+- Linux v4.19.34
+- Update device tree for BananaPi M2 Berry
+- Update device tree for BananaPi M2 Ultra
+- Remove upstreamed patches
+
 * Fri Mar 29 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.32-300
 - Linux v4.19.32
 

@@ -1,0 +1,469 @@
+From c41ca64d075020e2d5daecb7f48da6af0ba5b512 Mon Sep 17 00:00:00 2001
+From: Tuomas Tynkkynen <tuomas@tuxera.com>
+Date: Wed, 8 Aug 2018 02:25:53 +0300
+Subject: ARM: dts: sunxi: Don't use cd-inverted in sun8i-r40-bananapi-m2-ultra
+
+Another user of cd-inverted seems to have crept in. Switch it away from
+cd-inverted to be consistent with other sunxi boards.
+
+Signed-off-by: Tuomas Tynkkynen <tuomas@tuxera.com>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts b/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
+index c39b9169ea64..a891a387e8f1 100644
+--- a/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
++++ b/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
+@@ -159,8 +159,7 @@
+ &mmc0 {
+ 	vmmc-supply = <&reg_dcdc1>;
+ 	bus-width = <4>;
+-	cd-gpios = <&pio 7 13 GPIO_ACTIVE_HIGH>; /* PH13 */
+-	cd-inverted;
++	cd-gpios = <&pio 7 13 GPIO_ACTIVE_LOW>; /* PH13 */
+ 	status = "okay";
+ };
+ 
+-- 
+cgit 1.2-0.3.lf.el7
+
+From e5c6e693be831c1bba9b4f8f1da597fb5514deca Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Wed, 9 Jan 2019 23:02:55 +0800
+Subject: ARM: dts: sun8i: r40: bananapi-m2-ultra: Fix WiFi regulator
+ definitions
+
+The design of the Bananapi M2 Ultra has both DLDO1 and DLDO2 regulators
+provide power to the WiFi+BT module, which is based on the Broadcom
+BCM43438 or BCM43430 chip. Each regulator output from the PMIC can supply
+up to 200 mA. The datasheet of the chip suggests a maximum power draw of
+up to 360 mA when transmitting, thus requiring two outputs from the PMIC
+to handle the load. However the device tree only references one of them,
+leaving the other unused and possibly turned off.
+
+This patch marks both as always-on, since we don't have a proper binding
+to specify two regulators as "bound together". The name and constraints
+of DLDO2 are also added.
+
+Fixes: da7ac948fa93 ("ARM: dts: sun8i: Add board dts file for Banana Pi M2
+		      Ultra")
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts b/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
+index 438b7b44dab3..1a6794e63b90 100644
+--- a/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
++++ b/arch/arm/boot/dts/sun8i-r40-bananapi-m2-ultra.dts
+@@ -250,12 +250,27 @@
+ 	regulator-name = "vcc-wifi-io";
+ };
+ 
++/*
++ * Our WiFi chip needs both DLDO2 and DLDO3 to be powered at the same
++ * time, with the two being in sync, to be able to meet maximum power
++ * consumption during transmits. Since this is not really supported
++ * right now, just use the two as always on, and we will fix it later.
++ */
++
+ &reg_dldo2 {
++	regulator-always-on;
+ 	regulator-min-microvolt = <3300000>;
+ 	regulator-max-microvolt = <3300000>;
+ 	regulator-name = "vcc-wifi";
+ };
+ 
++&reg_dldo3 {
++	regulator-always-on;
++	regulator-min-microvolt = <3300000>;
++	regulator-max-microvolt = <3300000>;
++	regulator-name = "vcc-wifi-2";
++};
++
+ &reg_dldo4 {
+ 	regulator-min-microvolt = <2500000>;
+ 	regulator-max-microvolt = <2500000>;
+-- 
+cgit 1.2-0.3.lf.el7
+
+From 0729b4af5753b65aa031f58c435da53dbbf56d19 Mon Sep 17 00:00:00 2001
+From: Rob Herring <robh@kernel.org>
+Date: Thu, 13 Sep 2018 13:12:32 -0500
+Subject: ARM: dts: sunxi: Fix I2C bus warnings
+
+dtc has new checks for I2C buses. Fix the warnings in unit-addresses.
+
+arch/arm/boot/dts/sun8i-a23-gt90h-v4.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun8i-a23-inet86dz.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun8i-a23-polaroid-mid2407pxe03.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun8i-a23-polaroid-mid2809pxe04.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun8i-a33-ga10h-v1.1.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun8i-a33-inet-d978-rev2.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: missing or empty reg property
+arch/arm/boot/dts/sun8i-a33-ippo-q8h-v1.2.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: missing or empty reg property
+arch/arm/boot/dts/sun8i-a33-q8-tablet.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2ac00/touchscreen@0: missing or empty reg property
+arch/arm/boot/dts/sun5i-a13-utoo-p66.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2b000/touchscreen: I2C bus unit address format error, expected "40"
+arch/arm/boot/dts/sun5i-a13-difrnce-dit4350.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2b000/touchscreen: missing or empty reg property
+arch/arm/boot/dts/sun5i-a13-empire-electronix-m712.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2b000/touchscreen: missing or empty reg property
+arch/arm/boot/dts/sun5i-a13-inet-98v-rev2.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2b000/touchscreen: missing or empty reg property
+arch/arm/boot/dts/sun5i-a13-q8-tablet.dtb: Warning (i2c_bus_reg): /soc@1c00000/i2c@1c2b000/touchscreen: missing or empty reg property
+
+Cc: Maxime Ripard <maxime.ripard@bootlin.com>
+Cc: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+(limited to 'arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts')
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index 35859d8f3267..bf97f6244c23 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -95,7 +95,7 @@
+ &i2c0 {
+ 	status = "okay";
+ 
+-	axp22x: pmic@68 {
++	axp22x: pmic@34 {
+ 		compatible = "x-powers,axp221";
+ 		reg = <0x34>;
+ 		interrupt-parent = <&nmi_intc>;
+-- 
+cgit 1.2-0.3.lf.el7
+
+From 933ea7e9d143cee0c8c3bdc274afa69c91d91d61 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Wed, 10 Apr 2019 18:59:25 -0300
+Subject: [PATCH v2 1/6] ARM: dts: sun8i: v40: bananapi-m2-berry: Sort device
+ node dereferences.
+
+The device node dereferences are out of order, sort them.
+
+Signed-off-by: Pablo Greco <pgreco@centosproject.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 36 +++++++++++------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index bf97f62..f05cabd 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -105,6 +105,24 @@
+ 
+ #include "axp22x.dtsi"
+ 
++&mmc0 {
++	vmmc-supply = <&reg_dcdc1>;
++	bus-width = <4>;
++	cd-gpios = <&pio 7 13 GPIO_ACTIVE_LOW>; /* PH13 */
++	status = "okay";
++};
++
++&mmc1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc1_pg_pins>;
++	vmmc-supply = <&reg_dldo2>;
++	vqmmc-supply = <&reg_dldo1>;
++	mmc-pwrseq = <&wifi_pwrseq>;
++	bus-width = <4>;
++	non-removable;
++	status = "okay";
++};
++
+ &reg_aldo3 {
+ 	regulator-always-on;
+ 	regulator-min-microvolt = <2700000>;
+@@ -152,24 +170,6 @@
+ 	regulator-name = "vcc-wifi";
+ };
+ 
+-&mmc0 {
+-	vmmc-supply = <&reg_dcdc1>;
+-	bus-width = <4>;
+-	cd-gpios = <&pio 7 13 GPIO_ACTIVE_LOW>; /* PH13 */
+-	status = "okay";
+-};
+-
+-&mmc1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&mmc1_pg_pins>;
+-	vmmc-supply = <&reg_dldo2>;
+-	vqmmc-supply = <&reg_dldo1>;
+-	mmc-pwrseq = <&wifi_pwrseq>;
+-	bus-width = <4>;
+-	non-removable;
+-	status = "okay";
+-};
+-
+ &uart0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_pb_pins>;
+-- 
+1.8.3.1
+
+From 745c1a105e34553caf247215cdcefa30db95092a Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Thu, 11 Apr 2019 13:58:49 -0300
+Subject: [PATCH v2 2/6] ARM: dts: sun8i: v40: bananapi-m2-berry: Enable GMAC
+ ethernet controller
+
+Just like the Bananapi M2 Ultra, the Bananapi M2 Berry has a Realtek
+RTL8211E RGMII PHY tied to the GMAC.
+The PMIC's DC1SW output provides power for the PHY, while the ALDO2
+output provides I/O voltages on both sides.
+
+Signed-off-by: Pablo Greco <pgreco@centosproject.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 30 +++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index f05cabd..0d79e91 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -50,6 +50,7 @@
+ 	compatible = "sinovoip,bpi-m2-berry", "allwinner,sun8i-r40";
+ 
+ 	aliases {
++		ethernet0 = &gmac;
+ 		serial0 = &uart0;
+ 	};
+ 
+@@ -92,6 +93,22 @@
+ 	status = "okay";
+ };
+ 
++&gmac {
++	pinctrl-names = "default";
++	pinctrl-0 = <&gmac_rgmii_pins>;
++	phy-handle = <&phy1>;
++	phy-mode = "rgmii";
++	phy-supply = <&reg_dc1sw>;
++	status = "okay";
++};
++
++&gmac_mdio {
++	phy1: ethernet-phy@1 {
++		compatible = "ethernet-phy-ieee802.3-c22";
++		reg = <1>;
++	};
++};
++
+ &i2c0 {
+ 	status = "okay";
+ 
+@@ -123,6 +140,13 @@
+ 	status = "okay";
+ };
+ 
++&reg_aldo2 {
++	regulator-always-on;
++	regulator-min-microvolt = <2500000>;
++	regulator-max-microvolt = <2500000>;
++	regulator-name = "vcc-pa";
++};
++
+ &reg_aldo3 {
+ 	regulator-always-on;
+ 	regulator-min-microvolt = <2700000>;
+@@ -130,6 +154,12 @@
+ 	regulator-name = "avcc";
+ };
+ 
++&reg_dc1sw {
++	regulator-min-microvolt = <3000000>;
++	regulator-max-microvolt = <3000000>;
++	regulator-name = "vcc-gmac-phy";
++};
++
+ &reg_dcdc1 {
+ 	regulator-always-on;
+ 	regulator-min-microvolt = <3000000>;
+-- 
+1.8.3.1
+
+From 274ba1411bac61fcecdf021a13d645891e7b723c Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Thu, 11 Apr 2019 14:00:05 -0300
+Subject: [PATCH v2 3/6] ARM: dts: sun8i: v40: bananapi-m2-berry: Enable HDMI
+ output
+
+This patch adds the hdmi nodes to the Bananapi M2 Berry, the same way it
+was done to the Bananapi M2 Ultra
+
+Signed-off-by: Pablo Greco <pgreco@centosproject.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 29 +++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index 0d79e91..2a5b80b 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -58,6 +58,17 @@
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 
++	connector {
++		compatible = "hdmi-connector";
++		type = "a";
++
++		port {
++			hdmi_con_in: endpoint {
++				remote-endpoint = <&hdmi_out_con>;
++			};
++		};
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 
+@@ -88,6 +99,10 @@
+ 	};
+ };
+ 
++&de {
++	status = "okay";
++};
++
+ &ehci1 {
+ 	/* Terminus Tech FE 1.1s 4-port USB 2.0 hub here */
+ 	status = "okay";
+@@ -109,6 +124,16 @@
+ 	};
+ };
+ 
++&hdmi {
++	status = "okay";
++};
++
++&hdmi_out {
++	hdmi_out_con: endpoint {
++		remote-endpoint = <&hdmi_con_in>;
++	};
++};
++
+ &i2c0 {
+ 	status = "okay";
+ 
+@@ -200,6 +225,10 @@
+ 	regulator-name = "vcc-wifi";
+ };
+ 
++&tcon_tv0 {
++	status = "okay";
++};
++
+ &uart0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_pb_pins>;
+-- 
+1.8.3.1
+
+From e91ec82e21aaf29f1453053175050b8230c2b495 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Thu, 11 Apr 2019 14:03:54 -0300
+Subject: [PATCH v2 4/6] ARM: dts: sun8i: v40: bananapi-m2-berry: Enable AHCI
+
+Just like the Bananapi M2 Ultra, enable the ahci controller and
+the two regulators needed to activate it.
+
+Signed-off-by: Pablo Greco <pgreco@centosproject.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index 2a5b80b..c37c7ab 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -99,6 +99,12 @@
+ 	};
+ };
+ 
++&ahci {
++	ahci-supply = <&reg_dldo4>;
++	phy-supply = <&reg_eldo3>;
++	status = "okay";
++};
++
+ &de {
+ 	status = "okay";
+ };
+@@ -225,6 +231,18 @@
+ 	regulator-name = "vcc-wifi";
+ };
+ 
++&reg_dldo4 {
++	regulator-min-microvolt = <2500000>;
++	regulator-max-microvolt = <2500000>;
++	regulator-name = "vdd2v5-sata";
++};
++
++&reg_eldo3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++	regulator-name = "vdd1v2-sata";
++};
++
+ &tcon_tv0 {
+ 	status = "okay";
+ };
+-- 
+1.8.3.1
+
+From df95d67e4385275586d3f91ee145f8d13885a560 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Thu, 11 Apr 2019 14:04:35 -0300
+Subject: [PATCH v2 5/6] ARM: dts: sun8i: v40: bananapi-m2-berry: Fix WiFi
+ regulator definitions
+
+Just like was done for the bananapi-m2-ultra, add the second wifi/bt
+regulator and mark both as always-on.
+
+Signed-off-by: Pablo Greco <pgreco@centosproject.org>
+---
+ arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+index c37c7ab..78f4a1a 100644
+--- a/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
++++ b/arch/arm/boot/dts/sun8i-v40-bananapi-m2-berry.dts
+@@ -225,12 +225,27 @@
+ 	regulator-name = "vcc-wifi-io";
+ };
+ 
++/*
++ * Our WiFi chip needs both DLDO2 and DLDO3 to be powered at the same
++ * time, with the two being in sync, to be able to meet maximum power
++ * consumption during transmits. Since this is not really supported
++ * right now, just use the two as always on, and we will fix it later.
++ */
++
+ &reg_dldo2 {
++	regulator-always-on;
+ 	regulator-min-microvolt = <3300000>;
+ 	regulator-max-microvolt = <3300000>;
+ 	regulator-name = "vcc-wifi";
+ };
+ 
++&reg_dldo3 {
++	regulator-always-on;
++	regulator-min-microvolt = <3300000>;
++	regulator-max-microvolt = <3300000>;
++	regulator-name = "vcc-wifi-2";
++};
++
+ &reg_dldo4 {
+ 	regulator-min-microvolt = <2500000>;
+ 	regulator-max-microvolt = <2500000>;
+-- 
+1.8.3.1
+
