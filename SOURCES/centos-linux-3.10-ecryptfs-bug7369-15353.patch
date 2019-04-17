@@ -1,0 +1,406 @@
+From 21a46cb1e668aa27756e6858512a0eb48b37f588 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pablo@fliagreco.com.ar>
+Date: Wed, 10 Oct 2018 13:03:14 -0300
+Subject: [PATCH 1/5] https://bugs.centos.org/view.php?id=7369
+ http://kozlex.blogspot.com/2015/05/building-ecryptfs-on-redhat-7_19.html
+
+To fix ecryptfs and build it in the kernel follow is the partial fix:
+This is a fix that will not be proposed to upstream cause it is not
+compatible with other kernels; instead it is a patch to make ecryptfs
+work on Rhel7 only.
+---
+ fs/ecryptfs/main.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/fs/ecryptfs/main.c b/fs/ecryptfs/main.c
+index 8b0957e..b07cee6 100644
+--- a/fs/ecryptfs/main.c
++++ b/fs/ecryptfs/main.c
+@@ -500,6 +500,7 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
+ 	struct path path;
+ 	uid_t check_ruid;
+ 	int rc;
++	int *s_stack_depth;
+ 
+ 	sbi = kmem_cache_zalloc(ecryptfs_sb_info_cache, GFP_KERNEL);
+ 	if (!sbi) {
+@@ -567,10 +568,10 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
+ 	s->s_maxbytes = path.dentry->d_sb->s_maxbytes;
+ 	s->s_blocksize = path.dentry->d_sb->s_blocksize;
+ 	s->s_magic = ECRYPTFS_SUPER_MAGIC;
+-	s->s_stack_depth = path.dentry->d_sb->s_stack_depth + 1;
++	s_stack_depth = get_s_stack_depth(path.dentry->d_sb);
+ 
+ 	rc = -EINVAL;
+-	if (s->s_stack_depth > FILESYSTEM_MAX_STACK_DEPTH) {
++	if ( *s_stack_depth > FILESYSTEM_MAX_STACK_DEPTH) {
+ 		pr_err("eCryptfs: maximum fs stacking depth exceeded\n");
+ 		goto out_free;
+ 	}
+-- 
+1.8.3.1
+
+From 8eff0cda21d01242dd4b580a041fcb7f064d52a7 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pablo@fliagreco.com.ar>
+Date: Wed, 10 Oct 2018 13:04:36 -0300
+Subject: [PATCH 2/5] https://bugs.centos.org/view.php?id=15353 Update ecryptfs
+ to 3.10.108, fixes some null pointer dereference
+
+---
+ fs/ecryptfs/crypto.c |  1 -
+ fs/ecryptfs/file.c   | 27 ++++++++++++++-------------
+ fs/ecryptfs/inode.c  |  2 +-
+ fs/ecryptfs/main.c   | 16 +++++++++++++---
+ 4 files changed, 28 insertions(+), 18 deletions(-)
+
+diff --git a/fs/ecryptfs/crypto.c b/fs/ecryptfs/crypto.c
+index f71ec12..1da2446 100644
+--- a/fs/ecryptfs/crypto.c
++++ b/fs/ecryptfs/crypto.c
+@@ -2102,7 +2102,6 @@ ecryptfs_decode_from_filename(unsigned char *dst, size_t *dst_size,
+ 			break;
+ 		case 2:
+ 			dst[dst_byte_offset++] |= (src_byte);
+-			dst[dst_byte_offset] = 0;
+ 			current_bit_offset = 0;
+ 			break;
+ 		}
+diff --git a/fs/ecryptfs/file.c b/fs/ecryptfs/file.c
+index 041379a..fac9d01 100644
+--- a/fs/ecryptfs/file.c
++++ b/fs/ecryptfs/file.c
+@@ -185,6 +185,19 @@ out:
+ 	return rc;
+ }
+ 
++static int ecryptfs_mmap(struct file *file, struct vm_area_struct *vma)
++{
++	struct file *lower_file = ecryptfs_file_to_lower(file);
++	/*
++	 * Don't allow mmap on top of file systems that don't support it
++	 * natively.  If FILESYSTEM_MAX_STACK_DEPTH > 2 or ecryptfs
++	 * allows recursive mounting, this will need to be extended.
++	 */
++	if (!lower_file->f_op->mmap)
++		return -ENODEV;
++	return generic_file_mmap(file, vma);
++}
++
+ /**
+  * ecryptfs_open
+  * @inode: inode speciying file to open
+@@ -198,23 +211,11 @@ static int ecryptfs_open(struct inode *inode, struct file *file)
+ {
+ 	int rc = 0;
+ 	struct ecryptfs_crypt_stat *crypt_stat = NULL;
+-	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
+ 	struct dentry *ecryptfs_dentry = file->f_path.dentry;
+ 	/* Private value of ecryptfs_dentry allocated in
+ 	 * ecryptfs_lookup() */
+ 	struct ecryptfs_file_info *file_info;
+ 
+-	mount_crypt_stat = &ecryptfs_superblock_to_private(
+-		ecryptfs_dentry->d_sb)->mount_crypt_stat;
+-	if ((mount_crypt_stat->flags & ECRYPTFS_ENCRYPTED_VIEW_ENABLED)
+-	    && ((file->f_flags & O_WRONLY) || (file->f_flags & O_RDWR)
+-		|| (file->f_flags & O_CREAT) || (file->f_flags & O_TRUNC)
+-		|| (file->f_flags & O_APPEND))) {
+-		printk(KERN_WARNING "Mount has encrypted view enabled; "
+-		       "files may only be read\n");
+-		rc = -EPERM;
+-		goto out;
+-	}
+ 	/* Released in ecryptfs_release or end of function if failure */
+ 	file_info = kmem_cache_zalloc(ecryptfs_file_info_cache, GFP_KERNEL);
+ 	ecryptfs_set_file_private(file, file_info);
+@@ -372,7 +373,7 @@ const struct file_operations ecryptfs_main_fops = {
+ #ifdef CONFIG_COMPAT
+ 	.compat_ioctl = ecryptfs_compat_ioctl,
+ #endif
+-	.mmap = generic_file_mmap,
++	.mmap = ecryptfs_mmap,
+ 	.open = ecryptfs_open,
+ 	.flush = ecryptfs_flush,
+ 	.release = ecryptfs_release,
+diff --git a/fs/ecryptfs/inode.c b/fs/ecryptfs/inode.c
+index 1648908..d3d47e7 100644
+--- a/fs/ecryptfs/inode.c
++++ b/fs/ecryptfs/inode.c
+@@ -1042,7 +1042,7 @@ ecryptfs_setxattr(struct dentry *dentry, const char *name, const void *value,
+ 	}
+ 
+ 	rc = vfs_setxattr(lower_dentry, name, value, size, flags);
+-	if (!rc)
++	if (!rc && dentry->d_inode)
+ 		fsstack_copy_attr_all(dentry->d_inode, lower_dentry->d_inode);
+ out:
+ 	return rc;
+diff --git a/fs/ecryptfs/main.c b/fs/ecryptfs/main.c
+index b07cee6..01b209d 100644
+--- a/fs/ecryptfs/main.c
++++ b/fs/ecryptfs/main.c
+@@ -494,6 +494,7 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
+ {
+ 	struct super_block *s;
+ 	struct ecryptfs_sb_info *sbi;
++	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
+ 	struct ecryptfs_dentry_info *root_info;
+ 	const char *err = "Getting sb failed";
+ 	struct inode *inode;
+@@ -513,6 +514,7 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
+ 		err = "Error parsing options";
+ 		goto out;
+ 	}
++	mount_crypt_stat = &sbi->mount_crypt_stat;
+ 
+ 	s = sget(fs_type, NULL, set_anon_super, flags, NULL);
+ 	if (IS_ERR(s)) {
+@@ -559,11 +561,19 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
+ 
+ 	/**
+ 	 * Set the POSIX ACL flag based on whether they're enabled in the lower
+-	 * mount. Force a read-only eCryptfs mount if the lower mount is ro.
+-	 * Allow a ro eCryptfs mount even when the lower mount is rw.
++	 * mount.
+ 	 */
+ 	s->s_flags = flags & ~MS_POSIXACL;
+-	s->s_flags |= path.dentry->d_sb->s_flags & (MS_RDONLY | MS_POSIXACL);
++	s->s_flags |= path.dentry->d_sb->s_flags & MS_POSIXACL;
++
++	/**
++	 * Force a read-only eCryptfs mount when:
++	 *   1) The lower mount is ro
++	 *   2) The ecryptfs_encrypted_view mount option is specified
++	 */
++	if (path.dentry->d_sb->s_flags & MS_RDONLY ||
++	    mount_crypt_stat->flags & ECRYPTFS_ENCRYPTED_VIEW_ENABLED)
++		s->s_flags |= MS_RDONLY;
+ 
+ 	s->s_maxbytes = path.dentry->d_sb->s_maxbytes;
+ 	s->s_blocksize = path.dentry->d_sb->s_blocksize;
+-- 
+1.8.3.1
+
+From b14c0c55ccb3a77172d35bda6c3b1e1af8daed16 Mon Sep 17 00:00:00 2001
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Date: Tue, 22 Aug 2017 23:41:28 +0300
+Subject: [PATCH 3/5] eCryptfs: use after free in ecryptfs_release_messaging()
+
+commit db86be3a12d0b6e5c5b51c2ab2a48f06329cb590 upstream.
+
+We're freeing the list iterator so we should be using the _safe()
+version of hlist_for_each_entry().
+
+Fixes: 88b4a07e6610 ("[PATCH] eCryptfs: Public key transport mechanism")
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ fs/ecryptfs/messaging.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/fs/ecryptfs/messaging.c b/fs/ecryptfs/messaging.c
+index 49ff8ea..331f502 100644
+--- a/fs/ecryptfs/messaging.c
++++ b/fs/ecryptfs/messaging.c
+@@ -444,15 +444,16 @@ void ecryptfs_release_messaging(void)
+ 	}
+ 	if (ecryptfs_daemon_hash) {
+ 		struct ecryptfs_daemon *daemon;
++		struct hlist_node *n;
+ 		int i;
+ 
+ 		mutex_lock(&ecryptfs_daemon_hash_mux);
+ 		for (i = 0; i < (1 << ecryptfs_hash_bits); i++) {
+ 			int rc;
+ 
+-			hlist_for_each_entry(daemon,
+-					     &ecryptfs_daemon_hash[i],
+-					     euid_chain) {
++			hlist_for_each_entry_safe(daemon, n,
++						  &ecryptfs_daemon_hash[i],
++						  euid_chain) {
+ 				rc = ecryptfs_exorcise_daemon(daemon);
+ 				if (rc)
+ 					printk(KERN_ERR "%s: Error whilst "
+-- 
+1.8.3.1
+
+From e67495775579bdb7f70dddcc28d44cbb2e09d782 Mon Sep 17 00:00:00 2001
+From: Al Viro <viro@zeniv.linux.org.uk>
+Date: Fri, 29 Nov 2013 22:51:47 -0500
+Subject: [PATCH 4/5] ecryptfs: fix failure handling in ->readlink()
+
+If ecryptfs_readlink_lower() fails, buf remains an uninitialized
+pointer and passing it nd_set_link() won't do anything good.
+
+Fixed by switching ecryptfs_readlink_lower() to saner API - make it
+return buf or ERR_PTR(...) and update callers.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+ fs/ecryptfs/inode.c | 29 +++++++++++++----------------
+ 1 file changed, 13 insertions(+), 16 deletions(-)
+
+diff --git a/fs/ecryptfs/inode.c b/fs/ecryptfs/inode.c
+index d3d47e7..4052e41 100644
+--- a/fs/ecryptfs/inode.c
++++ b/fs/ecryptfs/inode.c
+@@ -659,19 +659,17 @@ out_lock:
+ 	return rc;
+ }
+ 
+-static int ecryptfs_readlink_lower(struct dentry *dentry, char **buf,
+-				   size_t *bufsiz)
++static char *ecryptfs_readlink_lower(struct dentry *dentry, size_t *bufsiz)
+ {
+ 	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
+ 	char *lower_buf;
++	char *buf;
+ 	mm_segment_t old_fs;
+ 	int rc;
+ 
+ 	lower_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+-	if (!lower_buf) {
+-		rc = -ENOMEM;
+-		goto out;
+-	}
++	if (!lower_buf)
++		return ERR_PTR(-ENOMEM);
+ 	old_fs = get_fs();
+ 	set_fs(get_ds());
+ 	rc = lower_dentry->d_inode->i_op->readlink(lower_dentry,
+@@ -680,21 +678,18 @@ static int ecryptfs_readlink_lower(struct dentry *dentry, char **buf,
+ 	set_fs(old_fs);
+ 	if (rc < 0)
+ 		goto out;
+-	rc = ecryptfs_decode_and_decrypt_filename(buf, bufsiz, dentry,
++	rc = ecryptfs_decode_and_decrypt_filename(&buf, bufsiz, dentry,
+ 						  lower_buf, rc);
+ out:
+ 	kfree(lower_buf);
+-	return rc;
++	return rc ? ERR_PTR(rc) : buf;
+ }
+ 
+ static void *ecryptfs_follow_link(struct dentry *dentry, struct nameidata *nd)
+ {
+-	char *buf;
+-	size_t len = PATH_MAX;
+-	int rc;
+-
+-	rc = ecryptfs_readlink_lower(dentry, &buf, &len);
+-	if (rc)
++	size_t len;
++	char *buf = ecryptfs_readlink_lower(dentry, &len);
++	if (IS_ERR(buf))
+ 		goto out;
+ 	fsstack_copy_attr_atime(dentry->d_inode,
+ 				ecryptfs_dentry_to_lower(dentry)->d_inode);
+@@ -1003,10 +998,12 @@ static int ecryptfs_getattr_link(struct vfsmount *mnt, struct dentry *dentry,
+ 		char *target;
+ 		size_t targetsiz;
+ 
+-		rc = ecryptfs_readlink_lower(dentry, &target, &targetsiz);
+-		if (!rc) {
++		target = ecryptfs_readlink_lower(dentry, &targetsiz);
++		if (!IS_ERR(target)) {
+ 			kfree(target);
+ 			stat->size = targetsiz;
++		} else {
++			rc = PTR_ERR(target);
+ 		}
+ 	}
+ 	return rc;
+-- 
+1.8.3.1
+
+From 7f59ba91ad4d6547a12493131833d4c89017f7ab Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pablo@fliagreco.com.ar>
+Date: Wed, 10 Oct 2018 13:10:09 -0300
+Subject: [PATCH 5/5] https://bugs.centos.org/view.php?id=15353 Update ecryptfs
+ to the use rename2 in inode_operations. Needed for the changes made between
+ 7.0 and 7.1
+
+---
+ fs/ecryptfs/ecryptfs_kernel.h |  2 +-
+ fs/ecryptfs/inode.c           | 27 ++++++++++++++++++++++-----
+ 2 files changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/fs/ecryptfs/ecryptfs_kernel.h b/fs/ecryptfs/ecryptfs_kernel.h
+index 07b4757..8ebcd40 100644
+--- a/fs/ecryptfs/ecryptfs_kernel.h
++++ b/fs/ecryptfs/ecryptfs_kernel.h
+@@ -545,7 +545,7 @@ void __ecryptfs_printk(const char *fmt, ...);
+ extern const struct file_operations ecryptfs_main_fops;
+ extern const struct file_operations ecryptfs_dir_fops;
+ extern const struct inode_operations ecryptfs_main_iops;
+-extern const struct inode_operations ecryptfs_dir_iops;
++extern const struct inode_operations_wrapper ecryptfs_dir_iops;
+ extern const struct inode_operations ecryptfs_symlink_iops;
+ extern const struct super_operations ecryptfs_sops;
+ extern const struct dentry_operations ecryptfs_dops;
+diff --git a/fs/ecryptfs/inode.c b/fs/ecryptfs/inode.c
+index 4052e41..6e5cb89 100644
+--- a/fs/ecryptfs/inode.c
++++ b/fs/ecryptfs/inode.c
+@@ -71,12 +71,16 @@ static int ecryptfs_inode_set(struct inode *inode, void *opaque)
+ 	inode->i_mapping->a_ops = &ecryptfs_aops;
+ 	inode->i_mapping->backing_dev_info = inode->i_sb->s_bdi;
+ 
+-	if (S_ISLNK(inode->i_mode))
++	if (S_ISLNK(inode->i_mode)) {
+ 		inode->i_op = &ecryptfs_symlink_iops;
+-	else if (S_ISDIR(inode->i_mode))
+-		inode->i_op = &ecryptfs_dir_iops;
+-	else
++	}
++	else if (S_ISDIR(inode->i_mode)) {
++		inode->i_op = &ecryptfs_dir_iops.ops;
++		inode->i_flags |= S_IOPS_WRAPPER;
++	}
++	else {
+ 		inode->i_op = &ecryptfs_main_iops;
++	}
+ 
+ 	if (S_ISDIR(inode->i_mode))
+ 		inode->i_fop = &ecryptfs_dir_fops;
+@@ -659,6 +663,16 @@ out_lock:
+ 	return rc;
+ }
+ 
++static int ecryptfs_rename2(struct inode *old_dir, struct dentry *old_dentry,
++			 struct inode *new_dir, struct dentry *new_dentry,
++			 unsigned int flags)
++{
++	if (flags & ~RENAME_NOREPLACE)
++		return -EINVAL;
++
++	return ecryptfs_rename(old_dir, old_dentry, new_dir, new_dentry);
++}
++
+ static char *ecryptfs_readlink_lower(struct dentry *dentry, size_t *bufsiz)
+ {
+ 	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
+@@ -1119,7 +1133,8 @@ const struct inode_operations ecryptfs_symlink_iops = {
+ 	.removexattr = ecryptfs_removexattr
+ };
+ 
+-const struct inode_operations ecryptfs_dir_iops = {
++const struct inode_operations_wrapper ecryptfs_dir_iops = {
++	.ops = {
+ 	.create = ecryptfs_create,
+ 	.lookup = ecryptfs_lookup,
+ 	.link = ecryptfs_link,
+@@ -1135,6 +1150,8 @@ const struct inode_operations ecryptfs_dir_iops = {
+ 	.getxattr = ecryptfs_getxattr,
+ 	.listxattr = ecryptfs_listxattr,
+ 	.removexattr = ecryptfs_removexattr
++	},
++	.rename2 = ecryptfs_rename2,
+ };
+ 
+ const struct inode_operations ecryptfs_main_iops = {
+-- 
+1.8.3.1
+

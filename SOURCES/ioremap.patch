@@ -1,0 +1,14 @@
+--- a/arch/x86/mm/ioremap.c	2017-08-06 11:10:56.224088715 -0700
++++ b/arch/x86/mm/ioremap.c	2017-08-06 11:16:09.797088715 -0700
+@@ -115,8 +115,9 @@
+ 	last_pfn = last_addr >> PAGE_SHIFT;
+ 	if (walk_system_ram_range(pfn, last_pfn - pfn + 1, NULL,
+ 					  __ioremap_check_ram) == 1) {
+-		WARN_ONCE(1, "ioremap on RAM at 0x%llx - 0x%llx\n",
+-					phys_addr, last_addr);
++		WARN_ONCE(1, "ioremap on RAM at 0x%lx - 0x%lx\n",
++				(unsigned long int)phys_addr,
++				(unsigned long int)last_addr);
+ 		return NULL;
+ 	}
+ 

@@ -1,0 +1,51 @@
+diff -up ./arch/x86/include/asm/efi.h.efi ./arch/x86/include/asm/efi.h
+--- ./arch/x86/include/asm/efi.h.efi	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/include/asm/efi.h	2018-04-16 16:53:32.000000000 +0900
+@@ -35,18 +35,18 @@
+ extern unsigned long asmlinkage efi_call_phys(void *, ...);
+ 
+ #define arch_efi_call_virt_setup()					\
+-{(									\
++({									\
+ 	bool ibrs_on;							\
+ 	kernel_fpu_begin();						\
+ 	ibrs_on = unprotected_firmware_begin();				\
+ 	ibrs_on;							\
+-)}
++})
+ 
+ #define arch_efi_call_virt_teardown(ibrs_on)				\
+-{(									\
++({									\
+ 	unprotected_firmware_end(ibrs_on);				\
+ 	kernel_fpu_end();						\
+-)}
++})
+ 
+ 
+ /*
+diff -up ./include/linux/ftrace.h.ftrace ./include/linux/ftrace.h
+--- ./include/linux/ftrace.h.ftrace	2018-03-22 06:40:12.000000000 +0900
++++ ./include/linux/ftrace.h	2018-04-16 14:21:51.000000000 +0900
+@@ -685,6 +685,9 @@ struct ftrace_ret_stack {
+ 	unsigned long func;
+ 	unsigned long long calltime;
+ 	unsigned long long subtime;
++#ifdef HAVE_FUNCTION_GRAPH_FP_TEST
++	unsigned long fp;
++#endif
+ 	RH_KABI_REPLACE(unsigned long fp, unsigned long *retp)
+ };
+ 
+diff -up ./kernel/trace/trace_output.c.ftrace ./kernel/trace/trace_output.c
+--- ./kernel/trace/trace_output.c.ftrace	2018-03-22 06:40:12.000000000 +0900
++++ ./kernel/trace/trace_output.c	2018-04-16 13:21:31.000000000 +0900
+@@ -399,7 +399,7 @@ ftrace_print_flags_seq_u64(struct trace_
+ 
+ 	return ret;
+ }
+-EXPORT_SYMBOL(trace_print_flags_seq_u64);
++EXPORT_SYMBOL(ftrace_print_flags_seq_u64);
+ 
+ const char *
+ ftrace_print_symbols_seq_u64(struct trace_seq *p, unsigned long long val,

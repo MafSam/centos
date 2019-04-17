@@ -1,0 +1,11 @@
+--- a/tools/perf/Makefile.config	2017-09-09 00:06:42.000000000 -0700
++++ b/tools/perf/Makefile.config	2017-10-07 14:12:43.689808032 -0700
+@@ -468,7 +468,7 @@ endif
+ 
+ ifndef NO_LIBCRYPTO
+   ifneq ($(feature-libcrypto), 1)
+-    msg := $(warning No libcrypto.h found, disables jitted code injection, please install libssl-devel or libssl-dev);
++    msg := $(warning No crypto.h found, disables jitted code injection, please install openssl-devel);
+     NO_LIBCRYPTO := 1
+   else
+     CFLAGS += -DHAVE_LIBCRYPTO_SUPPORT

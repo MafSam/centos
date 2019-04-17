@@ -1,0 +1,20 @@
+Without CONFIG_DAX_DRIVER, drivers/md/dm-stripe.c fails to compile:
+
+drivers/md/dm-stripe.c:515:27: error: 'stripe_dax_memcpy_toiovecend' undeclared here (not in a function)
+.dax_memcpy_toiovecend = stripe_dax_memcpy_toiovecend,
+^
+
+CONFIG_DAX_DRIVER will be automaticallly selected by NVDIMM support,
+which needs PHYS_ADDR_T_64BIT setup.
+
+diff -up ./drivers/md/dm-stripe.c.dax ./drivers/md/dm-stripe.c
+--- ./drivers/md/dm-stripe.c.dax	2018-10-05 05:18:19.000000000 +0900
++++ ./drivers/md/dm-stripe.c	2018-11-01 12:53:35.000000000 +0900
+@@ -370,6 +370,7 @@ static int stripe_dax_memcpy_toiovecend(
+ #define stripe_dax_direct_access NULL
+ #define stripe_dax_memcpy_fromiovecend NULL
+ #define stripe_dax_memcpy_fromiovecend NULL
++#define stripe_dax_memcpy_toiovecend NULL
+ #endif
+ 
+ /*

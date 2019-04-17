@@ -1,0 +1,11 @@
+--- a/arch/x86/mm/init_32.c	2017-07-06 16:37:46.000000000 -0700
++++ b/arch/x86/mm/init_32.c	2017-08-06 06:29:29.459776079 -0700
+@@ -845,7 +845,7 @@
+ }
+ 
+ #ifdef CONFIG_MEMORY_HOTPLUG
+-int arch_add_memory(int nid, u64 start, u64 size)
++int arch_add_memory(int nid, u64 start, u64 size, bool for_device)
+ {
+ 	struct pglist_data *pgdata = NODE_DATA(nid);
+ 	struct zone *zone = pgdata->node_zones + ZONE_HIGHMEM;

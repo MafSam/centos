@@ -1,0 +1,117 @@
+32bit version of copy_from_user() requires that
+compiler statically knows that buffer overflow won't occur.
+These patch so that static analysis by the compiler succeeds.
+
+diff -up ./drivers/isdn/hardware/avm/b1.c.cfu4 ./drivers/isdn/hardware/avm/b1.c
+--- ./drivers/isdn/hardware/avm/b1.c.cfu4	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/isdn/hardware/avm/b1.c	2018-04-18 16:24:24.000000000 +0900
+@@ -176,6 +176,8 @@ int b1_load_t4file(avmcard *card, capilo
+ 	}
+ 	if (left) {
+ 		if (t4file->user) {
++			if (left > sizeof(buf)) /* make copy_from_user happy */
++				return -EFAULT;
+ 			if (copy_from_user(buf, dp, left))
+ 				return -EFAULT;
+ 		} else {
+@@ -224,6 +226,8 @@ int b1_load_config(avmcard *card, capilo
+ 	}
+ 	if (left) {
+ 		if (config->user) {
++			if (left > sizeof(buf)) /* make copy_from_user happy */
++				return -EFAULT;
+ 			if (copy_from_user(buf, dp, left))
+ 				return -EFAULT;
+ 		} else {
+diff -up ./fs/binfmt_misc.c.cfu2 ./fs/binfmt_misc.c
+--- ./fs/binfmt_misc.c.cfu2	2018-03-22 06:40:12.000000000 +0900
++++ ./fs/binfmt_misc.c	2018-04-18 14:19:53.000000000 +0900
+@@ -396,12 +396,12 @@ static int parse_command(const char __us
+ {
+ 	char s[4];
+ 
+-	if (!count)
+-		return 0;
+ 	if (count > 3)
+ 		return -EINVAL;
+ 	if (copy_from_user(s, buffer, count))
+ 		return -EFAULT;
++	if (!count)
++		return 0;
+ 	if (s[count-1] == '\n')
+ 		count--;
+ 	if (count == 1 && s[0] == '0')
+diff -up ./net/core/pktgen.c.pkt ./net/core/pktgen.c
+--- ./net/core/pktgen.c.pkt	2018-03-22 06:40:12.000000000 +0900
++++ ./net/core/pktgen.c	2018-04-18 20:13:43.000000000 +0900
+@@ -881,6 +881,8 @@ static ssize_t pktgen_if_write(struct fi
+ 		return len;
+ 
+ 	memset(name, 0, sizeof(name));
++	if (len > sizeof(name))
++		return -EFAULT;
+ 	if (copy_from_user(name, &user_buffer[i], len))
+ 		return -EFAULT;
+ 	i += len;
+@@ -1798,6 +1800,8 @@ static ssize_t pktgen_thread_write(struc
+ 		return len;
+ 
+ 	memset(name, 0, sizeof(name));
++	if (len > sizeof(name))
++		return -EFAULT;
+ 	if (copy_from_user(name, &user_buffer[i], len))
+ 		return -EFAULT;
+ 	i += len;
+@@ -1828,6 +1832,8 @@ static ssize_t pktgen_thread_write(struc
+ 			ret = len;
+ 			goto out;
+ 		}
++		if (len > sizeof(f))
++			return -EFAULT;
+ 		if (copy_from_user(f, &user_buffer[i], len))
+ 			return -EFAULT;
+ 		i += len;
+diff -up ./sound/core/seq/seq_clientmgr.c.cfu5 ./sound/core/seq/seq_clientmgr.c
+--- ./sound/core/seq/seq_clientmgr.c.cfu5	2018-03-22 06:40:12.000000000 +0900
++++ ./sound/core/seq/seq_clientmgr.c	2018-04-18 18:57:48.000000000 +0900
+@@ -2123,6 +2123,8 @@ static long snd_seq_ioctl(struct file *f
+ 	 */
+ 	size = _IOC_SIZE(handler->cmd);
+ 	if (handler->cmd & IOC_IN) {
++		if (size > sizeof(buf)) /* make copy_from_user happy */
++			return -EFAULT;
+ 		if (copy_from_user(&buf, (const void __user *)arg, size))
+ 			return -EFAULT;
+ 	}
+diff -up ./kernel/sys.c.cfu ./kernel/sys.c
+--- ./kernel/sys.c.cfu	2018-03-22 06:40:12.000000000 +0900
++++ ./kernel/sys.c	2018-04-16 13:03:32.000000000 +0900
+@@ -2091,7 +2091,10 @@ static int prctl_set_mm_map(int opt, con
+ 		return error;
+ 
+ 	if (prctl_map.auxv_size) {
++		unsigned long arg4 = prctl_map.auxv_size;
+ 		memset(user_auxv, 0, sizeof(user_auxv));
++		if (arg4 > sizeof(user_auxv)) /* to make copy_from_user happy */
++			return -EFAULT;
+ 		if (copy_from_user(user_auxv,
+ 				   (const void __user *)prctl_map.auxv,
+ 				   prctl_map.auxv_size))
+diff -up ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c.cfu3 ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c
+--- ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c.cfu3	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c	2018-04-18 15:54:52.000000000 +0900
+@@ -4498,9 +4498,13 @@ int vmw_execbuf_ioctl(struct drm_device
+ 		u32 idx = array_index_nospec(arg.version - 1,
+ 					     DRM_VMW_EXECBUF_VERSION);
+ 
++		/* to make copy_from_user() happy, check bounds beforehand */
++		size_t copysize = copy_offset[idx] - copy_offset[0];
++		if (copysize > sizeof(arg.context_handle))
++			return -EFAULT;
+ 		if (copy_from_user(&arg.context_handle,
+ 				  (void __user *) (data + copy_offset[0]),
+-				  copy_offset[idx] - copy_offset[0]) != 0)
++				  copysize) != 0)
+ 			return -EFAULT;
+ 	}
+ 

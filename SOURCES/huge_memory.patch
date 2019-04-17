@@ -1,0 +1,20 @@
+--- a/mm/huge_memory.c	2017-07-06 16:37:46.000000000 -0700
++++ b/mm/huge_memory.c	2017-08-06 11:46:55.552088715 -0700
+@@ -1078,7 +1078,7 @@ static int do_huge_pmd_wp_page_fallback(
+ {
+ 	spinlock_t *ptl;
+ 	pgtable_t pgtable;
+-	pmd_t _pmd = {0};
++	pmd_t _pmd = {{{0}}};
+ 	int ret = 0, i;
+ 	struct page **pages;
+ 	unsigned long mmun_start;	/* For mmu_notifiers */
+@@ -1887,7 +1887,7 @@ static int __split_huge_page_map(struct
+ {
+ 	struct mm_struct *mm = vma->vm_mm;
+ 	spinlock_t *ptl;
+-	pmd_t *pmd, _pmd = {0};
++	pmd_t *pmd, _pmd = {{{0}}};
+ 	int ret = 0, i;
+ 	pgtable_t pgtable;
+ 	unsigned long haddr;

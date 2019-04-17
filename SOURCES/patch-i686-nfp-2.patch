@@ -1,0 +1,12 @@
+i686 plus kernel patch to fix nfp build error (readq) by @pgreco
+
+--- a/drivers/net/ethernet/netronome/nfp/nfp_net_repr.c.bak	2018-10-04 17:18:19.000000000 -0300
++++ b/drivers/net/ethernet/netronome/nfp/nfp_net_repr.c	2018-11-02 18:53:31.443337889 -0300
+@@ -38,6 +38,7 @@
+ 
+ #include "nfpcore/nfp_cpp.h"
+ #include "nfpcore/nfp_nsp.h"
++#include "nfp_net.h"
+ #include "nfp_app.h"
+ #include "nfp_main.h"
+ #include "nfp_net_ctrl.h"

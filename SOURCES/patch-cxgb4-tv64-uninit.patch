@@ -1,0 +1,28 @@
+When compiling for i686, drivers/infiniband/hw/cxgb4/device.o 
+fails to compile:
+
+drivers/infiniband/hw/cxgb4/device.c: In function 'wr_log_show':
+include/linux/ktime.h:84:36: error: 'prev_time.tv64' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+({ (ktime_t){ .tv64 = (lhs).tv64 - (rhs).tv64 }; })
+^
+drivers/infiniband/hw/cxgb4/device.c:133:10: note: 'prev_time.tv64' was declared here
+ktime_t prev_time;
+^
+cc1: all warnings being treated as errors
+make[5]: *** [drivers/infiniband/hw/cxgb4/device.o] Error 1
+
+I don't know why x86_64 is compiling without this patch.
+Compiler (gcc) version dependence?
+
+diff -up ./drivers/infiniband/hw/cxgb4/device.c.tv64 ./drivers/infiniband/hw/cxgb4/device.c
+--- ./drivers/infiniband/hw/cxgb4/device.c.tv64	2018-10-05 05:18:19.000000000 +0900
++++ ./drivers/infiniband/hw/cxgb4/device.c	2018-11-01 09:34:48.000000000 +0900
+@@ -130,7 +130,7 @@ void c4iw_log_wr_stats(struct t4_wq *wq,
+ static int wr_log_show(struct seq_file *seq, void *v)
+ {
+ 	struct c4iw_dev *dev = seq->private;
+-	ktime_t prev_time;
++	ktime_t prev_time = { .tv64 = 0 };
+ 	struct wr_log_entry *lep;
+ 	int prev_time_set = 0;
+ 	int idx, end;

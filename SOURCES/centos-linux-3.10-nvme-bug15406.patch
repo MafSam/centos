@@ -1,0 +1,11 @@
+diff -Naurp a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+--- a/drivers/nvme/host/pci.c	2018-09-21 05:18:28.000000000 -0300
++++ b/drivers/nvme/host/pci.c	2018-10-24 09:57:23.805005344 -0300
+@@ -1548,7 +1548,6 @@ retry:
+ 		DEFINE_DMA_ATTRS(attrs);
+ 
+ 		dma_set_attr(DMA_ATTR_NO_KERNEL_MAPPING, &attrs);
+-		dma_set_attr(DMA_ATTR_NO_WARN, &attrs);
+ 		len = min_t(u64, chunk_size, preferred - size);
+ 		bufs[i] = dma_alloc_attrs(dev->dev, len, &dma_addr, GFP_KERNEL,
+ 				&attrs);

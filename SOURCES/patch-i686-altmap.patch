@@ -1,0 +1,20 @@
+diff -up ./arch/x86/mm/init_32.c.altmap ./arch/x86/mm/init_32.c
+--- ./arch/x86/mm/init_32.c.altmap	2018-10-31 19:01:52.000000000 +0900
++++ ./arch/x86/mm/init_32.c	2018-10-31 19:03:08.000000000 +0900
+@@ -844,14 +844,14 @@ void __init mem_init(void)
+ }
+ 
+ #ifdef CONFIG_MEMORY_HOTPLUG
+-int arch_add_memory(int nid, u64 start, u64 size, bool for_device)
++int arch_add_memory(int nid, u64 start, u64 size, struct vmem_altmap *altmap, bool for_device)
+ {
+ 	struct pglist_data *pgdata = NODE_DATA(nid);
+ 	struct zone *zone = pgdata->node_zones + ZONE_HIGHMEM;
+ 	unsigned long start_pfn = start >> PAGE_SHIFT;
+ 	unsigned long nr_pages = size >> PAGE_SHIFT;
+ 
+-	return __add_pages(nid, zone, start_pfn, nr_pages);
++	return __add_pages(nid, zone, start_pfn, nr_pages, altmap);
+ }
+ 
+ #ifdef CONFIG_MEMORY_HOTREMOVE

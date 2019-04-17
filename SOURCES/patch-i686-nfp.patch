@@ -1,0 +1,16 @@
+patch patch-i686-nfp.patch
+
+Use the difinition of readq defined in linux/io-64-nonatomic-lo-hi.h
+
+Ref: https://lkml.org/lkml/2017/3/27/119
+
+--- a/drivers/net/ethernet/netronome/nfp/nfp_net_repr.c	2018-10-04 13:18:19.000000000 -0700
++++ b/drivers/net/ethernet/netronome/nfp/nfp_net_repr.c	2018-11-02 11:15:50.377000000 -0700
+@@ -33,6 +33,7 @@
+ 
+ #include <linux/etherdevice.h>
+ #include <linux/lockdep.h>
++#include <asm-generic/io-64-nonatomic-lo-hi.h>
+ #include <net/dst_metadata.h>
+ #include <net/switchdev.h>
+ 

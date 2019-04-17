@@ -1,0 +1,429 @@
+diff -up ./arch/x86/include/asm/processor.h.gsi ./arch/x86/include/asm/processor.h
+--- ./arch/x86/include/asm/processor.h.gsi	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/include/asm/processor.h	2018-04-16 21:12:06.000000000 +0900
+@@ -527,6 +527,15 @@ struct stack_canary {
+ };
+ DECLARE_PER_CPU_ALIGNED(struct stack_canary, stack_canary);
+ #endif
++/*
++ * per-CPU IRQ handling stacks
++ */
++struct irq_stack {
++	u32                     stack[THREAD_SIZE/sizeof(u32)];
++} __aligned(THREAD_SIZE);
++
++DECLARE_PER_CPU(struct irq_stack *, hardirq_stack);
++DECLARE_PER_CPU(struct irq_stack *, softirq_stack);
+ #endif	/* X86_64 */
+ 
+ extern unsigned int xstate_size;
+diff -up ./arch/x86/include/asm/thread_info.h.gsi ./arch/x86/include/asm/thread_info.h
+--- ./arch/x86/include/asm/thread_info.h.gsi	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/include/asm/thread_info.h	2018-04-16 23:01:00.000000000 +0900
+@@ -9,6 +9,7 @@
+ 
+ #include <linux/compiler.h>
+ #include <asm/page.h>
++#include <asm/percpu.h>
+ #include <asm/types.h>
+ 
+ /*
+@@ -34,9 +35,6 @@ struct thread_info {
+ 	struct restart_block    restart_block;
+ 	void __user		*sysenter_return;
+ #ifdef CONFIG_X86_32
+-	unsigned long           previous_esp;   /* ESP of the previous stack in
+-						   case of nested (IRQ) stacks
+-						*/
+ 	__u8			supervisor_stack[0];
+ #endif
+ 	unsigned int		sig_on_uaccess_error:1;
+@@ -159,9 +157,9 @@ struct thread_info {
+ 
+ #define PREEMPT_ACTIVE		0x10000000
+ 
+-#ifdef CONFIG_X86_32
++#define STACK_WARN		(THREAD_SIZE/8)
++#define KERNEL_STACK_OFFSET	(5*(BITS_PER_LONG/8))
+ 
+-#define STACK_WARN	(THREAD_SIZE/8)
+ /*
+  * macros/functions for gaining access to the thread information structure
+  *
+@@ -173,30 +171,9 @@ struct thread_info {
+ /* how to get the current stack pointer from C */
+ register unsigned long current_stack_pointer asm("esp") __used;
+ 
+-/* how to get the thread information struct from C */
+-static inline struct thread_info *current_thread_info(void)
+-{
+-	return (struct thread_info *)
+-		(current_stack_pointer & ~(THREAD_SIZE - 1));
+-}
+-
+-#else /* !__ASSEMBLY__ */
+-
+-/* how to get the thread information struct from ASM */
+-#define GET_THREAD_INFO(reg)	 \
+-	movl $-THREAD_SIZE, reg; \
+-	andl %esp, reg
+-
+-/* use this one if reg already contains %esp */
+-#define GET_THREAD_INFO_WITH_ESP(reg) \
+-	andl $-THREAD_SIZE, reg
+-
+ #endif
+ 
+-#else /* X86_32 */
+-
+ #include <asm/percpu.h>
+-#define KERNEL_STACK_OFFSET (5*8)
+ 
+ /*
+  * macros/functions for gaining access to the thread information structure
+@@ -220,8 +197,8 @@ static inline struct thread_info *curren
+ 
+ /* how to get the thread information struct from ASM */
+ #define GET_THREAD_INFO(reg) \
+-	movq PER_CPU_VAR(kernel_stack),reg ; \
+-	subq $(THREAD_SIZE-KERNEL_STACK_OFFSET),reg
++	_ASM_MOV PER_CPU_VAR(kernel_stack),reg ; \
++	_ASM_SUB $(THREAD_SIZE-KERNEL_STACK_OFFSET),reg ;
+ 
+ /*
+  * Same if PER_CPU_VAR(kernel_stack) is, perhaps with some offset, already in
+@@ -231,8 +208,6 @@ static inline struct thread_info *curren
+ 
+ #endif
+ 
+-#endif /* !X86_32 */
+-
+ /*
+  * Thread-synchronous status.
+  *
+diff -up ./arch/x86/kernel/cpu/common.c.gsi ./arch/x86/kernel/cpu/common.c
+--- ./arch/x86/kernel/cpu/common.c.gsi	2018-04-15 20:28:45.000000000 +0900
++++ ./arch/x86/kernel/cpu/common.c	2018-04-16 23:48:12.000000000 +0900
+@@ -1286,6 +1286,13 @@ static __init int setup_clearcpuid(char
+ }
+ __setup("clearcpuid=", setup_clearcpuid);
+ 
++DEFINE_PER_CPU(unsigned long, kernel_stack) =
++	(unsigned long)&init_thread_union - KERNEL_STACK_OFFSET + THREAD_SIZE;
++DEFINE_PER_CPU(unsigned long, __kernel_stack_70__) =
++	(unsigned long)&init_thread_union - KERNEL_STACK_OFFSET + THREAD_SIZE - 8192;
++EXPORT_PER_CPU_SYMBOL(kernel_stack);
++EXPORT_PER_CPU_SYMBOL(__kernel_stack_70__);
++
+ #ifdef CONFIG_X86_64
+ struct desc_ptr idt_descr = { NR_VECTORS * 16 - 1, (unsigned long) idt_table };
+ struct desc_ptr debug_idt_descr = { NR_VECTORS * 16 - 1,
+@@ -1302,12 +1309,6 @@ DEFINE_PER_CPU(struct task_struct *, cur
+ 	&init_task;
+ EXPORT_PER_CPU_SYMBOL(current_task);
+ 
+-DEFINE_PER_CPU(unsigned long, kernel_stack) =
+-	(unsigned long)&init_thread_union - KERNEL_STACK_OFFSET + THREAD_SIZE;
+-DEFINE_PER_CPU(unsigned long, __kernel_stack_70__) =
+-	(unsigned long)&init_thread_union - KERNEL_STACK_OFFSET + THREAD_SIZE - 8192;
+-EXPORT_PER_CPU_SYMBOL(kernel_stack);
+-EXPORT_PER_CPU_SYMBOL(__kernel_stack_70__);
+ 
+ DEFINE_PER_CPU(char *, irq_stack_ptr) =
+ 	init_per_cpu_var(irq_stack_union.irq_stack) + IRQ_STACK_SIZE;
+diff -up ./arch/x86/kernel/dumpstack_32.c.gsi ./arch/x86/kernel/dumpstack_32.c
+--- ./arch/x86/kernel/dumpstack_32.c.gsi	2018-04-16 21:12:06.000000000 +0900
++++ ./arch/x86/kernel/dumpstack_32.c	2018-04-17 19:43:45.000000000 +0900
+@@ -17,6 +17,95 @@
+ #include <asm/stacktrace.h>
+ 
+ 
++void stack_type_str(enum stack_type type, const char **begin, const char **end)
++{
++	switch (type) {
++	case STACK_TYPE_IRQ:
++		*begin = "IRQ";
++		*end   = "EOI";
++		break;
++	case STACK_TYPE_SOFTIRQ:
++		*begin = "SOFTIRQ";
++		*end   = "EOI";
++		break;
++#if 0 /*{*/
++	case STACK_TYPE_ENTRY:
++		*begin = "ENTRY_TRAMPOLINE";
++		*end   = "EOE";
++#endif /*}*/
++	default:
++		*begin = NULL;
++		*end   = NULL;
++	}
++}
++
++static bool in_hardirq_stack(unsigned long *stack, struct stack_info *info)
++{
++	unsigned long *begin = (unsigned long *)this_cpu_read(hardirq_stack);
++	unsigned long *end   = begin + (THREAD_SIZE / sizeof(long));
++
++	if (stack < begin || stack >= end)
++		return false;
++
++	info->type	= STACK_TYPE_IRQ;
++	info->begin	= begin;
++	info->end	= end;
++
++	/*
++	 * See irq_32.c -- the next stack pointer is stored at the beginning of
++	 * the stack.
++	 */
++	info->next_sp	= (unsigned long *)*begin;
++
++	return true;
++}
++
++static bool in_softirq_stack(unsigned long *stack, struct stack_info *info)
++{
++	unsigned long *begin = (unsigned long *)this_cpu_read(softirq_stack);
++	unsigned long *end   = begin + (THREAD_SIZE / sizeof(long));
++
++	if (stack < begin || stack >= end)
++		return false;
++
++	info->type	= STACK_TYPE_SOFTIRQ;
++	info->begin	= begin;
++	info->end	= end;
++
++	/*
++	 * The next stack pointer is stored at the beginning of the stack.
++	 * See irq_32.c.
++	 */
++	info->next_sp	= (unsigned long *)*begin;
++
++	return true;
++}
++
++int get_stack_info(unsigned long *stack, struct task_struct *task,
++		   struct stack_info *info, unsigned long *visit_mask)
++{
++	if (!stack)
++		goto unknown;
++
++	task = task ? : current;
++
++	if (in_task_stack(stack, task, info))
++		return 0;
++
++	if (task != current)
++		goto unknown;
++
++	if (in_hardirq_stack(stack, info))
++		return 0;
++
++	if (in_softirq_stack(stack, info))
++		return 0;
++
++unknown:
++	info->type = STACK_TYPE_UNKNOWN;
++	return -EINVAL;
++}
++
+ void show_regs(struct pt_regs *regs)
+ {
+ 	int i;
+diff -up ./arch/x86/kernel/irq_32.c.gsi ./arch/x86/kernel/irq_32.c
+--- ./arch/x86/kernel/irq_32.c.gsi	2018-04-15 20:28:44.000000000 +0900
++++ ./arch/x86/kernel/irq_32.c	2018-04-16 23:09:01.000000000 +0900
+@@ -58,16 +58,8 @@ static inline int check_stack_overflow(v
+ static inline void print_stack_overflow(void) { }
+ #endif
+ 
+-/*
+- * per-CPU IRQ handling contexts (thread information and stack)
+- */
+-union irq_ctx {
+-	struct thread_info      tinfo;
+-	u32                     stack[THREAD_SIZE/sizeof(u32)];
+-} __attribute__((aligned(THREAD_SIZE)));
+-
+-static DEFINE_PER_CPU(union irq_ctx *, hardirq_ctx);
+-static DEFINE_PER_CPU(union irq_ctx *, softirq_ctx);
++DEFINE_PER_CPU(struct irq_stack *, hardirq_stack);
++DEFINE_PER_CPU(struct irq_stack *, softirq_stack);
+ 
+ static void call_on_stack(void *func, void *stack)
+ {
+@@ -80,14 +72,22 @@ static void call_on_stack(void *func, vo
+ 		     : "memory", "cc", "edx", "ecx", "eax");
+ }
+ 
++/* how to get the current stack pointer from C */
++register unsigned long current_stack_pointer asm("esp") __used;
++
++static inline void *current_stack(void)
++{
++	return (void *)(current_stack_pointer & ~(THREAD_SIZE - 1));
++}
++
+ static inline int
+ execute_on_irq_stack(int overflow, struct irq_desc *desc, int irq)
+ {
+-	union irq_ctx *curctx, *irqctx;
+-	u32 *isp, arg1, arg2;
++	struct irq_stack *curstk, *irqstk;
++ 	u32 *isp, *prev_esp, arg1, arg2;
+ 
+-	curctx = (union irq_ctx *) current_thread_info();
+-	irqctx = __this_cpu_read(hardirq_ctx);
++	curstk = (struct irq_stack *) current_stack();
++	irqstk = __this_cpu_read(hardirq_stack);
+ 
+ 	/*
+ 	 * this is where we switch to the IRQ stack. However, if we are
+@@ -95,16 +95,14 @@ execute_on_irq_stack(int overflow, struc
+ 	 * handler) we can't do that and just have to keep using the
+ 	 * current stack (which is the irq stack already after all)
+ 	 */
+-	if (unlikely(curctx == irqctx))
++	if (unlikely(curstk == irqstk))
+ 		return 0;
+ 
+-	/* build the stack frame on the IRQ stack */
+-	isp = (u32 *) ((char *)irqctx + sizeof(*irqctx));
+-	irqctx->tinfo.task = curctx->tinfo.task;
+-	irqctx->tinfo.previous_esp = current_stack_pointer;
++	isp = (u32 *) ((char *)irqstk + sizeof(*irqstk));
+ 
+-	/* Copy the preempt_count so that the [soft]irq checks work. */
+-	irqctx->tinfo.preempt_count = curctx->tinfo.preempt_count;
++	/* Save the next esp at the bottom of the stack */
++	prev_esp = (u32 *)irqstk;
++ 	*prev_esp = current_stack_pointer;
+ 
+ 	if (unlikely(overflow))
+ 		call_on_stack(print_stack_overflow, isp);
+@@ -124,40 +122,31 @@ execute_on_irq_stack(int overflow, struc
+  */
+ void irq_ctx_init(int cpu)
+ {
+-	union irq_ctx *irqctx;
++	struct irq_stack *irqstk;
+ 
+-	if (per_cpu(hardirq_ctx, cpu))
++	if (per_cpu(hardirq_stack, cpu))
+ 		return;
+ 
+-	irqctx = page_address(alloc_pages_node(cpu_to_node(cpu),
++	irqstk = page_address(alloc_pages_node(cpu_to_node(cpu),
+ 					       THREADINFO_GFP,
+ 					       THREAD_SIZE_ORDER));
+-	memset(&irqctx->tinfo, 0, sizeof(struct thread_info));
+-	irqctx->tinfo.cpu		= cpu;
+-	irqctx->tinfo.preempt_count	= HARDIRQ_OFFSET;
+-	irqctx->tinfo.addr_limit	= MAKE_MM_SEG(0);
+-
+-	per_cpu(hardirq_ctx, cpu) = irqctx;
++	per_cpu(hardirq_stack, cpu) = irqstk;
+ 
+-	irqctx = page_address(alloc_pages_node(cpu_to_node(cpu),
++	irqstk = page_address(alloc_pages_node(cpu_to_node(cpu),
+ 					       THREADINFO_GFP,
+ 					       THREAD_SIZE_ORDER));
+-	memset(&irqctx->tinfo, 0, sizeof(struct thread_info));
+-	irqctx->tinfo.cpu		= cpu;
+-	irqctx->tinfo.addr_limit	= MAKE_MM_SEG(0);
+-
+-	per_cpu(softirq_ctx, cpu) = irqctx;
++	per_cpu(softirq_stack, cpu) = irqstk;
+ 
+ 	printk(KERN_DEBUG "CPU %u irqstacks, hard=%p soft=%p\n",
+-	       cpu, per_cpu(hardirq_ctx, cpu),  per_cpu(softirq_ctx, cpu));
++	       cpu, per_cpu(hardirq_stack, cpu),  per_cpu(softirq_stack, cpu));
+ }
+ 
+ asmlinkage void do_softirq(void)
+ {
+ 	unsigned long flags;
+-	struct thread_info *curctx;
+-	union irq_ctx *irqctx;
+-	u32 *isp;
++	struct thread_info *curstk;
++	struct irq_stack *irqstk;
++ 	u32 *isp, *prev_esp;
+ 
+ 	if (in_interrupt())
+ 		return;
+@@ -165,13 +154,14 @@ asmlinkage void do_softirq(void)
+ 	local_irq_save(flags);
+ 
+ 	if (local_softirq_pending()) {
+-		curctx = current_thread_info();
+-		irqctx = __this_cpu_read(softirq_ctx);
+-		irqctx->tinfo.task = curctx->task;
+-		irqctx->tinfo.previous_esp = current_stack_pointer;
++		curstk = current_stack();
++		irqstk = __this_cpu_read(softirq_stack);
+ 
+ 		/* build the stack frame on the softirq stack */
+-		isp = (u32 *) ((char *)irqctx + sizeof(*irqctx));
++		isp = (u32 *) ((char *)irqstk + sizeof(*irqstk));
++
++		prev_esp = (u32 *)irqstk;
++		*prev_esp = current_stack_pointer;
+ 
+ 		call_on_stack(__do_softirq, isp);
+ 		/*
+diff -up ./arch/x86/kernel/process_32.c.gsi ./arch/x86/kernel/process_32.c
+--- ./arch/x86/kernel/process_32.c.gsi	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/kernel/process_32.c	2018-04-16 21:12:06.000000000 +0900
+@@ -307,6 +307,10 @@ __switch_to(struct task_struct *prev_p,
+ 	 */
+ 	arch_end_context_switch(next_p);
+ 
++	this_cpu_write(kernel_stack,
++		  (unsigned long)task_stack_page(next_p) +
++		  THREAD_SIZE - KERNEL_STACK_OFFSET);
++
+ 	/*
+ 	 * Restore %gs if needed (which is common)
+ 	 */
+diff -up ./arch/x86/kernel/ptrace.c.gsi ./arch/x86/kernel/ptrace.c
+--- ./arch/x86/kernel/ptrace.c.gsi	2018-04-16 21:12:06.000000000 +0900
++++ ./arch/x86/kernel/ptrace.c	2018-04-16 23:39:44.000000000 +0900
+@@ -184,14 +184,15 @@ unsigned long kernel_stack_pointer(struc
+ {
+ 	unsigned long context = (unsigned long)regs & ~(THREAD_SIZE - 1);
+ 	unsigned long sp = (unsigned long)&regs->sp;
+-	struct thread_info *tinfo;
++	u32 *prev_esp;
+ 
+ 	if (context == (sp & ~(THREAD_SIZE - 1)))
+ 		return sp;
+ 
+-	tinfo = (struct thread_info *)context;
+-	if (tinfo->previous_esp)
+-		return tinfo->previous_esp;
++	prev_esp = (u32 *)(context);
++	if (*prev_esp)
++		return (unsigned long)*prev_esp;
++
+ 
+ 	return (unsigned long)regs;
+ }
+diff -up ./arch/x86/kernel/smpboot.c.gsi ./arch/x86/kernel/smpboot.c
+--- ./arch/x86/kernel/smpboot.c.gsi	2018-04-16 21:12:06.000000000 +0900
++++ ./arch/x86/kernel/smpboot.c	2018-04-16 21:46:54.000000000 +0900
+@@ -898,13 +898,13 @@ static int do_boot_cpu(int apicid, int c
+ #else
+ 	clear_tsk_thread_flag(idle, TIF_FORK);
+ 	initial_gs = per_cpu_offset(cpu);
++#endif
+ 	per_cpu(kernel_stack, cpu) =
+ 		(unsigned long)task_stack_page(idle) -
+ 		KERNEL_STACK_OFFSET + THREAD_SIZE;
+ 	per_cpu(__kernel_stack_70__, cpu) =
+ 		(unsigned long)task_stack_page(idle) -
+ 		KERNEL_STACK_OFFSET + THREAD_SIZE - 8192;
+-#endif
+ 	early_gdt_descr.address = (unsigned long)get_cpu_gdt_table(cpu);
+ 	initial_code = (unsigned long)start_secondary;
+ 	initial_stack  = idle->thread.sp;

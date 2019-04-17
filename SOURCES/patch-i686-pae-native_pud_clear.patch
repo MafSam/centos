@@ -1,0 +1,38 @@
+The #ifdef around pud_clear() is very weird, but needed to
+compile bootstrapping arch/x86/boot/compressed/error.c,
+which arch/x86/boot/compressed/misc.h does
+#undef CONFIG_PARAVIRT
+and codepath inside arch/x86/include/asm/pgtable.h
+goes into generally unused codepath, which does
+#ifndef __PAGETABLE_PMD_FOLDED	/* never defined */
+#define pud_clear(pud)                  native_pud_clear(pud)
+#endif
+which will duplicate define pud_clear().
+
+
+
+diff -up ./arch/x86/include/asm/pgtable-3level.h.pud ./arch/x86/include/asm/pgtable-3level.h
+--- ./arch/x86/include/asm/pgtable-3level.h.pud	2018-11-02 13:21:03.000000000 +0900
++++ ./arch/x86/include/asm/pgtable-3level.h	2018-11-02 13:20:08.000000000 +0900
+@@ -129,12 +129,11 @@ static inline void native_pmd_clear(pmd_
+ 	*(tmp + 1) = 0;
+ }
+ 
+-#ifndef CONFIG_SMP
+ static inline void native_pud_clear(pud_t *pudp)
+ {
+ }
+-#endif
+ 
++#if /*defined(__PAGETABLE_PMD_FOLDED) &&*/ defined(CONFIG_PARAVIRT)
+ static inline void pud_clear(pud_t *pudp)
+ {
+ 	mm_track_pud(pudp);
+@@ -151,6 +150,7 @@ static inline void pud_clear(pud_t *pudp
+ 	 * pud_clear_bad()), so we don't need TLB flush here.
+ 	 */
+ }
++#endif
+ 
+ #ifdef CONFIG_SMP
+ static inline pte_t native_ptep_get_and_clear(pte_t *ptep)

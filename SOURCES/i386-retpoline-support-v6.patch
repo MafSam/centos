@@ -1,0 +1,120 @@
+diff -up ./arch/x86/include/asm/mshyperv.h.retp ./arch/x86/include/asm/mshyperv.h
+--- ./arch/x86/include/asm/mshyperv.h.retp	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/include/asm/mshyperv.h	2018-04-21 01:29:24.000000000 +0900
+@@ -200,13 +200,13 @@ static inline u64 hv_do_hypercall(u64 co
+ 	if (!hv_hypercall_pg)
+ 		return U64_MAX;
+ 
+-	__asm__ __volatile__(CALL_NOSPEC
++	__asm__ __volatile__(CALL_NOSPEC_FULL
+ 			     : "=A" (hv_status),
+ 			       "+c" (input_address_lo), "+r" (__sp)
+ 			     : "A" (control),
+ 			       "b" (input_address_hi),
+ 			       "D"(output_address_hi), "S"(output_address_lo),
+-			       THUNK_TARGET(hv_hypercall_pg)
++			       THUNK_TARGET_FULL(hv_hypercall_pg)
+ 			     : "cc", "memory");
+ #endif /* !x86_64 */
+ 	return hv_status;
+diff -up ./arch/x86/include/asm/nospec-branch.h.retp ./arch/x86/include/asm/nospec-branch.h
+--- ./arch/x86/include/asm/nospec-branch.h.retp	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/include/asm/nospec-branch.h	2018-04-21 01:27:33.000000000 +0900
+@@ -160,6 +160,67 @@
+ 	"call __x86_indirect_thunk_%V[thunk_target]\n"
+ #define THUNK_TARGET(addr) [thunk_target] "r" (addr)
+ 
++#elif defined(CONFIG_X86_32) && defined(CONFIG_RETPOLINE)
++/*
++ * Redefinition of STATIC_JUMP in arch/x86/include/asm/jump_label.h
++ * as inline asm code.
++ */
++# define STATIC_JUMP(target, key) \
++	"911: .byte " __stringify(STATIC_KEY_INIT_NOP) "\n\t"	\
++	".pushsection __jump_table, \"aw\" \n\t"		\
++	_ASM_ALIGN "\n\t"					\
++	_ASM_PTR "911b, " target ", " #key "\n\t" /*jump_entry*/\
++	".popsection\n"
++/*
++ * For i386 we use the original ret-equivalent retpoline, because
++ * otherwise we'll run out of registers. We don't care about CET
++ * here, anyway.
++ */
++# define CALL_NOSPEC STATIC_JUMP("912f", retp_enabled_key)	\
++	"	call *%[thunk_target]\n"			\
++	"	jmp    913f\n"					\
++	"912:	\n"						\
++	"       jmp    904f;\n"					\
++	"       .align 16\n"					\
++	"901:	call   903f;\n"					\
++	"902:	pause;\n"					\
++	"    	lfence;\n"					\
++	"       jmp    902b;\n"					\
++	"       .align 16\n"					\
++	"903:	addl   $4, %%esp;\n"				\
++	"       pushl  %[thunk_target];\n"			\
++	"       ret;\n"						\
++	"       .align 16\n"					\
++	"904:	call   901b;\n"					\
++	"913:	\n"					
++
++# define THUNK_TARGET(addr) [thunk_target] "rm" (addr)
++/*
++ * CALL_NOSPEC doesn't work if [thunk_target] was *(%esp),
++ * when all registers except %ebp is used up, as in
++ * drivers/hv/hv.c:hv_do_hypercall().
++ */
++# define CALL_NOSPEC_FULL STATIC_JUMP("912f", retp_enabled_key)	\
++	"	call *%[thunk_target]\n"			\
++	"	jmp    913f\n"					\
++	"912:	\n"						\
++	"	pushl  %[thunk_target];\n"			\
++	"       jmp    904f;\n"					\
++	"       .align 16\n"					\
++	"901:	call   903f;\n"					\
++	"902:	pause;\n"					\
++	"    	lfence;\n"					\
++	"       jmp    902b;\n"					\
++	"       .align 16\n"					\
++	"903:	addl   $4, %%esp;\n"				\
++	"       pushl  4(%%esp);\n"				\
++	"       ret;\n"						\
++	"       .align 16\n"					\
++	"904:	call   901b;\n"					\
++	"	addl   $4, %%esp;\n"				\
++	"913:	\n"					
++
++# define THUNK_TARGET_FULL(addr) [thunk_target] "rm" (addr)
+ #else /* No retpoline for C / inline asm */
+ # define CALL_NOSPEC "call *%[thunk_target]\n"
+ # define THUNK_TARGET(addr) [thunk_target] "rm" (addr)
+diff -up ./arch/x86/kernel/i386_ksyms_32.c.retp ./arch/x86/kernel/i386_ksyms_32.c
+--- ./arch/x86/kernel/i386_ksyms_32.c.retp	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/kernel/i386_ksyms_32.c	2018-04-21 01:26:08.000000000 +0900
+@@ -4,6 +4,7 @@
+ #include <asm/pgtable.h>
+ #include <asm/desc.h>
+ #include <asm/ftrace.h>
++#include <asm/asm.h>
+ 
+ #ifdef CONFIG_FUNCTION_TRACER
+ /* mcount is defined in assembly */
+@@ -37,3 +38,17 @@ EXPORT_SYMBOL(strstr);
+ 
+ EXPORT_SYMBOL(csum_partial);
+ EXPORT_SYMBOL(empty_zero_page);
++
++#ifdef CONFIG_RETPOLINE
++#define EXPORT_THUNK(reg)						\
++	extern void __x86_indirect_thunk_ ## reg(void);			\
++	EXPORT_SYMBOL(__x86_indirect_thunk_ ## reg)
++
++EXPORT_THUNK(eax);
++EXPORT_THUNK(ebx);
++EXPORT_THUNK(ecx);
++EXPORT_THUNK(edx);
++EXPORT_THUNK(esi);
++EXPORT_THUNK(edi);
++EXPORT_THUNK(ebp);
++#endif /* CONFIG_RETPOLINE */
+diff -up ./drivers/hv/hv.c.retp ./drivers/hv/hv.c

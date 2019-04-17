@@ -1,0 +1,14 @@
+--- a/include/asm-generic/qspinlock_types.h	2017-07-06 16:37:46.000000000 -0700
++++ b/include/asm-generic/qspinlock_types.h	2017-08-04 21:24:07.781511544 -0700
+@@ -31,7 +31,11 @@
+ /*
+  * Maintain the same kABI signature as the ticket lock.
+  */
++#if defined CONFIG_X86_64
+ typedef u16 __ticket_t;
++#else
++typedef u8  __ticket_t;
++#endif
+ #ifndef __GENKSYMS__
+ typedef struct qspinlock {
+ 	atomic_t	val;

@@ -1,0 +1,12 @@
+diff -up ./kernel/bpf/syscall.c.u32 ./kernel/bpf/syscall.c
+--- ./kernel/bpf/syscall.c.u32	2018-10-05 05:18:19.000000000 +0900
++++ ./kernel/bpf/syscall.c	2018-10-30 22:16:32.000000000 +0900
+@@ -1576,7 +1576,7 @@ static int bpf_prog_get_info_by_fd(struc
+ 	info.nr_map_ids = prog->aux->used_map_cnt;
+ 	ulen = min_t(u32, info.nr_map_ids, ulen);
+ 	if (ulen) {
+-		u32 *user_map_ids = (u32 *)info.map_ids;
++		u32 *user_map_ids = (u32 *)(unsigned long)info.map_ids;
+ 		u32 i;
+ 
+ 		for (i = 0; i < ulen; i++)

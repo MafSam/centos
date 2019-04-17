@@ -1,0 +1,243 @@
+diff -Naurp a/drivers/net/ethernet/intel/e100.c b/drivers/net/ethernet/intel/e100.c
+--- a/drivers/net/ethernet/intel/e100.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/intel/e100.c	2018-01-29 09:03:56.774087675 -0300
+@@ -2834,7 +2834,7 @@ static const struct net_device_ops e100_
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_rx_mode	= e100_set_multicast_list,
+ 	.ndo_set_mac_address	= e100_set_mac_address,
+-	.ndo_change_mtu		= e100_change_mtu,
++	.ndo_change_mtu_rh74	= e100_change_mtu,
+ 	.ndo_do_ioctl		= e100_do_ioctl,
+ 	.ndo_tx_timeout		= e100_tx_timeout,
+ #ifdef CONFIG_NET_POLL_CONTROLLER
+diff -Naurp a/drivers/net/ethernet/intel/ixgb/ixgb_main.c b/drivers/net/ethernet/intel/ixgb/ixgb_main.c
+--- a/drivers/net/ethernet/intel/ixgb/ixgb_main.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/intel/ixgb/ixgb_main.c	2018-01-29 09:48:20.415267000 -0300
+@@ -370,7 +370,7 @@ static const struct net_device_ops ixgb_
+ 	.ndo_set_rx_mode	= ixgb_set_multi,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address	= ixgb_set_mac,
+-	.ndo_change_mtu		= ixgb_change_mtu,
++	.ndo_change_mtu_rh74	= ixgb_change_mtu,
+ 	.ndo_tx_timeout		= ixgb_tx_timeout,
+ 	.ndo_vlan_rx_add_vid	= ixgb_vlan_rx_add_vid,
+ 	.ndo_vlan_rx_kill_vid	= ixgb_vlan_rx_kill_vid,
+diff -Naurp a/drivers/net/ethernet/nvidia/forcedeth.c b/drivers/net/ethernet/nvidia/forcedeth.c
+--- a/drivers/net/ethernet/nvidia/forcedeth.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/nvidia/forcedeth.c	2018-01-29 10:39:01.130527988 -0300
+@@ -1735,7 +1735,7 @@ static void nv_update_stats(struct net_d
+  * Called with read_lock(&dev_base_lock) held for read -
+  * only synchronized against unregister_netdevice.
+  */
+-static struct rtnl_link_stats64*
++static void
+ nv_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *storage)
+ 	__acquires(&netdev_priv(dev)->hwstats_lock)
+ 	__releases(&netdev_priv(dev)->hwstats_lock)
+@@ -1795,8 +1795,6 @@ nv_get_stats64(struct net_device *dev, s
+ 
+ 		spin_unlock_bh(&np->hwstats_lock);
+ 	}
+-
+-	return storage;
+ }
+ 
+ /*
+@@ -5564,7 +5562,7 @@ static const struct net_device_ops nv_ne
+ 	.ndo_get_stats64	= nv_get_stats64,
+ 	.ndo_start_xmit		= nv_start_xmit,
+ 	.ndo_tx_timeout		= nv_tx_timeout,
+-	.ndo_change_mtu		= nv_change_mtu,
++	.ndo_change_mtu_rh74	= nv_change_mtu,
+ 	.ndo_fix_features	= nv_fix_features,
+ 	.ndo_set_features	= nv_set_features,
+ 	.ndo_validate_addr	= eth_validate_addr,
+@@ -5581,7 +5579,7 @@ static const struct net_device_ops nv_ne
+ 	.ndo_get_stats64	= nv_get_stats64,
+ 	.ndo_start_xmit		= nv_start_xmit_optimized,
+ 	.ndo_tx_timeout		= nv_tx_timeout,
+-	.ndo_change_mtu		= nv_change_mtu,
++	.ndo_change_mtu_rh74	= nv_change_mtu,
+ 	.ndo_fix_features	= nv_fix_features,
+ 	.ndo_set_features	= nv_set_features,
+ 	.ndo_validate_addr	= eth_validate_addr,
+diff -Naurp a/drivers/net/ethernet/packetengines/hamachi.c b/drivers/net/ethernet/packetengines/hamachi.c
+--- a/drivers/net/ethernet/packetengines/hamachi.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/packetengines/hamachi.c	2018-01-29 10:36:48.179514885 -0300
+@@ -568,7 +568,7 @@ static const struct net_device_ops hamac
+ 	.ndo_start_xmit		= hamachi_start_xmit,
+ 	.ndo_get_stats		= hamachi_get_stats,
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_tx_timeout		= hamachi_tx_timeout,
+diff -Naurp a/drivers/net/ethernet/packetengines/yellowfin.c b/drivers/net/ethernet/packetengines/yellowfin.c
+--- a/drivers/net/ethernet/packetengines/yellowfin.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/packetengines/yellowfin.c	2018-01-29 10:38:04.922523162 -0300
+@@ -360,7 +360,7 @@ static const struct net_device_ops netde
+ 	.ndo_stop 		= yellowfin_close,
+ 	.ndo_start_xmit 	= yellowfin_start_xmit,
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_do_ioctl 		= netdev_ioctl,
+diff -Naurp a/drivers/net/ethernet/via/via-velocity.c b/drivers/net/ethernet/via/via-velocity.c
+--- a/drivers/net/ethernet/via/via-velocity.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/via/via-velocity.c	2018-01-29 10:51:37.069588416 -0300
+@@ -2617,7 +2617,7 @@ static const struct net_device_ops veloc
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address	= eth_mac_addr,
+ 	.ndo_set_rx_mode	= velocity_set_multi,
+-	.ndo_change_mtu		= velocity_change_mtu,
++	.ndo_change_mtu_rh74	= velocity_change_mtu,
+ 	.ndo_do_ioctl		= velocity_ioctl,
+ 	.ndo_vlan_rx_add_vid	= velocity_vlan_rx_add_vid,
+ 	.ndo_vlan_rx_kill_vid	= velocity_vlan_rx_kill_vid,
+diff -Naurp a/drivers/net/ethernet/sis/sis190.c b/drivers/net/ethernet/sis/sis190.c
+--- a/drivers/net/ethernet/sis/sis190.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/sis/sis190.c	2018-01-29 16:32:05.812338481 -0300
+@@ -1833,7 +1833,7 @@ static const struct net_device_ops sis19
+ 	.ndo_start_xmit		= sis190_start_xmit,
+ 	.ndo_tx_timeout		= sis190_tx_timeout,
+ 	.ndo_set_rx_mode	= sis190_set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address	= sis190_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ #ifdef CONFIG_NET_POLL_CONTROLLER
+diff -Naurp a/drivers/net/ethernet/sis/sis900.c b/drivers/net/ethernet/sis/sis900.c
+--- a/drivers/net/ethernet/sis/sis900.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/sis/sis900.c	2018-01-29 16:32:21.223230782 -0300
+@@ -400,7 +400,7 @@ static const struct net_device_ops sis90
+ 	.ndo_start_xmit		= sis900_start_xmit,
+ 	.ndo_set_config		= sis900_set_config,
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_do_ioctl		= mii_ioctl,
+diff -Naurp a/drivers/net/ethernet/3com/3c509.c b/drivers/net/ethernet/3com/3c509.c
+--- a/drivers/net/ethernet/3com/3c509.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/3c509.c	2018-01-29 16:54:04.611124113 -0300
+@@ -509,7 +509,7 @@ static const struct net_device_ops netde
+ 	.ndo_get_stats 		= el3_get_stats,
+ 	.ndo_set_rx_mode	= set_multicast_list,
+ 	.ndo_tx_timeout 	= el3_tx_timeout,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ #ifdef CONFIG_NET_POLL_CONTROLLER
+diff -Naurp a/drivers/net/ethernet/3com/3c515.c b/drivers/net/ethernet/3com/3c515.c
+--- a/drivers/net/ethernet/3com/3c515.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/3c515.c	2018-01-29 16:54:26.145031849 -0300
+@@ -570,7 +570,7 @@ static const struct net_device_ops netde
+ 	.ndo_tx_timeout		= corkscrew_timeout,
+ 	.ndo_get_stats		= corkscrew_get_stats,
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ };
+diff -Naurp a/drivers/net/ethernet/3com/3c574_cs.c b/drivers/net/ethernet/3com/3c574_cs.c
+--- a/drivers/net/ethernet/3com/3c574_cs.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/3c574_cs.c	2018-01-29 16:54:36.142861676 -0300
+@@ -255,7 +255,7 @@ static const struct net_device_ops el3_n
+ 	.ndo_get_stats		= el3_get_stats,
+ 	.ndo_do_ioctl		= el3_ioctl,
+ 	.ndo_set_rx_mode	= set_multicast_list,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ };
+diff -Naurp a/drivers/net/ethernet/3com/3c589_cs.c b/drivers/net/ethernet/3com/3c589_cs.c
+--- a/drivers/net/ethernet/3com/3c589_cs.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/3c589_cs.c	2018-01-29 16:54:43.241740846 -0300
+@@ -184,7 +184,7 @@ static const struct net_device_ops el3_n
+ 	.ndo_set_config		= el3_config,
+ 	.ndo_get_stats		= el3_get_stats,
+ 	.ndo_set_rx_mode	= set_multicast_list,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ };
+diff -Naurp a/drivers/net/ethernet/3com/3c59x.c b/drivers/net/ethernet/3com/3c59x.c
+--- a/drivers/net/ethernet/3com/3c59x.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/3c59x.c	2018-01-29 16:54:49.242638705 -0300
+@@ -1063,7 +1063,7 @@ static const struct net_device_ops boomr
+ 	.ndo_do_ioctl 		= vortex_ioctl,
+ #endif
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ #ifdef CONFIG_NET_POLL_CONTROLLER
+@@ -1081,7 +1081,7 @@ static const struct net_device_ops vorte
+ 	.ndo_do_ioctl 		= vortex_ioctl,
+ #endif
+ 	.ndo_set_rx_mode	= set_rx_mode,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ 	.ndo_set_mac_address 	= eth_mac_addr,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ #ifdef CONFIG_NET_POLL_CONTROLLER
+diff -Naurp a/drivers/net/ethernet/3com/typhoon.c b/drivers/net/ethernet/3com/typhoon.c
+--- a/drivers/net/ethernet/3com/typhoon.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/3com/typhoon.c	2018-01-29 16:54:56.324576567 -0300
+@@ -2255,7 +2255,7 @@ static const struct net_device_ops typho
+ 	.ndo_get_stats		= typhoon_get_stats,
+ 	.ndo_validate_addr	= eth_validate_addr,
+ 	.ndo_set_mac_address	= eth_mac_addr,
+-	.ndo_change_mtu		= eth_change_mtu,
++	.ndo_change_mtu_rh74	= eth_change_mtu,
+ };
+ 
+ static int
+diff -Naurp a/drivers/net/ethernet/via/via-rhine.c b/drivers/net/ethernet/via/via-rhine.c
+--- a/drivers/net/ethernet/via/via-rhine.c	2018-01-15 13:45:04.000000000 -0300
++++ b/drivers/net/ethernet/via/via-rhine.c	2018-01-29 17:23:20.923905792 -0300
+@@ -503,7 +503,7 @@ static irqreturn_t rhine_interrupt(int i
+ static void rhine_tx(struct net_device *dev);
+ static int rhine_rx(struct net_device *dev, int limit);
+ static void rhine_set_rx_mode(struct net_device *dev);
+-static struct rtnl_link_stats64 *rhine_get_stats64(struct net_device *dev,
++static void rhine_get_stats64(struct net_device *dev,
+ 	       struct rtnl_link_stats64 *stats);
+ static int netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
+ static const struct ethtool_ops netdev_ethtool_ops;
+@@ -855,7 +855,7 @@ static const struct net_device_ops rhine
+ 	.ndo_start_xmit		 = rhine_start_tx,
+ 	.ndo_get_stats64	 = rhine_get_stats64,
+ 	.ndo_set_rx_mode	 = rhine_set_rx_mode,
+-	.ndo_change_mtu		 = eth_change_mtu,
++	.ndo_change_mtu_rh74	 = eth_change_mtu,
+ 	.ndo_validate_addr	 = eth_validate_addr,
+ 	.ndo_set_mac_address 	 = eth_mac_addr,
+ 	.ndo_do_ioctl		 = netdev_ioctl,
+@@ -2038,7 +2038,7 @@ out_unlock:
+ 	mutex_unlock(&rp->task_lock);
+ }
+ 
+-static struct rtnl_link_stats64 *
++static void
+ rhine_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
+ {
+ 	struct rhine_private *rp = netdev_priv(dev);
+@@ -2061,8 +2061,6 @@ rhine_get_stats64(struct net_device *dev
+ 		stats->tx_packets = rp->tx_stats.packets;
+ 		stats->tx_bytes = rp->tx_stats.bytes;
+ 	} while (u64_stats_fetch_retry_irq(&rp->tx_stats.syncp, start));
+-
+-	return stats;
+ }
+ 
+ static void rhine_set_rx_mode(struct net_device *dev)

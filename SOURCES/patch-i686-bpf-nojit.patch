@@ -1,0 +1,38 @@
+diff -up ./kernel/bpf/verifier.c.jit ./kernel/bpf/verifier.c
+--- ./kernel/bpf/verifier.c.jit	2018-10-05 05:18:19.000000000 +0900
++++ ./kernel/bpf/verifier.c	2018-10-30 23:32:29.000000000 +0900
+@@ -5312,7 +5312,9 @@ static int jit_subprogs(struct bpf_verif
+ 		func[i]->aux->name[0] = 'F';
+ 		func[i]->aux->stack_depth = env->subprog_stack_depth[i];
+ 		func[i]->jit_requested = 1;
++#ifdef CONFIG_BPF_JIT
+ 		func[i] = trace_bpf_int_jit_compile(func[i]);
++#endif
+ 		if (!func[i]->jited) {
+ 			err = -ENOTSUPP;
+ 			goto out_free;
+@@ -5338,7 +5340,11 @@ static int jit_subprogs(struct bpf_verif
+ 	}
+ 	for (i = 0; i <= env->subprog_cnt; i++) {
+ 		old_bpf_func = func[i]->bpf_func;
++#ifdef CONFIG_BPF_JIT
+ 		tmp = trace_bpf_int_jit_compile(func[i]);
++#else
++		tmp = func[i];
++#endif
+ 		if (tmp != func[i] || func[i]->bpf_func != old_bpf_func) {
+ 			verbose(env, "JIT doesn't support bpf-to-bpf calls\n");
+ 			err = -EFAULT;
+@@ -5379,8 +5385,11 @@ static int jit_subprogs(struct bpf_verif
+ 	return 0;
+ out_free:
+ 	for (i = 0; i <= env->subprog_cnt; i++)
+-		if (func[i])
++		if (func[i]) {
++#ifdef CONFIG_BPF_JIT
+ 			trace_bpf_jit_free(func[i]);
++#endif
++		}
+ 	kfree(func);
+ 	/* cleanup main prog to be interpreted */
+ 	prog->jit_requested = 0;

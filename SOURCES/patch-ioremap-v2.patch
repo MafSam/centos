@@ -1,0 +1,14 @@
+Replace this with ioremap.patch .
+
+diff -up ./arch/x86/mm/ioremap.c.ioremap ./arch/x86/mm/ioremap.c
+--- ./arch/x86/mm/ioremap.c.ioremap	2018-10-05 05:18:19.000000000 +0900
++++ ./arch/x86/mm/ioremap.c	2018-10-30 22:59:42.000000000 +0900
+@@ -167,7 +167,7 @@ static void __iomem *__ioremap_caller(re
+ 	 */
+ 	if (mem_flags.system_ram) {
+ 		WARN_ONCE(1, "ioremap on RAM at 0x%llx - 0x%llx\n",
+-					phys_addr, last_addr);
++					(unsigned long long)phys_addr, (unsigned long long)last_addr);
+ 		return NULL;
+ 	}
+ 

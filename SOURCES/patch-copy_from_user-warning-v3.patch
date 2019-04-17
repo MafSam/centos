@@ -1,0 +1,123 @@
+Replace this with patch-copy_from_user-warning-v2.patch .
+
+diff -up ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c.cfu ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c
+--- ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c.cfu	2018-10-30 20:06:59.000000000 +0900
++++ ./drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c	2018-10-30 20:17:55.000000000 +0900
+@@ -4494,12 +4494,16 @@ int vmw_execbuf_ioctl(struct drm_device
+ 		return -EINVAL;
+ 	}
+ 
+-	if (arg.version > 1 &&
+-	    copy_from_user(&arg.context_handle,
+-			   (void __user *) (data + copy_offset[0]),
+-			   copy_offset[arg.version - 1] -
+-			   copy_offset[0]) != 0)
+-		return -EFAULT;
++	if (arg.version > 1) {
++		/* to make copy_from_user() happy, check bounds beforehand */
++		size_t copysize = copy_offset[arg.version - 1] - copy_offset[0];
++		if (copysize > sizeof(arg.context_handle))
++			return -EFAULT;
++		if (copy_from_user(&arg.context_handle,
++				   (void __user *) (data + copy_offset[0]),
++				   copysize) != 0)
++			return -EFAULT;
++	}
+ 
+ 	switch (arg.version) {
+ 	case 1:
+diff -up ./drivers/isdn/hardware/avm/b1.c.cfu ./drivers/isdn/hardware/avm/b1.c
+--- ./drivers/isdn/hardware/avm/b1.c.cfu	2018-10-05 05:18:19.000000000 +0900
++++ ./drivers/isdn/hardware/avm/b1.c	2018-10-30 20:06:59.000000000 +0900
+@@ -176,6 +176,8 @@ int b1_load_t4file(avmcard *card, capilo
+ 	}
+ 	if (left) {
+ 		if (t4file->user) {
++			if (left > sizeof(buf)) /* make copy_from_user happy */
++				return -EFAULT;
+ 			if (copy_from_user(buf, dp, left))
+ 				return -EFAULT;
+ 		} else {
+@@ -224,6 +226,8 @@ int b1_load_config(avmcard *card, capilo
+ 	}
+ 	if (left) {
+ 		if (config->user) {
++			if (left > sizeof(buf)) /* make copy_from_user happy */
++				return -EFAULT;
+ 			if (copy_from_user(buf, dp, left))
+ 				return -EFAULT;
+ 		} else {
+diff -up ./fs/binfmt_misc.c.cfu ./fs/binfmt_misc.c
+--- ./fs/binfmt_misc.c.cfu	2018-10-05 05:18:19.000000000 +0900
++++ ./fs/binfmt_misc.c	2018-10-30 20:06:59.000000000 +0900
+@@ -396,12 +396,12 @@ static int parse_command(const char __us
+ {
+ 	char s[4];
+ 
+-	if (!count)
+-		return 0;
+ 	if (count > 3)
+ 		return -EINVAL;
+ 	if (copy_from_user(s, buffer, count))
+ 		return -EFAULT;
++	if (!count)
++		return 0;
+ 	if (s[count-1] == '\n')
+ 		count--;
+ 	if (count == 1 && s[0] == '0')
+diff -up ./kernel/sys.c.cfu ./kernel/sys.c
+--- ./kernel/sys.c.cfu	2018-10-05 05:18:19.000000000 +0900
++++ ./kernel/sys.c	2018-10-30 20:06:59.000000000 +0900
+@@ -2097,7 +2097,10 @@ static int prctl_set_mm_map(int opt, con
+ 		return error;
+ 
+ 	if (prctl_map.auxv_size) {
++		unsigned long arg4 = prctl_map.auxv_size;
+ 		memset(user_auxv, 0, sizeof(user_auxv));
++		if (arg4 > sizeof(user_auxv)) /* to make copy_from_user happy */
++			return -EFAULT;
+ 		if (copy_from_user(user_auxv,
+ 				   (const void __user *)prctl_map.auxv,
+ 				   prctl_map.auxv_size))
+diff -up ./net/core/pktgen.c.cfu ./net/core/pktgen.c
+--- ./net/core/pktgen.c.cfu	2018-10-05 05:18:19.000000000 +0900
++++ ./net/core/pktgen.c	2018-10-30 20:06:59.000000000 +0900
+@@ -881,6 +881,8 @@ static ssize_t pktgen_if_write(struct fi
+ 		return len;
+ 
+ 	memset(name, 0, sizeof(name));
++	if (len > sizeof(name))
++		return -EFAULT;
+ 	if (copy_from_user(name, &user_buffer[i], len))
+ 		return -EFAULT;
+ 	i += len;
+@@ -1798,6 +1800,8 @@ static ssize_t pktgen_thread_write(struc
+ 		return len;
+ 
+ 	memset(name, 0, sizeof(name));
++	if (len > sizeof(name))
++		return -EFAULT;
+ 	if (copy_from_user(name, &user_buffer[i], len))
+ 		return -EFAULT;
+ 	i += len;
+@@ -1828,6 +1832,8 @@ static ssize_t pktgen_thread_write(struc
+ 			ret = len;
+ 			goto out;
+ 		}
++		if (len > sizeof(f))
++			return -EFAULT;
+ 		if (copy_from_user(f, &user_buffer[i], len))
+ 			return -EFAULT;
+ 		i += len;
+diff -up ./sound/core/seq/seq_clientmgr.c.cfu ./sound/core/seq/seq_clientmgr.c
+--- ./sound/core/seq/seq_clientmgr.c.cfu	2018-10-05 05:18:19.000000000 +0900
++++ ./sound/core/seq/seq_clientmgr.c	2018-10-30 20:06:59.000000000 +0900
+@@ -2136,6 +2136,8 @@ static long snd_seq_ioctl(struct file *f
+ 	 */
+ 	size = _IOC_SIZE(handler->cmd);
+ 	if (handler->cmd & IOC_IN) {
++		if (size > sizeof(buf)) /* make copy_from_user happy */
++			return -EFAULT;
+ 		if (copy_from_user(&buf, (const void __user *)arg, size))
+ 			return -EFAULT;
+ 	}

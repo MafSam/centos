@@ -1,0 +1,15 @@
+Replace this with patch-zu-format-v1.patch .
+
+diff -up ./drivers/firmware/efi/efi.c.zu2 ./drivers/firmware/efi/efi.c
+--- ./drivers/firmware/efi/efi.c.zu2	2018-10-05 05:18:19.000000000 +0900
++++ ./drivers/firmware/efi/efi.c	2018-10-30 20:30:38.000000000 +0900
+@@ -277,7 +277,7 @@ int __init efi_mem_desc_lookup(u64 phys_
+ 				map->nr_map * map->desc_size);
+ 	if (!memmap) {
+ 		pr_err_once("early_memremap(%#llx, %zu) failed.\n",
+-			    (unsigned long long) map->phys_map, map->nr_map * map->desc_size);
++			    (unsigned long long) map->phys_map, (size_t) (map->nr_map * map->desc_size));
+ 		return -ENOMEM;
+ 	}
+ 
+diff -up ./drivers/target/target_core_user.c.zu2 ./drivers/target/target_core_user.c

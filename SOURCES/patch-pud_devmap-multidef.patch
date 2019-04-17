@@ -1,0 +1,72 @@
+diff -up ./arch/x86/include/asm/pgtable.h.pud ./arch/x86/include/asm/pgtable.h
+--- ./arch/x86/include/asm/pgtable.h.pud	2018-04-15 20:52:06.000000000 +0900
++++ ./arch/x86/include/asm/pgtable.h	2018-04-15 20:59:16.000000000 +0900
+@@ -216,6 +216,7 @@ static inline int pud_trans_splitting(pu
+ 	return pud_val(pud) & _PAGE_SPLITTING;
+ }
+ 
++#define __HAVE_ARCH_PUD_TRANS_HUGE
+ static inline int pud_trans_huge(pud_t pud)
+ {
+ 	return (pud_val(pud) & (_PAGE_PSE|_PAGE_DEVMAP)) == _PAGE_PSE;
+@@ -234,6 +235,7 @@ static inline int pmd_devmap(pmd_t pmd)
+ }
+ #endif
+ 
++#define __HAVE_ARCH_PUD_DEVMAP
+ #ifdef CONFIG_HAVE_ARCH_TRANSPARENT_HUGEPAGE_PUD
+ static inline int pud_devmap(pud_t pud)
+ {
+@@ -1033,6 +1035,7 @@ static inline int pmd_write(pmd_t pmd)
+ #if !defined(CONFIG_TRANSPARENT_HUGEPAGE) || \
+ 	(defined(CONFIG_TRANSPARENT_HUGEPAGE) && \
+ 	 !defined(CONFIG_HAVE_ARCH_TRANSPARENT_HUGEPAGE_PUD))
++#define __HAVE_ARCH_PUD_TRANS_HUGE
+ static inline int pud_trans_huge(pud_t pud)
+ {
+ 	return 0;
+diff -up ./include/asm-generic/pgtable.h.pud ./include/asm-generic/pgtable.h
+--- ./include/asm-generic/pgtable.h.pud	2018-03-22 06:40:12.000000000 +0900
++++ ./include/asm-generic/pgtable.h	2018-04-15 20:53:45.000000000 +0900
+@@ -629,10 +629,12 @@ static inline int pmd_trans_splitting(pm
+ {
+ 	return 0;
+ }
++# ifndef __HAVE_ARCH_PUD_TRANS_HUGE
+ static inline int pud_trans_huge(pud_t pud)
+ {
+ 	return 0;
+ }
++# endif
+ static inline int pud_trans_splitting(pud_t pud)
+ {
+ 	return 0;
+@@ -656,10 +658,12 @@ static inline int pud_write(pud_t pud)
+ #if !defined(CONFIG_TRANSPARENT_HUGEPAGE) || \
+ 	(defined(CONFIG_TRANSPARENT_HUGEPAGE) && \
+ 	 !defined(CONFIG_HAVE_ARCH_TRANSPARENT_HUGEPAGE_PUD))
++# ifndef __HAVE_ARCH_PUD_TRANS_HUGE
+ static inline int pud_trans_huge(pud_t pud)
+ {
+ 	return 0;
+ }
++# endif
+ #endif
+ 
+ #ifndef pmd_read_atomic
+diff -up ./include/linux/mm.h.pud ./include/linux/mm.h
+--- ./include/linux/mm.h.pud	2018-04-15 21:00:18.000000000 +0900
++++ ./include/linux/mm.h	2018-04-15 20:59:43.000000000 +0900
+@@ -380,10 +380,12 @@ static inline int pmd_devmap(pmd_t pmd)
+ {
+ 	return 0;
+ }
++# ifndef __HAVE_ARCH_PUD_DEVMAP
+ static inline int pud_devmap(pud_t pud)
+ {
+ 	return 0;
+ }
++# endif
+ #endif
+ 
+ /*

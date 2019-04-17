@@ -1,0 +1,24 @@
+diff -up ./arch/x86/events/intel/ds.c.kam ./arch/x86/events/intel/ds.c
+--- ./arch/x86/events/intel/ds.c.kam	2018-10-05 05:18:19.000000000 +0900
++++ ./arch/x86/events/intel/ds.c	2018-11-02 11:12:18.000000000 +0900
+@@ -292,7 +292,7 @@ static void *dsalloc(size_t size, gfp_t
+ 	if (!page)
+ 		return NULL;
+ 	addr = (unsigned long)page_address(page);
+-	if (kaiser_add_mapping(addr, size, __PAGE_KERNEL | _PAGE_GLOBAL) < 0) {
++	if (kaiser_add_mapping(addr, size, (unsigned long)(__PAGE_KERNEL | _PAGE_GLOBAL)) < 0) {
+ 		__free_pages(page, order);
+ 		addr = 0;
+ 	}
+diff -up ./arch/x86/kernel/ldt.c.kam ./arch/x86/kernel/ldt.c
+--- ./arch/x86/kernel/ldt.c.kam	2018-10-05 05:18:19.000000000 +0900
++++ ./arch/x86/kernel/ldt.c	2018-11-02 11:19:58.000000000 +0900
+@@ -94,7 +94,7 @@ static struct ldt_struct *alloc_ldt_stru
+ 
+ 	ret = kaiser_add_mapping((unsigned long)new_ldt->entries,
+ 				alloc_size,
+-				__PAGE_KERNEL | _PAGE_GLOBAL);
++				(unsigned long)(__PAGE_KERNEL | _PAGE_GLOBAL));
+ 	if (ret) {
+ 		free_ldt(new_ldt, size);
+ 		return NULL;

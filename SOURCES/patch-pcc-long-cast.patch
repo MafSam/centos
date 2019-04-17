@@ -1,0 +1,21 @@
+diff -up ./drivers/mailbox/pcc.c.pcc ./drivers/mailbox/pcc.c
+--- ./drivers/mailbox/pcc.c.pcc	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/mailbox/pcc.c	2018-04-16 16:58:39.000000000 +0900
+@@ -172,7 +172,7 @@ static bool pcc_tx_done(struct mbox_chan
+ {
+ 	struct acpi_pcct_hw_reduced *pcct_ss = chan->con_priv;
+ 	struct acpi_pcct_shared_memory *generic_comm_base =
+-		(struct acpi_pcct_shared_memory *) pcct_ss->base_address;
++		(struct acpi_pcct_shared_memory *) (unsigned long) pcct_ss->base_address;
+ 	u16 cmd_delay = pcct_ss->latency;
+ 	unsigned int retries = 0;
+ 
+@@ -207,7 +207,7 @@ static int pcc_send_data(struct mbox_cha
+ {
+ 	struct acpi_pcct_hw_reduced *pcct_ss = chan->con_priv;
+ 	struct acpi_pcct_shared_memory *generic_comm_base =
+-		(struct acpi_pcct_shared_memory *) pcct_ss->base_address;
++		(struct acpi_pcct_shared_memory *) (unsigned long) pcct_ss->base_address;
+ 	struct acpi_generic_address doorbell;
+ 	u64 doorbell_preserve;
+ 	u64 doorbell_val;

@@ -1,0 +1,100 @@
+diff -Naurp a/kernel/events/core.c b/kernel/events/core.c
+--- a/kernel/events/core.c	2018-08-10 13:17:43.000000000 -0300
++++ b/kernel/events/core.c	2018-08-15 07:55:47.687515042 -0300
+@@ -7477,7 +7477,6 @@ static void sw_perf_event_destroy(struct
+ 
+ 	WARN_ON(event->parent);
+ 
+-	event_id = array_index_nospec(event_id, PERF_COUNT_SW_MAX);
+ 	static_key_slow_dec(&perf_swevent_enabled[event_id]);
+ 	swevent_hlist_put(event);
+ }
+@@ -7514,7 +7513,6 @@ static int perf_swevent_init(struct perf
+ 		if (err)
+ 			return err;
+ 
+-		event_id = array_index_nospec(event_id, PERF_COUNT_SW_MAX);
+ 		static_key_slow_inc(&perf_swevent_enabled[event_id]);
+ 		event->destroy = sw_perf_event_destroy;
+ 	}
+diff -aurp a/drivers/block/zram/zram_drv.c b/drivers/block/zram/zram_drv.c
+--- a/drivers/block/zram/zram_drv.c	2018-08-10 13:17:43.000000000 -0300
++++ b/drivers/block/zram/zram_drv.c	2018-08-15 09:11:14.074903632 -0300
+@@ -131,7 +131,6 @@ static inline int valid_io_request_nospe
+ 	/* out of range range */
+ 	if (unlikely(*start >= bound || end > bound || *start > end))
+ 		return 0;
+-	*start = array_index_nospec(*start, bound);
+ 
+ 	/* I/O request is valid */
+ 	return 1;
+diff -aurp a/drivers/gpu/drm/i915/i915_perf.c b/drivers/gpu/drm/i915/i915_perf.c
+--- a/drivers/gpu/drm/i915/i915_perf.c	2018-08-10 13:17:43.000000000 -0300
++++ b/drivers/gpu/drm/i915/i915_perf.c	2018-08-15 09:47:26.886738292 -0300
+@@ -2758,7 +2758,6 @@ static int read_properties_unlocked(stru
+ 					  value);
+ 				return -EINVAL;
+ 			}
+-			value = array_index_nospec(value, I915_OA_FORMAT_MAX);
+ 
+ 			if (!dev_priv->perf.oa.oa_formats[value].size) {
+ 				DRM_DEBUG("Unsupported OA report format %llu\n",
+diff -aurp a/drivers/gpu/drm/i915/intel_sdvo.c b/drivers/gpu/drm/i915/intel_sdvo.c
+--- a/drivers/gpu/drm/i915/intel_sdvo.c	2018-08-10 13:17:43.000000000 -0300
++++ b/drivers/gpu/drm/i915/intel_sdvo.c	2018-08-15 09:21:16.000040109 -0300
+@@ -2112,7 +2112,6 @@ intel_sdvo_connector_atomic_set_property
+ 	struct intel_sdvo_connector_state *sdvo_state = to_intel_sdvo_connector_state(state);
+ 
+ 	if (property == intel_sdvo_connector->tv_format) {
+-		val = array_index_nospec(val, TV_FORMAT_NUM);
+ 		state->tv.mode = intel_sdvo_connector->tv_format_supported[val];
+ 
+ 		if (state->crtc) {
+diff -aurp a/drivers/net/ethernet/mellanox/mlx4/en_ethtool.c b/drivers/net/ethernet/mellanox/mlx4/en_ethtool.c
+--- a/drivers/net/ethernet/mellanox/mlx4/en_ethtool.c	2018-08-10 13:17:43.000000000 -0300
++++ b/drivers/net/ethernet/mellanox/mlx4/en_ethtool.c	2018-08-15 09:51:54.042321944 -0300
+@@ -1525,7 +1525,6 @@ static int mlx4_en_flow_replace(struct n
+ 	u32 qpn;
+ 	u64 reg_id;
+ 	u32 location;
+-	u64 ring_cookie;
+ 
+ 	struct mlx4_net_trans_rule rule = {
+ 		.queue_mode = MLX4_NET_TRANS_Q_FIFO,
+@@ -1549,10 +1548,8 @@ static int mlx4_en_flow_replace(struct n
+ 				cmd->fs.ring_cookie);
+ 			return -EINVAL;
+ 		}
+-		ring_cookie = array_index_nospec(cmd->fs.ring_cookie,
+-						 priv->rx_ring_num);
+ 
+-		qpn = priv->rss_map.qps[ring_cookie].qpn;
++		qpn = priv->rss_map.qps[cmd->fs.ring_cookie].qpn;
+ 		if (!qpn) {
+ 			en_warn(priv, "rxnfc: RX ring (%llu) is inactive\n",
+ 				cmd->fs.ring_cookie);
+diff -aurp a/drivers/net/ethernet/mellanox/mlx5/core/en_fs_ethtool.c b/drivers/net/ethernet/mellanox/mlx5/core/en_fs_ethtool.c
+--- a/drivers/net/ethernet/mellanox/mlx5/core/en_fs_ethtool.c	2018-08-10 13:17:43.000000000 -0300
++++ b/drivers/net/ethernet/mellanox/mlx5/core/en_fs_ethtool.c	2018-08-15 09:54:39.458206629 -0300
+@@ -393,8 +393,6 @@ static int validate_flow(struct mlx5e_pr
+ 	if (fs->ring_cookie >= priv->channels.params.num_channels &&
+ 	    fs->ring_cookie != RX_CLS_FLOW_DISC)
+ 		return -EINVAL;
+-	fs->ring_cookie = array_index_nospec(fs->ring_cookie,
+-					     priv->channels.params.num_channels);
+ 
+ 	switch (fs->flow_type & ~(FLOW_EXT | FLOW_MAC_EXT)) {
+ 	case ETHER_FLOW:
+diff -aurp a/fs/btrfs/send.c b/fs/btrfs/send.c
+--- a/fs/btrfs/send.c	2018-08-10 13:17:43.000000000 -0300
++++ b/fs/btrfs/send.c	2018-08-15 09:07:07.461535085 -0300
+@@ -6215,8 +6215,7 @@ long btrfs_ioctl_send(struct file *mnt_f
+ 		goto out;
+ 	}
+ 
+-	sctx->clone_roots_cnt = array_index_nospec(arg->clone_sources_count,
+-						   ULLONG_MAX / sizeof(*arg->clone_sources) + 1);
++	sctx->clone_roots_cnt = arg->clone_sources_count;
+ 
+ 	sctx->send_max_size = BTRFS_SEND_BUF_SIZE;
+ 	sctx->send_buf = kvmalloc(sctx->send_max_size, GFP_KERNEL);

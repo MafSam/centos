@@ -1,0 +1,12 @@
+diff -up ./arch/x86/kernel/entry_32.S.s32 ./arch/x86/kernel/entry_32.S
+--- ./arch/x86/kernel/entry_32.S.s32	2018-04-15 20:28:44.000000000 +0900
++++ ./arch/x86/kernel/entry_32.S	2018-04-15 22:25:48.000000000 +0900
+@@ -54,7 +54,7 @@
+ #include <asm/processor-flags.h>
+ #include <asm/ftrace.h>
+ #include <asm/irq_vectors.h>
+-#include <asm/cpufeature.h>
++#include <asm/cpufeatures.h>
+ #include <asm/alternative-asm.h>
+ #include <asm/asm.h>
+ #include <asm/smap.h>

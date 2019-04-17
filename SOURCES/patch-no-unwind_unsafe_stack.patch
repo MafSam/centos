@@ -1,0 +1,41 @@
+diff -up ./arch/x86/kernel/unwind_frame.c.unwind ./arch/x86/kernel/unwind_frame.c
+--- ./arch/x86/kernel/unwind_frame.c.unwind	2018-03-22 06:40:12.000000000 +0900
++++ ./arch/x86/kernel/unwind_frame.c	2018-04-17 21:03:45.000000000 +0900
+@@ -43,6 +43,7 @@ static bool update_stack_state(struct un
+ 	return true;
+ }
+ 
++#ifdef CONFIG_X86_64
+ extern const unsigned long __start___unwind_unsafe_stack[],
+ 			   __stop___unwind_unsafe_stack[];
+ 
+@@ -57,6 +58,7 @@ static bool unwind_unsafe(struct unwind_
+ 
+ 	return false;
+ }
++
+ extern const unsigned long __start___unwind_end_of_stack[],
+ 			   __stop___unwind_end_of_stack[],
+ 			   ret_from_fork_nospec_begin[],
+@@ -82,6 +84,7 @@ static bool unwind_end(struct unwind_sta
+ 
+ 	return false;
+ }
++#endif
+ 
+ bool unwind_next_frame(struct unwind_state *state)
+ {
+@@ -90,11 +93,13 @@ bool unwind_next_frame(struct unwind_sta
+ 	if (unwind_done(state))
+ 		return false;
+ 
++#ifdef CONFIG_X86_64
+ 	if (unwind_unsafe(state))
+ 		state->error = true;
+ 
+ 	if (unwind_end(state))
+ 		goto the_end;
++#endif
+ 
+ 	next_bp = (unsigned long *)READ_ONCE(*state->bp);
+ 

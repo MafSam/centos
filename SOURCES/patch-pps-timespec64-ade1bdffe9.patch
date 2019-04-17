@@ -1,0 +1,135 @@
+commit ade1bdffe90e59cd257cb9bd4f5abe4de5f14911
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Mon Sep 28 22:21:31 2015 +0200
+
+    ntp/pps: use y2038 safe types in pps_event_time
+    
+    The pps_event_time uses two 'timespec' structures internally, which
+    suffer from the y2038 problem. The uses of this structure are
+    fairly self-contained in the pps code, so this replaces them all at
+    once.
+    
+    Unfortunately, this includes the sfc ethernet driver aside from the
+    pps subsystem, so we change that one as well. Both touch the
+    same data structure, and there probably is no good way to split
+    the patch into smaller units.
+    
+    Acked-by: Richard Cochran <richardcochran@gmail.com>
+    Acked-by: David S. Miller <davem@davemloft.net>
+    Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+    Signed-off-by: John Stultz <john.stultz@linaro.org>
+
+Ported to kernel-3.10.0-862.el7 by T.Kabe
+diff -up ./drivers/net/ethernet/sfc/ptp.c.pps ./drivers/net/ethernet/sfc/ptp.c
+--- ./drivers/net/ethernet/sfc/ptp.c.pps	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/net/ethernet/sfc/ptp.c	2018-04-18 17:22:49.000000000 +0900
+@@ -646,26 +646,26 @@ static void efx_ptp_send_times(struct ef
+ 			       struct pps_event_time *last_time)
+ {
+ 	struct pps_event_time now;
+-	struct timespec limit;
++	struct timespec64 limit;
+ 	struct efx_ptp_data *ptp = efx->ptp_data;
+ 	int *mc_running = ptp->start.addr;
+ 
+ 	pps_get_ts(&now);
+ 	limit = now.ts_real;
+-	timespec_add_ns(&limit, SYNCHRONISE_PERIOD_NS);
++	timespec64_add_ns(&limit, SYNCHRONISE_PERIOD_NS);
+ 
+ 	/* Write host time for specified period or until MC is done */
+-	while ((timespec_compare(&now.ts_real, &limit) < 0) &&
++	while ((timespec64_compare(&now.ts_real, &limit) < 0) &&
+ 	       ACCESS_ONCE(*mc_running)) {
+-		struct timespec update_time;
++		struct timespec64 update_time;
+ 		unsigned int host_time;
+ 
+ 		/* Don't update continuously to avoid saturating the PCIe bus */
+ 		update_time = now.ts_real;
+-		timespec_add_ns(&update_time, SYNCHRONISATION_GRANULARITY_NS);
++		timespec64_add_ns(&update_time, SYNCHRONISATION_GRANULARITY_NS);
+ 		do {
+ 			pps_get_ts(&now);
+-		} while ((timespec_compare(&now.ts_real, &update_time) < 0) &&
++		} while ((timespec64_compare(&now.ts_real, &update_time) < 0) &&
+ 			 ACCESS_ONCE(*mc_running));
+ 
+ 		/* Synchronise NIC with single word of time only */
+@@ -721,7 +721,7 @@ efx_ptp_process_times(struct efx_nic *ef
+ 	struct efx_ptp_data *ptp = efx->ptp_data;
+ 	u32 last_sec;
+ 	u32 start_sec;
+-	struct timespec delta;
++	struct timespec64 delta;
+ 	ktime_t mc_time;
+ 
+ 	if (number_readings == 0)
+diff -up ./drivers/pps/kapi.c.pps ./drivers/pps/kapi.c
+--- ./drivers/pps/kapi.c.pps	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/pps/kapi.c	2018-04-18 17:13:42.000000000 +0900
+@@ -179,8 +179,8 @@ void pps_event(struct pps_device *pps, s
+ 	/* check event type */
+ 	BUG_ON((event & (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR)) == 0);
+ 
+-	dev_dbg(pps->dev, "PPS event at %ld.%09ld\n",
+-			ts->ts_real.tv_sec, ts->ts_real.tv_nsec);
++	dev_dbg(pps->dev, "PPS event at %lld.%09ld\n",
++			(s64)ts->ts_real.tv_sec, ts->ts_real.tv_nsec);
+ 
+ 	timespec_to_pps_ktime(&ts_real, ts->ts_real);
+ 
+diff -up ./include/linux/pps_kernel.h.pps ./include/linux/pps_kernel.h
+--- ./include/linux/pps_kernel.h.pps	2018-04-15 20:28:44.000000000 +0900
++++ ./include/linux/pps_kernel.h	2018-04-18 17:19:29.000000000 +0900
+@@ -48,9 +48,9 @@ struct pps_source_info {
+ 
+ struct pps_event_time {
+ #ifdef CONFIG_NTP_PPS
+-	struct timespec ts_raw;
++	struct timespec64 ts_raw;
+ #endif /* CONFIG_NTP_PPS */
+-	struct timespec ts_real;
++	struct timespec64 ts_real;
+ };
+ 
+ /* The main struct */
+@@ -105,7 +105,7 @@ extern void pps_event(struct pps_device
+ struct pps_device *pps_lookup_dev(void const *cookie);
+ 
+ static inline void timespec_to_pps_ktime(struct pps_ktime *kt,
+-		struct timespec ts)
++		struct timespec64 ts)
+ {
+ 	kt->sec = ts.tv_sec;
+ 	kt->nsec = ts.tv_nsec;
+@@ -115,25 +115,18 @@ static inline void pps_get_ts(struct pps
+ {
+ 	struct system_time_snapshot snap;
+ 	ktime_get_snapshot(&snap);
+-#if defined CONFIG_X86_64
+ 	ts->ts_real = ktime_to_timespec64(snap.real);
+ #ifdef CONFIG_NTP_PPS
+ 	ts->ts_raw = ktime_to_timespec64(snap.raw);
+ #endif
+-#else
+-	ts->ts_real = ktime_to_timespec(snap.real);
+-#ifdef CONFIG_NTP_PPS
+-	ts->ts_raw = ktime_to_timespec(snap.raw);
+-#endif
+-#endif
+ }
+ 
+ /* Subtract known time delay from PPS event time(s) */
+-static inline void pps_sub_ts(struct pps_event_time *ts, struct timespec delta)
++static inline void pps_sub_ts(struct pps_event_time *ts, struct timespec64 delta)
+ {
+-	ts->ts_real = timespec_sub(ts->ts_real, delta);
++	ts->ts_real = timespec64_sub(ts->ts_real, delta);
+ #ifdef CONFIG_NTP_PPS
+-	ts->ts_raw = timespec_sub(ts->ts_raw, delta);
++	ts->ts_raw = timespec64_sub(ts->ts_raw, delta);
+ #endif
+ }
+ 

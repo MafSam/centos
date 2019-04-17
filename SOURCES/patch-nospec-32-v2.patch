@@ -1,0 +1,149 @@
+diff -up ./arch/x86/kernel/entry_32.S.spec32 ./arch/x86/kernel/entry_32.S
+--- ./arch/x86/kernel/entry_32.S.spec32	2018-10-24 20:12:20.000000000 +0900
++++ ./arch/x86/kernel/entry_32.S	2018-10-24 20:19:21.000000000 +0900
+@@ -58,6 +58,7 @@
+ #include <asm/alternative-asm.h>
+ #include <asm/asm.h>
+ #include <asm/smap.h>
++#include <asm/nospec-branch.h>
+ 
+ /* Avoid __ASSEMBLER__'ifying <linux/audit.h> just for this.  */
+ #include <linux/elf-em.h>
+@@ -308,7 +309,8 @@ ENTRY(ret_from_kernel_thread)
+ 	pushl_cfi $0x0202		# Reset kernel eflags
+ 	popfl_cfi
+ 	movl PT_EBP(%esp),%eax
+-	call *PT_EBX(%esp)
++	movl	PT_EBX(%esp), %edx
++	CALL_NOSPEC %edx
+ 	movl $0,PT_EAX(%esp)
+ 	jmp syscall_exit
+ 	CFI_ENDPROC
+@@ -435,7 +437,14 @@ sysenter_past_esp:
+ sysenter_do_call:
+ 	cmpl $(NR_syscalls), %eax
+ 	jae syscall_badsys
++	sbb %edx, %edx				/* array_index_mask_nospec() */
++	and %edx, %eax
++#ifdef CONFIG_RETPOLINE
++	movl sys_call_table(,%eax,4),%eax
++	call __x86_indirect_thunk_eax
++#else
+ 	call *sys_call_table(,%eax,4)
++#endif
+ 	movl %eax,PT_EAX(%esp)
+ 	LOCKDEP_SYS_EXIT
+ 	DISABLE_INTERRUPTS(CLBR_ANY)
+@@ -513,7 +522,14 @@ ENTRY(system_call)
+ 	cmpl $(NR_syscalls), %eax
+ 	jae syscall_badsys
+ syscall_call:
++	sbb %edx, %edx				/* array_index_mask_nospec() */
++	and %edx, %eax
++#ifdef CONFIG_RETPOLINE
++	movl sys_call_table(,%eax,4),%eax
++	call __x86_indirect_thunk_eax
++#else
+ 	call *sys_call_table(,%eax,4)
++#endif
+ 	movl %eax,PT_EAX(%esp)		# store the return value
+ syscall_exit:
+ 	LOCKDEP_SYS_EXIT
+@@ -1190,7 +1206,8 @@ trace:
+ 	movl 0x4(%ebp), %edx
+ 	subl $MCOUNT_INSN_SIZE, %eax
+ 
+-	call *ftrace_trace_function
++	movl ftrace_trace_function, %ecx
++	CALL_NOSPEC %ecx
+ 
+ 	popl %edx
+ 	popl %ecx
+@@ -1225,7 +1242,7 @@ return_to_handler:
+ 	movl %eax, %ecx
+ 	popl %edx
+ 	popl %eax
+-	jmp *%ecx
++	JMP_NOSPEC %ecx
+ #endif
+ 
+ /*
+@@ -1285,7 +1302,7 @@ error_code:
+ 	movl %ecx, %es
+ 	TRACE_IRQS_OFF
+ 	movl %esp,%eax			# pt_regs pointer
+-	call *%edi
++	CALL_NOSPEC %edi
+ 	jmp ret_from_exception
+ 	CFI_ENDPROC
+ END(page_fault)
+diff -up ./arch/x86/kernel/irq_32.c.spec32 ./arch/x86/kernel/irq_32.c
+--- ./arch/x86/kernel/irq_32.c.spec32	2018-10-24 20:12:21.000000000 +0900
++++ ./arch/x86/kernel/irq_32.c	2018-10-24 20:12:23.000000000 +0900
+@@ -20,6 +20,7 @@
+ #include <linux/mm.h>
+ 
+ #include <asm/apic.h>
++#include <asm/nospec-branch.h>
+ 
+ DEFINE_PER_CPU_SHARED_ALIGNED(irq_cpustat_t, irq_stat);
+ EXPORT_PER_CPU_SYMBOL(irq_stat);
+@@ -64,11 +65,11 @@ DEFINE_PER_CPU(struct irq_stack *, softi
+ static void call_on_stack(void *func, void *stack)
+ {
+ 	asm volatile("xchgl	%%ebx,%%esp	\n"
+-		     "call	*%%edi		\n"
++		     CALL_NOSPEC
+ 		     "movl	%%ebx,%%esp	\n"
+ 		     : "=b" (stack)
+ 		     : "0" (stack),
+-		       "D"(func)
++		       [thunk_target] "D"(func)
+ 		     : "memory", "cc", "edx", "ecx", "eax");
+ }
+ 
+@@ -108,11 +109,11 @@ execute_on_irq_stack(int overflow, struc
+ 		call_on_stack(print_stack_overflow, isp);
+ 
+ 	asm volatile("xchgl	%%ebx,%%esp	\n"
+-		     "call	*%%edi		\n"
++		     CALL_NOSPEC
+ 		     "movl	%%ebx,%%esp	\n"
+ 		     : "=a" (arg1), "=d" (arg2), "=b" (isp)
+ 		     :  "0" (irq),   "1" (desc),  "2" (isp),
+-			"D" (desc->handle_irq)
++			[thunk_target] "D" (desc->handle_irq)
+ 		     : "memory", "cc", "ecx");
+ 	return 1;
+ }
+diff -up ./arch/x86/lib/checksum_32.S.spec32 ./arch/x86/lib/checksum_32.S
+--- ./arch/x86/lib/checksum_32.S.spec32	2018-09-21 17:18:28.000000000 +0900
++++ ./arch/x86/lib/checksum_32.S	2018-10-24 20:24:00.000000000 +0900
+@@ -29,7 +29,8 @@
+ #include <asm/dwarf2.h>
+ #include <asm/errno.h>
+ #include <asm/asm.h>
+-				
++#include <asm/nospec-branch.h>
++
+ /*
+  * computes a partial checksum, e.g. for TCP/UDP fragments
+  */
+@@ -165,7 +166,7 @@ ENTRY(csum_partial)
+ 	negl %ebx
+ 	lea 45f(%ebx,%ebx,2), %ebx
+ 	testl %esi, %esi
+-	jmp *%ebx
++	JMP_NOSPEC %ebx
+ 
+ 	# Handle 2-byte-aligned regions
+ 20:	addw (%esi), %ax
+@@ -463,7 +464,7 @@ ENTRY(csum_partial_copy_generic)
+ 	andl $-32,%edx
+ 	lea 3f(%ebx,%ebx), %ebx
+ 	testl %esi, %esi 
+-	jmp *%ebx
++	JMP_NOSPEC %ebx
+ 1:	addl $64,%esi
+ 	addl $64,%edi 
+ 	SRC(movb -32(%edx),%bl)	; SRC(movb (%edx),%bl)

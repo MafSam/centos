@@ -1,0 +1,15 @@
+diff -up ./arch/x86/include/asm/sync_core.h.pti ./arch/x86/include/asm/sync_core.h
+--- ./arch/x86/include/asm/sync_core.h.pti	2018-10-05 05:18:19.000000000 +0900
++++ ./arch/x86/include/asm/sync_core.h	2018-10-31 18:57:31.000000000 +0900
+@@ -14,9 +14,11 @@
+  */
+ static inline void sync_core_before_usermode(void)
+ {
++#ifdef CONFIG_PAGE_TABLE_ISOLATION
+ 	/* With PTI, we unconditionally serialize before running user code. */
+ 	if (kaiser_active())
+ 		return;
++#endif
+ 	/*
+ 	 * Return from interrupt and NMI is done through iret, which is core
+ 	 * serializing.

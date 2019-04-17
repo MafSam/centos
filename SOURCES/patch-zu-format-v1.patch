@@ -1,0 +1,24 @@
+diff -up ./drivers/firmware/efi/efi.c.zu1 ./drivers/firmware/efi/efi.c
+--- ./drivers/firmware/efi/efi.c.zu1	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/firmware/efi/efi.c	2018-04-16 16:48:08.000000000 +0900
+@@ -277,7 +277,7 @@ int __init efi_mem_desc_lookup(u64 phys_
+ 				map->nr_map * map->desc_size);
+ 	if (!memmap) {
+ 		pr_err_once("early_memremap(%#llx, %zu) failed.\n",
+-			    (unsigned long long) map->phys_map, map->nr_map * map->desc_size);
++			    (unsigned long long) map->phys_map, (size_t) (map->nr_map * map->desc_size));
+ 		return -ENOMEM;
+ 	}
+ 
+diff -up ./drivers/target/target_core_user.c.tgt1 ./drivers/target/target_core_user.c
+--- ./drivers/target/target_core_user.c.tgt1	2018-03-22 06:40:12.000000000 +0900
++++ ./drivers/target/target_core_user.c	2018-04-18 18:44:51.000000000 +0900
+@@ -551,7 +551,7 @@ static bool is_ring_space_avail(struct t
+ 
+ 	space = spc_free(cmd_head, udev->cmdr_last_cleaned, udev->cmdr_size);
+ 	if (space < cmd_needed) {
+-		pr_debug("no cmd space: %u %u %u %lu %lu\n", cmd_head,
++		pr_debug("no cmd space: %u %u %u %zu %zu\n", cmd_head,
+ 		       udev->cmdr_last_cleaned, udev->cmdr_size, cmd_needed, space);
+ 		return false;
+ 	}

@@ -1,0 +1,44 @@
+centosplus patch [bug#15040]
+
+Submitted-by h-masuda
+
+--- a/drivers/net/ethernet/sun/niu.c	2018-11-15 09:07:13.000000000 -0800
++++ b/drivers/net/ethernet/sun/niu.c	2018-12-16 16:32:19.423571926 -0800
+@@ -3492,7 +3492,7 @@ static int niu_process_rx_pkt(struct nap
+ 
+ 	rh = (struct rx_pkt_hdr1 *) skb->data;
+ 	if (np->dev->features & NETIF_F_RXHASH)
+-		skb->rxhash = ((u32)rh->hashval2_0 << 24 |
++		skb->hash = ((u32)rh->hashval2_0 << 24 | /* XXX rename */
+ 			       (u32)rh->hashval2_1 << 16 |
+ 			       (u32)rh->hashval1_1 << 8 |
+ 			       (u32)rh->hashval1_2 << 0);
+@@ -6293,8 +6293,8 @@ no_rings:
+ 	stats->tx_errors = errors;
+ }
+ 
+-static struct rtnl_link_stats64 *niu_get_stats(struct net_device *dev,
+-					       struct rtnl_link_stats64 *stats)
++static /* struct rtnl_link_stats64 * */ void niu_get_stats(struct net_device *dev,
++		struct rtnl_link_stats64 *stats) /* XXX RH_KABI_REPLACE in include/linux/netdevice.h */
+ {
+ 	struct niu *np = netdev_priv(dev);
+ 
+@@ -6303,7 +6303,7 @@ static struct rtnl_link_stats64 *niu_get
+ 		niu_get_tx_stats(np, stats);
+ 	}
+ 
+-	return stats;
++	/* return stats; */ /* XXX RH_KABI_REPLACE */
+ }
+ 
+ static void niu_load_hash_xmac(struct niu *np, u16 *hash)
+@@ -9695,7 +9695,7 @@ static const struct net_device_ops niu_n
+ 	.ndo_set_mac_address	= niu_set_mac_addr,
+ 	.ndo_do_ioctl		= niu_ioctl,
+ 	.ndo_tx_timeout		= niu_tx_timeout,
+-	.ndo_change_mtu		= niu_change_mtu,
++	.ndo_change_mtu_rh74 = niu_change_mtu, /* XXX RH_KABI_RENAME */
+ };
+ 
+ static void niu_assign_netdev_ops(struct net_device *dev)
