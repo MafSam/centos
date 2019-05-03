@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 34
+%define stable_update 38
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -610,8 +610,6 @@ Patch308: arm64-96boards-Rock960-CE-board-support.patch
 Patch309: arm64-rockchip-add-initial-Rockpro64.patch
 Patch310: arm64-rk3399-add-idle-states.patch
 
-Patch311: gpio-pxa-handle-corner-case-of-unprobed-device.patch
-
 Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 # https://patchwork.kernel.org/patch/10686407/
@@ -636,9 +634,6 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # Ena fixes from 4.20
 Patch503: ena-fixes.patch
-
-# rhbz 1526312, patch is in 4.20, can be dropped on rebase
-Patch507: 0001-HID-i2c-hid-override-HID-descriptors-for-certain-dev.patch
 
 # Patches from 4.20 fixing black screen on CHT devices with i915.fastboot=1
 Patch508: cherrytrail-pwm-lpss-fixes.patch
@@ -2214,6 +2209,11 @@ fi
 #
 #
 %changelog
+* Fri May  3 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.38-300
+- Linux v4.19.38
+- Update BananaPi M2 Berry/Ultra patches
+- Remove upstreamed patches
+
 * Sat Apr 13 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.34-300
 - Linux v4.19.34
 - Update device tree for BananaPi M2 Berry
