@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 38
+%define stable_update 39
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2209,6 +2209,9 @@ fi
 #
 #
 %changelog
+* Sat May  4 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.39-300
+- Linux v4.19.39
+
 * Fri May  3 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.38-300
 - Linux v4.19.38
 - Update BananaPi M2 Berry/Ultra patches
