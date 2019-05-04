@@ -1,3 +1,120 @@
+From a5a4bc14914faf219336d71c71595975b8112ff7 Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Wed, 9 Jan 2019 23:02:54 +0800
+Subject: ARM: dts: sun8i: r40: Add pinmux setting for CLK_OUT_A
+
+CLK_OUT_A, an external clock output function driven from the clock
+control unit, on the R40 is sometimes used to provide a low rate low
+power clock to a WiFi or Bluetooth controller.
+
+This patch adds a pinmux setting for it.
+
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index f1fcfa0bdce0..06b685869f52 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -342,6 +342,11 @@
+ 			#interrupt-cells = <3>;
+ 			#gpio-cells = <3>;
+ 
++			clk_out_a_pin: clk-out-a-pin {
++				pins = "PI12";
++				function = "clk_out_a";
++			};
++
+ 			gmac_rgmii_pins: gmac-rgmii-pins {
+ 				pins = "PA0", "PA1", "PA2", "PA3",
+ 				       "PA4", "PA5", "PA6", "PA7",
+-- 
+cgit 1.2-0.3.lf.el7
+
+From 26e9ffeb2c04f0f577d0179e7eca8e1d54f9e050 Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Wed, 9 Jan 2019 23:02:53 +0800
+Subject: ARM: dts: sun8i: r40: Add pinmux settings for UART3 on PG pingroup
+
+UART3 on the PG pingroup on the R40 SoC is commonly used to connect the
+bluetooth controller in a WiFi+Bluetooth combo chip, with the WiFi bits
+also on the PG pingroup.
+
+This patch adds two device nodes for UART3 on PG pingroup, one for the
+RX/TX pins, and one for the RTS/CTS pins. Consumers can reference either
+just the RX/TX pinmux setting or both, depending on the application.
+
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+Signed-off-by: Maxime Ripard <maxime.ripard@bootlin.com>
+---
+ arch/arm/boot/dts/sun8i-r40.dtsi | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index 89762dbefe42..f1fcfa0bdce0 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -389,6 +389,16 @@
+ 				pins = "PB22", "PB23";
+ 				function = "uart0";
+ 			};
++
++			uart3_pg_pins: uart3-pg-pins {
++				pins = "PG6", "PG7";
++				function = "uart3";
++			};
++
++			uart3_rts_cts_pg_pins: uart3-rts-cts-pg-pins {
++				pins = "PG8", "PG9";
++				function = "uart3";
++			};
+ 		};
+ 
+ 		wdt: watchdog@1c20c90 {
+-- 
+cgit 1.2-0.3.lf.el7
+
+From 75d64e8bf5c1582853515adc7e6f734852d5d5c7 Mon Sep 17 00:00:00 2001
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Mon, 3 Dec 2018 22:58:23 +0800
+Subject: ARM: dts: sun8i: r40: Add clock accuracy for external oscillators
+
+The R40 datasheet specifies a tolerance range for the external
+oscillators used. Add them to the device tree as the clock accuracy.
+
+Acked-by: Maxime Ripard <maxime.ripard@bootlin.com>
+Tested-by: Corentin Labbe <clabbe.montjoie@gmail.com>
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+---
+ arch/arm/boot/dts/sun8i-r40.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index 6f4c9ca5a3ee..a8917f8b1c80 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -61,6 +61,7 @@
+ 			#clock-cells = <0>;
+ 			compatible = "fixed-clock";
+ 			clock-frequency = <24000000>;
++			clock-accuracy = <50000>;
+ 			clock-output-names = "osc24M";
+ 		};
+ 
+@@ -68,6 +69,7 @@
+ 			#clock-cells = <0>;
+ 			compatible = "fixed-clock";
+ 			clock-frequency = <32768>;
++			clock-accuracy = <20000>;
+ 			clock-output-names = "osc32k";
+ 		};
+ 	};
+-- 
+cgit 1.2-0.3.lf.el7
+
 From c41ca64d075020e2d5daecb7f48da6af0ba5b512 Mon Sep 17 00:00:00 2001
 From: Tuomas Tynkkynen <tuomas@tuxera.com>
 Date: Wed, 8 Aug 2018 02:25:53 +0300
