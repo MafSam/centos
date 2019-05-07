@@ -2058,9 +2058,6 @@ fi
 #
 #
 %changelog
-* Tue May 07 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.el8.centos
-- Apply debranding changes
-
 * Wed Mar 13 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.el8]
 - [arm64] revert "arm64: tlb: Avoid synchronous TLBIs when freeing page tables" (Christoph von Recklinghausen) [1685697]
 
