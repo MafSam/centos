@@ -2070,6 +2070,9 @@ fi
 #
 #
 %changelog
+* Tue May 14 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.1.2.el8.centos
+- Apply debranding changes
+
 * Sun Apr 28 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.1.2.el8_0]
 - [arm64] arm64/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
 - [s390] s390/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
