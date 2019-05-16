@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 40
+%define stable_update 43
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2209,6 +2209,9 @@ fi
 #
 #
 %changelog
+* Thu May 16 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.43-300
+- Linux v4.19.43
+
 * Mon May  6 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.40-300
 - Linux v4.19.40
 
