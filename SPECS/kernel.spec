@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 116
+%define stable_update 119
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2239,6 +2239,9 @@ fi
 #
 #
 %changelog
+* Thu May 16 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.14.119-200
+- Rebase to LTS 4.14.119
+
 * Sat May  4 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.14.116-200
 - Rebase to LTS 4.14.116
 
