@@ -368,6 +368,13 @@ Summary: The Linux kernel
 %define _use_vdso 0
 %endif
 
+%if 0%{?rhel} >= 8
+%define python_name python3
+%define python_selected %{__python3}
+%else
+%define python_name python
+%define python_selected %{__python}
+%endif
 
 #
 # Packages that need to be installed before the kernel is, because the %%post
@@ -404,7 +411,14 @@ BuildRequires: net-tools, hostname, bc, elfutils-devel
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
+BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
+%if 0%{?rhel} >= 8
+BuildRequires: python3-devel python3-docutils
+# Used to mangle unversioned shebangs to be Python 3
+BuildRequires: /usr/bin/pathfix.py
+%else
+BuildRequires: python-devel
+%endif
 BuildRequires: audit-libs-devel
 BuildRequires: asciidoc xmlto
 %ifnarch s390x %{arm}
@@ -741,25 +755,30 @@ This package provides debug information for the perf package.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/traceevent/plugins/.*|XXX' -o perf-debuginfo.list}
 
-%package -n python-perf
+%package -n %{python_name}-perf
 Summary: Python bindings for apps which will manipulate perf events
-%description -n python-perf
-The python-perf package contains a module that permits applications
+%description -n %{python_name}-perf
+The %{python_name}-perf package contains a module that permits applications
 written in the Python programming language to use the interface
 to manipulate perf events.
 
+%if 0%{?rhel} >= 8
+%global python_sitearch %{python3_sitearch}
+%else
 %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%endif
 
-%package -n python-perf-debuginfo
+%if 0%{?rhel} < 8
+%package -n %{python_name}-perf-debuginfo
 Summary: Debug information for package perf python bindings
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n python-perf-debuginfo
+%description -n %{python_name}-perf-debuginfo
 This package provides debug information for the perf python bindings.
 
 # the python_sitearch macro should already be defined from above
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python_sitearch}/perf.so(\.debug)?|XXX' -o python-perf-debuginfo.list}
-
+%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python_sitearch}/perf.so(\.debug)?|XXX' -o %%{python_name}-perf-debuginfo.list}
+%endif
 
 %endif # with_perf
 
@@ -1293,6 +1312,19 @@ find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 # remove unnecessary SCM files
 find . -name .gitignore -delete >/dev/null
 
+%if 0%{?rhel} >= 8
+# Mangle /usr/bin/python shebangs to /usr/bin/python3
+# Mangle all Python shebangs to be Python 3 explicitly
+# -p preserves timestamps
+# -n prevents creating ~backup files
+# -i specifies the interpreter for the shebang
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/diffconfig
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/bloat-o-meter
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/show_delta
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" tools/ tools/perf/scripts/python/*.py tools/kvm/kvm_stat/kvm_stat
+%endif
+
 cd ..
 
 ###
@@ -1719,7 +1751,7 @@ BuildKernel %make_target %kernel_image %{_use_vdso}
 # perf
 # make sure check-headers.sh is executable
 chmod +x tools/perf/check-headers.sh
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT all
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT PYTHON=%{python_selected} all
 # Build the docs
 pushd tools/kvm/kvm_stat/
 make %{?_smp_mflags} man
@@ -1874,7 +1906,7 @@ rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
 
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT lib=%{_lib} install-bin install-traceevent-plugins
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT PYTHON=%{python_selected} lib=%{_lib} install-bin install-traceevent-plugins
 # remove the 'trace' symlink.
 rm -f %{buildroot}%{_bindir}/trace
 # remove the perf-tips
@@ -1890,7 +1922,7 @@ rm -rf %{buildroot}/usr/lib/perf/examples
 rm -rf %{buildroot}/usr/lib/perf/include/bpf/
 
 # python-perf extension
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT PYTHON=%{python_selected} install-python_ext
 
 # perf man pages (note: implicit rpm magic compresses them later)
 install -d %{buildroot}/%{_mandir}/man1
@@ -2088,13 +2120,15 @@ fi
 %{_sysconfdir}/bash_completion.d/perf
 %doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
 
-%files -n python-perf
+%files -n %{python_name}-perf
 %{python_sitearch}
 
 %if %{with_debuginfo}
 %files -f perf-debuginfo.list -n perf-debuginfo
 
-%files -f python-perf-debuginfo.list -n python-perf-debuginfo
+%if 0%{?rhel} < 8
+%files -f %{python_name}-perf-debuginfo.list -n %{python_name}-perf-debuginfo
+%endif
 %endif
 %endif # with_perf
 
@@ -2209,6 +2243,9 @@ fi
 #
 #
 %changelog
+* Thu May 23 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.43-300
+- Prepare to build with CentOS 8
+
 * Thu May 16 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.43-300
 - Linux v4.19.43
 
