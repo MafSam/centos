@@ -7,7 +7,7 @@ Summary: The Linux kernel
 # For internal testing builds during development, it should be 0.
 %global released_kernel 1
 
-%global distro_build 80.1.1
+%global distro_build 80
 
 # Sign the x86_64 kernel for secure boot authentication
 %ifarch x86_64 aarch64
@@ -30,13 +30,14 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-# define buildid .local
+%define dist .el8.centos.plus
+# % define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.1.2.el8_0
+%define pkgrelease 80.el8
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80.1.2%{?dist}
+%define specrelease 80%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -45,18 +46,18 @@ Summary: The Linux kernel
 # All should default to 1 (enabled) and be flipped to 0 (disabled)
 # by later arch-specific checks.
 
-%define _with_kabidupchk 1
 # The following build options are enabled by default.
 # Use either --without <opt> in your rpmbuild command or force values
 # to 0 in here to disable them.
 #
-# standard kernel
+# kernel-plus
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
-# kernel-debug
-%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
-# kernel-doc
+# kernel-plus-debug
+### % define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
+%define with_debug 0
+# kernel-plus-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
-# kernel-headers
+# kernel-plus-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 %define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
 # perf
@@ -236,7 +237,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 i686
+%define nobuildarches ppc64le s390x aarch64
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -261,7 +262,7 @@ Summary: The Linux kernel
 %define initrd_prereq  dracut >= 027
 
 
-Name: kernel%{?variant}
+Name: kernel-plus%{?variant}
 Group: System Environment/Kernel
 License: GPLv2 and Redistributable, no modification permitted
 URL: http://www.kernel.org/
@@ -272,8 +273,8 @@ Release: %{pkg_release}
 ExclusiveArch: noarch i386 i686 x86_64 s390x aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
-Requires: kernel-core-uname-r = %{KVERREL}%{?variant}
-Requires: kernel-modules-uname-r = %{KVERREL}%{?variant}
+Requires: kernel-plus-core-uname-r = %{KVERREL}%{?variant}
+Requires: kernel-plus-modules-uname-r = %{KVERREL}%{?variant}
 %endif
 
 
@@ -370,21 +371,21 @@ Source17: mod-extra.sh
 Source18: mod-sign.sh
 Source19: mod-extra-blacklist.sh
 Source90: filter-x86_64.sh
-Source93: filter-aarch64.sh
-Source96: filter-ppc64le.sh
-Source97: filter-s390x.sh
+#Source93: filter-aarch64.sh
+#Source96: filter-ppc64le.sh
+#Source97: filter-s390x.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
-Source20: kernel-aarch64.config
-Source21: kernel-aarch64-debug.config
-Source32: kernel-ppc64le.config
-Source33: kernel-ppc64le-debug.config
-Source36: kernel-s390x.config
-Source37: kernel-s390x-debug.config
-Source38: kernel-s390x-zfcpdump.config
+#Source20: kernel-aarch64.config
+#Source21: kernel-aarch64-debug.config
+#Source32: kernel-ppc64le.config
+#Source33: kernel-ppc64le-debug.config
+#Source36: kernel-s390x.config
+#Source37: kernel-s390x-debug.config
+#Source38: kernel-s390x-zfcpdump.config
 Source39: kernel-x86_64.config
-Source40: kernel-x86_64-debug.config
+#Source40: kernel-x86_64-debug.config
 Source41: generate_all_configs.sh
 
 Source42: process_configs.sh
@@ -392,20 +393,20 @@ Source43: generate_bls_conf.sh
 
 Source200: check-kabi
 
-Source201: Module.kabi_aarch64
-Source202: Module.kabi_ppc64le
-Source203: Module.kabi_s390x
+#Source201: Module.kabi_aarch64
+#Source202: Module.kabi_ppc64le
+#Source203: Module.kabi_s390x
 Source204: Module.kabi_x86_64
 
-Source210: Module.kabi_dup_aarch64
-Source211: Module.kabi_dup_ppc64le
-Source212: Module.kabi_dup_s390x
+#Source210: Module.kabi_dup_aarch64
+#Source211: Module.kabi_dup_ppc64le
+#Source212: Module.kabi_dup_s390x
 Source213: Module.kabi_dup_x86_64
 
 Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
 Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 
-# Sources for kernel-tools
+# Sources for kernel-plus-tools
 Source2000: cpupower.service
 Source2001: cpupower.config
 
@@ -429,6 +430,12 @@ Provides: kernel = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
 Provides: kernel-drm-nouveau = 16\
 Provides: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-plus = %{rpmversion}-%{pkg_release}\
+Provides: kernel-plus-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-plus-drm-nouveau = 16\
+Provides: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 Requires(pre): linux-firmware >= 20150904-56.git6ebf5d57\
@@ -466,7 +473,14 @@ Provides: glibc-kernheaders = 3.0-46
 %if "0%{?variant}"
 Obsoletes: kernel-headers < %{rpmversion}-%{pkg_release}
 Provides: kernel-headers = %{rpmversion}-%{pkg_release}
+### plus mod
+Obsoletes: kernel-plus-headers < %{rpmversion}-%{pkg_release}
+Provides: kernel-plus-headers = %{rpmversion}-%{pkg_release}
+### end of plus mod
 %endif
+### plus mod
+Conflicts: kernel-headers < %{rpmversion}-%{pkg_release}
+### end of plus mod
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -539,7 +553,7 @@ This package provides debug information for the perf python bindings.
 %endif # with_perf
 
 %if %{with_tools}
-%package -n kernel-tools
+%package -n kernel-plus-tools
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
@@ -551,49 +565,58 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
-Requires: kernel-tools-libs = %{version}-%{release}
+Requires: kernel-plus-tools-libs = %{version}-%{release}
+### plus mod
+Conflicts: kernel-tools < %{version}-%{release}
+### end of plus mod
 %endif
 %define __requires_exclude ^%{_bindir}/python
-%description -n kernel-tools
+%description -n kernel-plus-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
-%package -n kernel-tools-libs
+%package -n kernel-plus-tools-libs
 Summary: Libraries for the kernels-tools
 Group: Development/System
 License: GPLv2
-%description -n kernel-tools-libs
+### plus mod
+Conflicts: kernel-tools-libs < %{version}-%{release}
+### end of plus mod
+%description -n kernel-plus-tools-libs
 This package contains the libraries built from the tools/ directory
 from the kernel source.
 
-%package -n kernel-tools-libs-devel
+%package -n kernel-plus-tools-libs-devel
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
-Requires: kernel-tools = %{version}-%{release}
+Requires: kernel-plus-tools = %{version}-%{release}
 %ifarch %{cpupowerarchs}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
 %endif
-Requires: kernel-tools-libs = %{version}-%{release}
-Provides: kernel-tools-devel
-%description -n kernel-tools-libs-devel
+Requires: kernel-plus-tools-libs = %{version}-%{release}
+Provides: kernel-plus-tools-devel
+%description -n kernel-plus-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
-%package -n kernel-tools-debuginfo
-Summary: Debug information for package kernel-tools
+%package -n kernel-plus-tools-debuginfo
+Summary: Debug information for package kernel-plus-tools
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n kernel-tools-debuginfo
-This package provides debug information for package kernel-tools.
+### plus mod
+Conflicts: kernel-tools-debuginfo < %{version}-%{release}
+### end of plus mod
+%description -n kernel-plus-tools-debuginfo
+This package provides debug information for package kernel-plus-tools.
 
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-plus-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -636,11 +659,11 @@ Group: Development/System
 kernel-gcov includes the gcov graph and source files for gcov coverage collection.
 %endif
 
-%package -n kernel-abi-whitelists
+%package -n kernel-plus-abi-whitelists
 Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
-%description -n kernel-abi-whitelists
+%description -n kernel-plus-abi-whitelists
 The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
@@ -684,6 +707,12 @@ Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-devel = %{version}-%{release}\
+Provides: kernel-plus%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-plus-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 Provides: installonlypkg(kernel)\
 AutoReqProv: no\
 Requires(pre): findutils\
@@ -709,6 +738,14 @@ Provides: installonlypkg(kernel-module)\
 Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-plus%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-plus%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-extra\
@@ -729,6 +766,13 @@ Provides: kernel-modules = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-plus%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-plus-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus-modules = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules\
@@ -745,6 +789,10 @@ summary: kernel meta-package for the %{1} kernel\
 group: system environment/kernel\
 Requires: kernel-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
 Requires: kernel-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
+### plus mod\
+Requires: kernel-plus-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
+Requires: kernel-plus-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
+### end of plus mod\
 Provides: installonlypkg(kernel)\
 %description %{1}\
 The meta-package for the %{1} kernel\
@@ -760,6 +808,9 @@ The meta-package for the %{1} kernel\
 Summary: %{variant_summary}\
 Group: System Environment/Kernel\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-plus-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 Provides: installonlypkg(kernel)\
 %{expand:%%kernel_reqprovconf}\
 %if %{?1:1} %{!?1:0} \
@@ -863,6 +914,17 @@ ApplyOptionalPatch()
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
+
+# CentOS Modification
+
+# i686 mods
+%ifarch %{ix86}
+%endif
+
+### plus mod
+
+### end of plus mod
+# End of CentOS Modification
 
 # END OF PATCH APPLICATIONS
 
@@ -988,7 +1050,7 @@ BuildKernel() {
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
 
-    %{make} -s ARCH=$Arch oldnoconfig >/dev/null
+    %{make} -s ARCH=$Arch olddefconfig >/dev/null
     %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} KCFLAGS="%{?kcflags}" WITH_GCOV="%{?with_gcov}" $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
     if [ $DoModules -eq 1 ]; then
 	%{make} -s ARCH=$Arch V=1 %{?_smp_mflags} KCFLAGS="%{?kcflags}" WITH_GCOV="%{?with_gcov}" modules %{?sparse_mflags} || exit 1
@@ -1087,6 +1149,7 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     (cd $RPM_BUILD_ROOT/lib/modules/$KernelVer ; ln -s build source)
     # dirs for additional modules per module-init-tools, kbuild/modules.txt
+    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/weak-updates
     # first copy everything
@@ -1289,6 +1352,11 @@ BuildKernel() {
         rm -f modules.{alias*,builtin.bin,dep*,*map,symbols*,devname,softdep}
     popd
 
+    # Call the modules-extra script to move things around
+    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
+    # Blacklist net autoloadable modules in modules-extra
+    %{SOURCE19} $RPM_BUILD_ROOT lib/modules/$KernelVer
+
     #
     # Generate the kernel-core and kernel-modules files lists
     #
@@ -1300,23 +1368,8 @@ BuildKernel() {
     mkdir restore
     cp -r lib/modules/$KernelVer/* restore/.
 
-    # Call the modules-extra script to move things around.  Note cleanup below.
-    %{SOURCE17} $RPM_BUILD_ROOT /lib/modules/$KernelVer %{SOURCE16}
-    # Blacklist net autoloadable modules in modules-extra
-    %{SOURCE19} $RPM_BUILD_ROOT/modules-extra.list
-    cat $RPM_BUILD_ROOT/modules-extra.list | xargs rm -f
-
-    # If we're signing modules, we can't leave the .mod files for the .ko files
-    # we've moved in .tmp_versions/.  Remove them so the Kbuild 'modules_sign'
-    # target doesn't try to sign a non-existent file.  This is kinda ugly, but
-    # so is modules-extra.
-    popd
-    for mod in `cat $RPM_BUILD_ROOT/modules-extra.list`
-	do
-	  modfile=`basename $mod | sed -e 's/.ko/.mod/'`
-	  [ -f "$modfile" ] && rm .tmp_versions/$modfile
-	done
-    pushd $RPM_BUILD_ROOT
+    # don't include anything going into k-m-e in the file lists
+    rm -rf lib/modules/$KernelVer/extra
 
     if [ $DoModules -eq 1 ]; then
 	# Find all the module files and filter them out into the core and
@@ -1340,8 +1393,6 @@ BuildKernel() {
 	# Ensure important files/directories exist to let the packaging succeed
 	echo '%%defattr(-,-,-)' > modules.list
 	echo '%%defattr(-,-,-)' > k-d.list
-	# This overwrites anything created by %{SOURCE19}
-	echo '%%defattr(-,-,-)' > modules-extra.list
 	mkdir -p lib/modules/$KernelVer/kernel
 	# Add files usually created by make modules, needed to prevent errors
 	# thrown by depmod during package installation
@@ -1369,14 +1420,11 @@ BuildKernel() {
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/k-d.list > ../kernel${Flavour:+-${Flavour}}-modules.list
     sed -e 's/^lib*/%dir \/lib/' %{?zipsed} $RPM_BUILD_ROOT/module-dirs.list > ../kernel${Flavour:+-${Flavour}}-core.list
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules.list >> ../kernel${Flavour:+-${Flavour}}-core.list
-    sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules-extra.list >> ../kernel${Flavour:+-${Flavour}}-modules-extra.list
 
     # Cleanup
     rm -f $RPM_BUILD_ROOT/k-d.list
     rm -f $RPM_BUILD_ROOT/modules.list
     rm -f $RPM_BUILD_ROOT/module-dirs.list
-    # Cleanup file created by %{SOURCE17}
-    rm -f $RPM_BUILD_ROOT/modules-extra.list
 
 %if %{signmodules}
     if [ $DoModules -eq 1 ]; then
@@ -1736,10 +1784,10 @@ rm -rf $RPM_BUILD_ROOT
 ###
 
 %if %{with_tools}
-%post -n kernel-tools-libs
+%post -n kernel-plus-tools-libs
 /sbin/ldconfig
 
-%postun -n kernel-tools-libs
+%postun -n kernel-plus-tools-libs
 /sbin/ldconfig
 %endif
 
@@ -1865,7 +1913,7 @@ fi
 %endif
 
 %if %{with_kernel_abi_whitelists}
-%files -n kernel-abi-whitelists
+%files -n kernel-plus-abi-whitelists
 %defattr(-,root,root,-)
 /lib/modules/kabi-*
 %endif
@@ -1917,7 +1965,7 @@ fi
 %if %{with_tools}
 %ifarch %{cpupowerarchs}
 %defattr(-,root,root)
-%files -n kernel-tools -f cpupower.lang
+%files -n kernel-plus-tools -f cpupower.lang
 %{_bindir}/cpupower
 %ifarch x86_64
 %{_bindir}/centrino-decode
@@ -1947,16 +1995,16 @@ fi
 %{_bindir}/kvm_stat
 
 %if %{with_debuginfo}
-%files -f kernel-tools-debuginfo.list -n kernel-tools-debuginfo
+%files -f kernel-plus-tools-debuginfo.list -n kernel-plus-tools-debuginfo
 %defattr(-,root,root)
 %endif
 
 %ifarch %{cpupowerarchs}
-%files -n kernel-tools-libs
+%files -n kernel-plus-tools-libs
 %{_libdir}/libcpupower.so.0
 %{_libdir}/libcpupower.so.0.0.1
 
-%files -n kernel-tools-libs-devel
+%files -n kernel-plus-tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2047,7 +2095,10 @@ fi
 %defattr(-,root,root)\
 %defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
-%{expand:%%files -f kernel-%{?3:%{3}-}modules-extra.list %{?3:%{3}-}modules-extra}\
+%{expand:%%files %{?3:%{3}-}modules-extra}\
+%defattr(-,root,root)\
+%config(noreplace) /etc/modprobe.d/*-blacklist.conf\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
@@ -2070,43 +2121,8 @@ fi
 #
 #
 %changelog
-* Tue May 14 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.1.2.el8.centos
-- Apply debranding changes
-
-* Sun Apr 28 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.1.2.el8_0]
-- [arm64] arm64/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [s390] s390/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [powerpc] powerpc/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [powerpc] powerpc/64: Disable the speculation barrier from the command line (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add 'mitigations=' support for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [kernel] cpu/speculation: Add 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Print SMT vulnerable on MSBDS with mitigations off (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Fix comment (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add SMT warning message (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation: Move arch_smt_update() call to after mitigation decisions (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add mds=full, nosmt cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [documentation] Documentation: Add MDS vulnerability documentation (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [documentation] Documentation: Move L1TF to separate directory (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add mitigation mode VMWERV (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add sysfs reporting for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add mitigation control for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Conditionally clear CPU buffers on idle entry (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/kvm/vmx: Add MDS protection when L1D Flush is not active (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Clear CPU buffers on exit to user (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add mds_clear_cpu_buffers() (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [kvm] x86/kvm: Expose X86_FEATURE_MD_CLEAR to guests (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add BUG_MSBDS_ONLY (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation/mds: Add basic bug infrastructure for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation: Consolidate CPU whitelists (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/msr-index: Cleanup bit defines (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/speculation: Cast ~SPEC_CTRL_STIBP atomic value to int (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [x86] x86/cpu: Sanitize FAM6_ATOM naming (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [include] locking/atomics, asm-generic: Move some macros from <linux/bitops.h> to a new <linux/bits.h> file (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-- [tools] tools include: Adopt linux/bits.h (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
-
-* Sat Apr 27 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.1.1.el8_0]
-- [zstream] switch to zstream (Frantisek Hrbata)
+* Wed May 22 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
+- First c8 version
 
 * Wed Mar 13 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.el8]
 - [arm64] revert "arm64: tlb: Avoid synchronous TLBIs when freeing page tables" (Christoph von Recklinghausen) [1685697]
