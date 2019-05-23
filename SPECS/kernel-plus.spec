@@ -31,7 +31,7 @@ Summary: The Linux kernel
 %endif
 
 %define dist .el8.centos.plus
-# % define buildid .local
+# %%define buildid .local
 
 %define rpmversion 4.18.0
 %define pkgrelease 80.el8
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 # kernel-plus
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
 # kernel-plus-debug
-### % define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
+# %%define with_debug     %%{?_without_debug:     0} %%{?!_without_debug:     1}
 %define with_debug 0
 # kernel-plus-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
