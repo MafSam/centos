@@ -1,0 +1,59 @@
+diff -up ./arch/x86/kernel/cpu/common.c.dist ./arch/x86/kernel/cpu/common.c
+--- ./arch/x86/kernel/cpu/common.c.dist	2017-12-29 03:59:43.000000000 +0900
++++ ./arch/x86/kernel/cpu/common.c	2018-01-10 15:37:06.848478838 +0900
+@@ -1349,6 +1349,9 @@ DEFINE_PER_CPU(struct task_struct *, fpu
+ DEFINE_PER_CPU_ALIGNED(struct stack_canary, stack_canary);
+ #endif
+ 
++DEFINE_PER_CPU_USER_MAPPED(struct kernel_ibrs_spec_ctrl, spec_ctrl_pcp);
++EXPORT_PER_CPU_SYMBOL_GPL(spec_ctrl_pcp);
++
+ #endif	/* CONFIG_X86_64 */
+ 
+ /*
+diff -up ./arch/x86/include/asm/spec_ctrl.h.dist ./arch/x86/include/asm/spec_ctrl.h
+--- ./arch/x86/include/asm/spec_ctrl.h.dist    2018-06-15 13:57:32.000000000 -0700
++++ ./arch/x86/include/asm/spec_ctrl.h 2019-05-14 17:48:21.451670849 -0700
+@@ -191,6 +191,8 @@ extern void spec_ctrl_cpu_init(void);
+ extern void ssb_print_mitigation(void);
+ extern void mds_print_mitigation(void);
+ 
++DECLARE_PER_CPU_USER_MAPPED(struct kernel_ibrs_spec_ctrl, spec_ctrl_pcp);
++
+ bool spec_ctrl_force_enable_ibrs(void);
+ bool spec_ctrl_cond_enable_ibrs(bool full_retpoline);
+ bool spec_ctrl_enable_ibrs_always(void);
+diff -up ./arch/x86/kernel/reboot.c.dist ./arch/x86/kernel/reboot.c
+--- ./arch/x86/kernel/reboot.c.dist	2017-12-29 03:59:43.000000000 +0900
++++ ./arch/x86/kernel/reboot.c	2018-01-10 15:43:36.819240224 +0900
+@@ -23,6 +23,7 @@
+ #include <asm/cpu.h>
+ #include <asm/nmi.h>
+ #include <asm/smp.h>
++#include <asm/mmu_context.h>
+ 
+ #include <linux/ctype.h>
+ #include <linux/mc146818rtc.h>
+diff -up ./arch/x86/kernel/smpboot.c.dist ./arch/x86/kernel/smpboot.c
+--- ./arch/x86/kernel/smpboot.c.dist	2018-01-10 14:53:15.251175037 +0900
++++ ./arch/x86/kernel/smpboot.c	2018-01-10 15:45:14.219976320 +0900
+@@ -72,6 +72,7 @@
+ #include <asm/fpu-internal.h>
+ #include <asm/setup.h>
+ #include <asm/uv/uv.h>
++#include <asm/mmu_context.h>
+ #include <linux/mc146818rtc.h>
+ 
+ #include <asm/smpboot_hooks.h>
+diff -up ./arch/x86/platform/efi/efi_32.c.dist ./arch/x86/platform/efi/efi_32.c
+--- ./arch/x86/platform/efi/efi_32.c.dist	2017-12-29 03:59:43.000000000 +0900
++++ ./arch/x86/platform/efi/efi_32.c	2018-01-10 15:45:56.356433372 +0900
+@@ -30,6 +30,7 @@
+ #include <asm/pgtable.h>
+ #include <asm/tlbflush.h>
+ #include <asm/efi.h>
++#include <asm/mmu_context.h>
+ 
+ /*
+  * To make EFI call EFI runtime service in physical addressing mode we need
+
