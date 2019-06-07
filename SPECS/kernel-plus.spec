@@ -32,6 +32,7 @@ Summary: The Linux kernel
 
 %define dist .el8.centos.plus
 # %%define buildid .local
+%define buildid .z05
 
 %define rpmversion 4.18.0
 %define pkgrelease 80.el8
@@ -276,6 +277,10 @@ ExclusiveOS: Linux
 Requires: kernel-plus-core-uname-r = %{KVERREL}%{?variant}
 Requires: kernel-plus-modules-uname-r = %{KVERREL}%{?variant}
 %endif
+### plus mod
+Provides: kernel = %{version}-%{release}
+Provides: installonlypkg(kernel)
+### end of plus mod
 
 
 #
@@ -358,13 +363,13 @@ Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
 Source11: x509.genkey
 %if %{?released_kernel}
-Source13: securebootca.cer
-Source14: secureboot.cer
-%define pesign_name redhatsecureboot301
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot001.crt
+%define pesign_name centossecureboot001
 %else
-Source13: redhatsecurebootca2.cer
-Source14: redhatsecureboot003.cer
-%define pesign_name redhatsecureboot003
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot001.crt
+%define pesign_name centossecureboot001
 %endif
 Source16: mod-extra.list
 Source17: mod-extra.sh
@@ -412,6 +417,15 @@ Source2001: cpupower.config
 
 ## Patches needed for building this package
 
+# CentOS Modification
+Patch1000: debrand-rh-i686-cpu.patch
+Patch1001: debrand-rh_taint.patch
+Patch1002: debrand-single-cpu.patch
+
+Source9000: centos.pem
+
+# End of CentOS Modification
+
 # END OF PATCH DEFINITIONS
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -445,6 +459,9 @@ Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
+### plus mod\
+Provides: kernel = %{version}-%{release}\
+### end of plus mod\
 # We can't let RPM do the dependencies automatic because it'll then pick up\
 # a correct but undesirable perl dependency from the module headers which\
 # isn't required for the kernel proper to function\
@@ -590,6 +607,9 @@ from the kernel source.
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
+### plus mod
+Conflicts: kernel-tools-libs-devel < %{version}-%{release}
+### end of plus mod
 Requires: kernel-plus-tools = %{version}-%{release}
 %ifarch %{cpupowerarchs}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
@@ -810,6 +830,7 @@ Group: System Environment/Kernel\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 ### plus mod\
 Provides: kernel-plus-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-%{?1:%{1}-}core = %{rpmversion}-%{pkg_release}\
 ### end of plus mod\
 Provides: installonlypkg(kernel)\
 %{expand:%%kernel_reqprovconf}\
@@ -911,11 +932,16 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 # CentOS Modification
+ApplyOptionalPatch debrand-single-cpu.patch
+ApplyOptionalPatch debrand-rh_taint.patch
+ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # i686 mods
 %ifarch %{ix86}
@@ -2121,8 +2147,9 @@ fi
 #
 #
 %changelog
-* Wed May 22 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
-- First c8 version
+* Wed Jun 05 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
+- Apply debranding changes
+- Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
 
 * Wed Mar 13 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.el8]
 - [arm64] revert "arm64: tlb: Avoid synchronous TLBIs when freeing page tables" (Christoph von Recklinghausen) [1685697]
