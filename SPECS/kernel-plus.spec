@@ -32,7 +32,6 @@ Summary: The Linux kernel
 
 %define dist .el8.centos.plus
 # %%define buildid .local
-%define buildid .z05
 
 %define rpmversion 4.18.0
 %define pkgrelease 80.el8
@@ -2147,7 +2146,7 @@ fi
 #
 #
 %changelog
-* Wed Jun 05 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
+* Fri Jun 07 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
 
