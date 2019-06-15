@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 43
+%define stable_update 51
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -566,8 +566,6 @@ Patch119: namespaces-no-expert.patch
 
 Patch120: ath9k-rx-dma-stop-check.patch
 
-Patch121: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
-
 Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 # This no longer applies, let's see if it needs to be updated
@@ -665,6 +663,7 @@ Patch517: 0001-Bluetooth-btsdio-Do-not-bind-to-non-removable-BCM434.patch
 Patch10002: 9999-centos-a83t-hdmi.patch
 Patch11002: 9999-centos-r40sata.patch
 Patch11003: 9999-centos-r40-v40-dts-update.patch
+Patch11004: v3-drivers-ata-ahci_sunxi-Increased-SATA-AHCI-DMA-TX-RX-FIFOs.patch
 ##end centos
 
 # END OF PATCH DEFINITIONS
@@ -2243,6 +2242,11 @@ fi
 #
 #
 %changelog
+* Sat Jun 15 2019 Pablo Greco <pgreco@centosproject.org> - 4.19.51-300
+- Linux v4.19.51
+- Remove upstreamed patches
+- Add sunxi-sata-performance-patch
+
 * Thu May 23 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.19.43-300
 - Prepare to build with CentOS 8
 
