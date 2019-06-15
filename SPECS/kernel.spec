@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 119
+%define stable_update 126
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -539,8 +539,6 @@ Patch118: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 Patch119: criu-no-expert.patch
 
 Patch120: ath9k-rx-dma-stop-check.patch
-
-Patch121: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
 Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
@@ -2239,6 +2237,10 @@ fi
 #
 #
 %changelog
+* Sat Jun 15 2019 Pablo Greco <pgreco@centosproject.org> - 4.14.126-200
+- Rebase to LTS 4.14.126
+- Remove upstreamed patches
+
 * Thu May 16 2019 Pablo Greco <pablo@fliagreco.com.ar> - 4.14.119-200
 - Rebase to LTS 4.14.119
 

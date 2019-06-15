@@ -105,7 +105,7 @@ index d540966..eeb47b6 100644
 +		sh $(srctree)/$(src)/checkundef.sh '$(NM)' '$@'
  
  VDSO_LDFLAGS = -shared $(call ld-option, --hash-style=both) \
- 	$(call ld-option, --build-id) -Bsymbolic
+ 	$(call ld-option, --build-id) $(call ld-option, --eh-frame-hdr) \
 diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
 index f742c65..526eee4 100755
 --- a/scripts/link-vmlinux.sh

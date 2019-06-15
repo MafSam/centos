@@ -1604,7 +1604,7 @@ index 66f4a4e79f4b..7c7a7e33e4d1 100644
 
  extern int efi_status_to_err(efi_status_t status);
 @@ -1518,12 +1528,6 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- bool efi_runtime_disabled(void);
+ 
  extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
 
 -enum efi_secureboot_mode {
