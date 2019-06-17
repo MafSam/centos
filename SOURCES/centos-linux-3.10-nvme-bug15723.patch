@@ -1,0 +1,28 @@
+centosplus patch
+
+Patch provided by RH in BZ#1671551
+
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index 645b4f138a6c..8492e7ca4ef8 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -76,6 +76,9 @@ static void blk_mq_check_inflight(struct blk_mq_hw_ctx *hctx,
+ {
+ 	struct mq_inflight *mi = priv;
+ 
++	if (!blk_mq_request_started(rq))
++		return;
++
+ 	/*
+ 	 * index[0] counts the specific partition that was asked
+ 	 * for. index[1] counts the ones that are active on the
+@@ -103,6 +106,9 @@ static void blk_mq_check_inflight_rw(struct blk_mq_hw_ctx *hctx,
+ {
+ 	struct mq_inflight *mi = priv;
+ 
++	if (!blk_mq_request_started(rq))
++		return;
++
+ 	if (rq->part == mi->part)
+ 		mi->inflight[rq_data_dir(rq)]++;
+ }
