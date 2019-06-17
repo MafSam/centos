@@ -2070,6 +2070,9 @@ fi
 #
 #
 %changelog
+* Mon Jun 17 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.4.2.el8.centos
+- Apply debranding changes
+
 * Fri Jun 14 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.4.2.el8_0]
 - [net] tcp: enforce tcp_min_snd_mss in tcp_mtu_probing() (Florian Westphal) [1719922 1719923] {CVE-2019-11479}
 - [net] tcp: add tcp_min_snd_mss sysctl (Florian Westphal) [1719922 1719923] {CVE-2019-11479}
