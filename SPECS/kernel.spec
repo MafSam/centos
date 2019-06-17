@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 51
+%define stable_update 52
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2242,6 +2242,9 @@ fi
 #
 #
 %changelog
+* Mon Jun 17 2019 Pablo Greco <pgreco@centosproject.org> - 4.19.52-300
+- Linux v4.19.52
+
 * Sat Jun 15 2019 Pablo Greco <pgreco@centosproject.org> - 4.19.51-300
 - Linux v4.19.51
 - Remove upstreamed patches
