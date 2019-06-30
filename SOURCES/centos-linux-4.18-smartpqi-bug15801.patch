@@ -1,0 +1,17 @@
+centosplus kernel patch [bug#15801]
+
+This patch was centos-linux-3.10-smartpqi-bug15801.patch in CentOS 7.
+
+
+--- a/drivers/scsi/smartpqi/smartpqi_init.c	2019-03-13 04:04:53.000000000 -0700
++++ b/drivers/scsi/smartpqi/smartpqi_init.c	2019-06-29 11:53:00.400314895 -0700
+@@ -2720,6 +2720,9 @@ static unsigned int pqi_process_io_intr(
+ 		switch (response->header.iu_type) {
+ 		case PQI_RESPONSE_IU_RAID_PATH_IO_SUCCESS:
+ 		case PQI_RESPONSE_IU_AIO_PATH_IO_SUCCESS:
++			if (io_request->scmd)
++			    io_request->scmd->result = 0;
++			/* fall through */
+ 		case PQI_RESPONSE_IU_GENERAL_MANAGEMENT:
+ 			break;
+ 		case PQI_RESPONSE_IU_TASK_MANAGEMENT:

@@ -1,0 +1,18 @@
+centosplus patch
+
+Ref: ELRepo patch 
+
+Some device IDs are listed as 'support_removed' in RHEL kernels.
+Do not return error when unsupported hardware is detected.
+
+--- a/drivers/scsi/megaraid/megaraid_sas_base.c	2019-03-13 11:04:53.000000000 +0000
++++ b/drivers/scsi/megaraid/megaraid_sas_base.c	2019-06-23 18:12:38.268330790 +0100
+@@ -6515,7 +6515,7 @@ static int megasas_probe_one(struct pci_
+ 
+ 	if (pci_device_support_removed(megasas_pci_table,
+ 				megasas_pci_ids_removed, pdev))
+-		return -ENODEV;
++		printk(KERN_DEBUG "megasas: elrepo version supporting all pci ids\n");
+ 
+ 	switch (pdev->device) {
+ 	case PCI_DEVICE_ID_LSI_AERO_10E1:

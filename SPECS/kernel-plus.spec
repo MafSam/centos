@@ -31,7 +31,7 @@ Summary: The Linux kernel
 %endif
 
 %define dist .el8.centos.plus
-# %%define buildid .local
+%%define buildid .local
 
 %define rpmversion 4.18.0
 %define pkgrelease 80.el8
@@ -421,6 +421,15 @@ Patch1000: debrand-rh-i686-cpu.patch
 Patch1001: debrand-rh_taint.patch
 Patch1002: debrand-single-cpu.patch
 
+# plus mod
+Patch10001: centos-linux-4.18-fix-em28xx-cards-bug8285.patch
+Patch10002: centos-linux-4.18-openssl-correct-msg-bug13990.patch
+Patch10003: centos-linux-4.18-smartpqi-bug15801.patch
+Patch10004: centos-linux-4.18-elrepo-fusion-mptsas-mptspi-el8.patch
+Patch10005: centos-linux-4.18-elrepo-megaraid_sas-unremove-el8.patch
+Patch10006: centos-linux-4.18-elrepo-mpt3sas-unremove-el8.patch
+# end of plus mod
+
 Source9000: centos.pem
 
 # End of CentOS Modification
@@ -755,15 +764,13 @@ Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}
 Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 ### plus mod\
 Provides: kernel-plus%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-plus%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-plus%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-plus%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 ### end of plus mod\
 AutoReq: no\
 AutoProv: yes\
@@ -783,14 +790,12 @@ Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-modules = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
-Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 ### plus mod\
 Provides: kernel-plus%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-plus-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-plus-modules = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-plus%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-plus-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 ### end of plus mod\
 AutoReq: no\
 AutoProv: yes\
@@ -806,12 +811,8 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 %package %{1}\
 summary: kernel meta-package for the %{1} kernel\
 group: system environment/kernel\
-Requires: kernel-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
-Requires: kernel-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
-### plus mod\
 Requires: kernel-plus-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
 Requires: kernel-plus-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
-### end of plus mod\
 Provides: installonlypkg(kernel)\
 %description %{1}\
 The meta-package for the %{1} kernel\
@@ -826,9 +827,8 @@ The meta-package for the %{1} kernel\
 %package %{?1:%{1}-}core\
 Summary: %{variant_summary}\
 Group: System Environment/Kernel\
-Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-### plus mod\
 Provides: kernel-plus-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
 Provides: kernel-%{?1:%{1}-}core = %{rpmversion}-%{pkg_release}\
 ### end of plus mod\
 Provides: installonlypkg(kernel)\
@@ -942,13 +942,15 @@ ApplyOptionalPatch debrand-single-cpu.patch
 ApplyOptionalPatch debrand-rh_taint.patch
 ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
-# i686 mods
-%ifarch %{ix86}
-%endif
+# plus mod
+ApplyOptionalPatch centos-linux-4.18-fix-em28xx-cards-bug8285.patch
+ApplyOptionalPatch centos-linux-4.18-openssl-correct-msg-bug13990.patch
+ApplyOptionalPatch centos-linux-4.18-smartpqi-bug15801.patch
+ApplyOptionalPatch centos-linux-4.18-elrepo-fusion-mptsas-mptspi-el8.patch
+ApplyOptionalPatch centos-linux-4.18-elrepo-megaraid_sas-unremove-el8.patch
+ApplyOptionalPatch centos-linux-4.18-elrepo-mpt3sas-unremove-el8.patch
+# end of plus mod
 
-### plus mod
-
-### end of plus mod
 # End of CentOS Modification
 
 # END OF PATCH APPLICATIONS
@@ -2146,9 +2148,11 @@ fi
 #
 #
 %changelog
-* Fri Jun 07 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
+* Sun Jun 30 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
+- Apply patches from CentOS-7 plus kernel
+- Apply driver patches imported from ELRepo
 
 * Wed Mar 13 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.el8]
 - [arm64] revert "arm64: tlb: Avoid synchronous TLBIs when freeing page tables" (Christoph von Recklinghausen) [1685697]
