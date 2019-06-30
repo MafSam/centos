@@ -31,7 +31,7 @@ Summary: The Linux kernel
 %endif
 
 %define dist .el8.centos.plus
-%%define buildid .local
+%define buildid .local
 
 %define rpmversion 4.18.0
 %define pkgrelease 80.el8
