@@ -1,17 +1,18 @@
 #! /bin/bash
 
-Dir=$1
-List=$2
+Rpmdir=$1
+Dir=$Rpmdir/$2
+List=$3
 
 pushd $Dir
 rm -rf modnames
 find . -name "*.ko" -type f > modnames
 # Look through all of the modules, and throw any that have a dependency in
 # our list into the list as well.
-rm -rf dep.list dep2.list
+rm -rf dep.list
 rm -rf req.list req2.list
 touch dep.list req.list
-cp $2 .
+cp $List .
 
 for dep in `cat modnames`
 do
@@ -48,33 +49,12 @@ do
   # get the path for the module
   modpath=`grep /$mod modnames` ||:
   [ -z "$modpath" ]  && continue;
-  echo $modpath >> dep.list
+  echo /lib/modules/$(basename $Dir)/${modpath#"./"} >> dep.list
 done
 
-sort -u dep.list > dep2.list
-
-# now move the modules into the extra/ directory
-for mod in `cat dep2.list`
-do
-  newpath=`dirname $mod | sed -e 's/kernel\//extra\//'`
-  mkdir -p $newpath
-  mv $mod $newpath
-done
-
-popd
-
-# If we're signing modules, we can't leave the .mod files for the .ko files
-# we've moved in .tmp_versions/.  Remove them so the Kbuild 'modules_sign'
-# target doesn't try to sign a non-existent file.  This is kinda ugly, but
-# so is modules-extra.
-
-for mod in `cat ${Dir}/dep2.list`
-do
-  modfile=`basename $mod | sed -e 's/.ko/.mod/'`
-  rm .tmp_versions/$modfile
-done
-
-pushd $Dir
-rm modnames dep.list dep2.list req.list req2.list
+sort -u dep.list > $Rpmdir/modules-extra.list
+rm modnames dep.list req.list req2.list
 rm mod-extra.list mod-extra2.list mod-extra3.list
 popd
+
+sed -i "s|^\/||g" $Rpmdir/modules-extra.list

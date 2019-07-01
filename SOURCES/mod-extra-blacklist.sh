@@ -1,7 +1,7 @@
 #!/bin/bash
 
-buildroot="$1"
-kernel_base="$2"
+list="$1"
+buildroot=${list%/*}
 
 blacklist()
 {
@@ -18,7 +18,7 @@ __EOF__
 
 check_blacklist()
 {
-	if modinfo "$1" | grep -q '^alias:\s\+net-'; then
+	if modinfo "$buildroot/$1" | grep -q '^alias:\s\+net-'; then
 		mod="${1##*/}"
 		mod="${mod%.ko*}"
 		echo "$mod has an alias that allows auto-loading. Blacklisting."
@@ -44,5 +44,15 @@ foreachp()
 }
 
 [ -d "$buildroot/etc/modprobe.d/" ] || mkdir -p "$buildroot/etc/modprobe.d/"
-find "$buildroot/$kernel_base/extra" -name "*.ko*" | \
-	foreachp check_blacklist
+
+if [ -s $list ]; then
+	cat $list | foreachp check_blacklist
+	if ls $buildroot/etc/modprobe.d/* >& /dev/null ; then
+		echo "%defattr(-,root,root)" >> $list
+		echo "%config(noreplace) /etc/modprobe.d/*-blacklist.conf" >> $list
+	fi
+else
+	# If modules-extra.list is empty the %files section will throw an
+	# error.  Add a dummy entry to workaround the problem.
+	echo "%defattr(-,root,root)" >> $list
+fi
