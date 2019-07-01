@@ -30,7 +30,7 @@ Summary: The Linux kernel
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define dist .el8.centos.plus
+%define dist .el8_0.centos.plus
 # %%define buildid .local
 
 %define rpmversion 4.18.0
