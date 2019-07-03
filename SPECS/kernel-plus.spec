@@ -7,7 +7,7 @@ Summary: The Linux kernel
 # For internal testing builds during development, it should be 0.
 %global released_kernel 1
 
-%global distro_build 80
+%global distro_build 80.1.1
 
 # Sign the x86_64 kernel for secure boot authentication
 %ifarch x86_64 aarch64
@@ -34,10 +34,10 @@ Summary: The Linux kernel
 # %%define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.el8
+%define pkgrelease 80.1.2.el8_0
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80%{?dist}
+%define specrelease 80.1.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -46,6 +46,7 @@ Summary: The Linux kernel
 # All should default to 1 (enabled) and be flipped to 0 (disabled)
 # by later arch-specific checks.
 
+ %define _with_kabidupchk 1
 # The following build options are enabled by default.
 # Use either --without <opt> in your rpmbuild command or force values
 # to 0 in here to disable them.
@@ -1176,7 +1177,6 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     (cd $RPM_BUILD_ROOT/lib/modules/$KernelVer ; ln -s build source)
     # dirs for additional modules per module-init-tools, kbuild/modules.txt
-    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/weak-updates
     # first copy everything
@@ -1379,11 +1379,6 @@ BuildKernel() {
         rm -f modules.{alias*,builtin.bin,dep*,*map,symbols*,devname,softdep}
     popd
 
-    # Call the modules-extra script to move things around
-    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
-    # Blacklist net autoloadable modules in modules-extra
-    %{SOURCE19} $RPM_BUILD_ROOT lib/modules/$KernelVer
-
     #
     # Generate the kernel-core and kernel-modules files lists
     #
@@ -1395,8 +1390,23 @@ BuildKernel() {
     mkdir restore
     cp -r lib/modules/$KernelVer/* restore/.
 
-    # don't include anything going into k-m-e in the file lists
-    rm -rf lib/modules/$KernelVer/extra
+    # Call the modules-extra script to move things around.  Note cleanup below.
+    %{SOURCE17} $RPM_BUILD_ROOT /lib/modules/$KernelVer %{SOURCE16}
+    # Blacklist net autoloadable modules in modules-extra
+    %{SOURCE19} $RPM_BUILD_ROOT/modules-extra.list
+    cat $RPM_BUILD_ROOT/modules-extra.list | xargs rm -f
+
+    # If we're signing modules, we can't leave the .mod files for the .ko files
+    # we've moved in .tmp_versions/.  Remove them so the Kbuild 'modules_sign'
+    # target doesn't try to sign a non-existent file.  This is kinda ugly, but
+    # so is modules-extra.
+    popd
+    for mod in `cat $RPM_BUILD_ROOT/modules-extra.list`
+    do
+      modfile=`basename $mod | sed -e 's/.ko/.mod/'`
+      [ -f "$modfile" ] && rm .tmp_versions/$modfile
+    done
+    pushd $RPM_BUILD_ROOT
 
     if [ $DoModules -eq 1 ]; then
 	# Find all the module files and filter them out into the core and
@@ -1420,6 +1430,8 @@ BuildKernel() {
 	# Ensure important files/directories exist to let the packaging succeed
 	echo '%%defattr(-,-,-)' > modules.list
 	echo '%%defattr(-,-,-)' > k-d.list
+	# This overwrites anything created by %{SOURCE19}
+	echo '%%defattr(-,-,-)' > modules-extra.list
 	mkdir -p lib/modules/$KernelVer/kernel
 	# Add files usually created by make modules, needed to prevent errors
 	# thrown by depmod during package installation
@@ -1447,11 +1459,14 @@ BuildKernel() {
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/k-d.list > ../kernel${Flavour:+-${Flavour}}-modules.list
     sed -e 's/^lib*/%dir \/lib/' %{?zipsed} $RPM_BUILD_ROOT/module-dirs.list > ../kernel${Flavour:+-${Flavour}}-core.list
     sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules.list >> ../kernel${Flavour:+-${Flavour}}-core.list
+    sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules-extra.list >> ../kernel${Flavour:+-${Flavour}}-modules-extra.list
 
     # Cleanup
     rm -f $RPM_BUILD_ROOT/k-d.list
     rm -f $RPM_BUILD_ROOT/modules.list
     rm -f $RPM_BUILD_ROOT/module-dirs.list
+    # Cleanup file created by %{SOURCE17}
+    rm -f $RPM_BUILD_ROOT/modules-extra.list
 
 %if %{signmodules}
     if [ $DoModules -eq 1 ]; then
@@ -2122,10 +2137,7 @@ fi
 %defattr(-,root,root)\
 %defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
-%{expand:%%files %{?3:%{3}-}modules-extra}\
-%defattr(-,root,root)\
-%config(noreplace) /etc/modprobe.d/*-blacklist.conf\
-/lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
+%{expand:%%files -f kernel-%{?3:%{3}-}modules-extra.list %{?3:%{3}-}modules-extra}\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
@@ -2148,11 +2160,46 @@ fi
 #
 #
 %changelog
-* Sun Jun 30 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.el8.centos.plus]
+* Sun Jun 30 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.1.2.el8_0.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
 - Apply patches from CentOS-7 plus kernel
 - Apply driver patches imported from ELRepo
+
+* Sun Apr 28 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.1.2.el8_0]
+- [arm64] arm64/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [s390] s390/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [powerpc] powerpc/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [powerpc] powerpc/64: Disable the speculation barrier from the command line (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add 'mitigations=' support for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation: Support 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [kernel] cpu/speculation: Add 'mitigations=' cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Print SMT vulnerable on MSBDS with mitigations off (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Fix comment (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add SMT warning message (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation: Move arch_smt_update() call to after mitigation decisions (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add mds=full, nosmt cmdline option (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [documentation] Documentation: Add MDS vulnerability documentation (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [documentation] Documentation: Move L1TF to separate directory (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add mitigation mode VMWERV (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add sysfs reporting for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add mitigation control for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Conditionally clear CPU buffers on idle entry (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/kvm/vmx: Add MDS protection when L1D Flush is not active (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Clear CPU buffers on exit to user (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add mds_clear_cpu_buffers() (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [kvm] x86/kvm: Expose X86_FEATURE_MD_CLEAR to guests (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add BUG_MSBDS_ONLY (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation/mds: Add basic bug infrastructure for MDS (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation: Consolidate CPU whitelists (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/msr-index: Cleanup bit defines (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/speculation: Cast ~SPEC_CTRL_STIBP atomic value to int (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [x86] x86/cpu: Sanitize FAM6_ATOM naming (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [include] locking/atomics, asm-generic: Move some macros from <linux/bitops.h> to a new <linux/bits.h> file (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+- [tools] tools include: Adopt linux/bits.h (Josh Poimboeuf) [1698809 1698896 1699001 1690338 1690360 1690351] {CVE-2018-12130 CVE-2018-12127 CVE-2018-12126}
+
+* Sat Apr 27 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.1.1.el8_0]
+- [zstream] switch to zstream (Frantisek Hrbata)
 
 * Wed Mar 13 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.el8]
 - [arm64] revert "arm64: tlb: Avoid synchronous TLBIs when freeing page tables" (Christoph von Recklinghausen) [1685697]
