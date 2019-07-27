@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 127
+%define stable_update 134
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2237,6 +2237,9 @@ fi
 #
 #
 %changelog
+* Sat Jul 27 2019 Pablo Greco <pgreco@centosproject.org> - 4.14.134-200
+- Rebase to LTS 4.14.134
+
 * Mon Jun 17 2019 Pablo Greco <pgreco@centosproject.org> - 4.14.127-200
 - Rebase to LTS 4.14.127
 
