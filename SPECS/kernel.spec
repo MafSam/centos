@@ -2083,6 +2083,9 @@ fi
 #
 #
 %changelog
+* Tue Jul 30 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.7.1.el8.centos
+- Apply debranding changes
+
 * Mon Jun 24 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.1.el8_0]
 - [x86] Update stepping values for Whiskey Lake U/Y (David Arcari) [1722372 1704801]
 - [x86] x86/perf/amd: Resolve NMI latency issues for active PMCs (David Arcari) [1722367 1640238]
