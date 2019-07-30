@@ -33,10 +33,10 @@ Summary: The Linux kernel
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.4.2.el8_0
+%define pkgrelease 80.7.1.el8_0
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80.4.2%{?dist}
+%define specrelease 80.7.1%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -357,13 +357,13 @@ Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
 Source11: x509.genkey
 %if %{?released_kernel}
-Source13: centos-ca-secureboot.der
-Source14: centossecureboot001.crt 
-%define pesign_name centossecureboot001
+Source13: securebootca.cer
+Source14: secureboot.cer
+%define pesign_name redhatsecureboot301
 %else
-Source13: centos-ca-secureboot.der
-Source14: centossecureboot001.crt
-%define pesign_name centossecureboot001
+Source13: redhatsecurebootca2.cer
+Source14: redhatsecureboot003.cer
+%define pesign_name redhatsecureboot003
 %endif
 Source16: mod-extra.list
 Source17: mod-extra.sh
@@ -409,13 +409,10 @@ Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
 ## Patches needed for building this package
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-Patch1002: debrand-rh-i686-cpu.patch
+
+# empty final patch to facilitate testing of kernel patches
+Patch999999: linux-kernel-test.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -866,15 +863,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-ApplyOptionalPatch debrand-rh-i686-cpu.patch
+ApplyOptionalPatch linux-kernel-test.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -916,7 +909,15 @@ cp $RPM_SOURCE_DIR/kernel-*.config .
 cp %{SOURCE41} .
 VERSION=%{version} ./generate_all_configs.sh
 
-%define make make %{?cross_opts} HOSTCFLAGS="${RPM_OPT_FLAGS}" HOSTLDFLAGS="%{__global_ldflags}"
+# Note we need to disable these flags for cross builds because the flags
+# from redhat-rpm-config assume that host == target so target arch
+# flags cause issues with the host compiler.
+%if !%{with_cross}
+%define build_hostcflags  ${RPM_OPT_FLAGS}
+%define build_hostldflags %{__global_ldflags}
+%endif
+
+%define make make %{?cross_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}"
 
 # enable GCOV kernel config options if gcov is on
 %if %{with_gcov}
@@ -2082,17 +2083,69 @@ fi
 #
 #
 %changelog
-* Mon Jul 01 2019 Johnny Hughes <johnny@centos.org>
-- Manual CentOS Debranding
-
-* Mon Jun 17 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.4.2.el8.centos
-- Apply debranding changes
-
-* Fri Jun 14 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.4.2.el8_0]
+* Mon Jun 24 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.1.el8_0]
+- [x86] Update stepping values for Whiskey Lake U/Y (David Arcari) [1722372 1704801]
+- [x86] x86/perf/amd: Resolve NMI latency issues for active PMCs (David Arcari) [1722367 1640238]
+- [x86] x86/perf/amd: Resolve race condition when disabling PMC (David Arcari) [1722367 1640238]
+- [edac] EDAC/amd64: Set maximum channel layer size depending on family (Gary Hook) [1722365 1690984]
+- [edac] EDAC/amd64: Adjust printed chip select sizes when interleaved (Gary Hook) [1722365 1690984]
+- [edac] EDAC/amd64: Recognize x16 symbol size (Gary Hook) [1722365 1690984]
+- [edac] EDAC/amd64: Support more than two Unified Memory Controllers (Gary Hook) [1722365 1690984]
+- [edac] EDAC/amd64: Use a macro for iterating over Unified Memory Controllers (Gary Hook) [1722365 1690984]
+- [edac] EDAC, amd64: Add Family 17h, models 10h-2fh support (Gary Hook) [1722365 1690984]
+- [edac] EDAC/amd64: Add Family 17h Model 30h PCI IDs (Aristeu Rozanski) [1722365 1696603]
+- [x86] mark AMD Rome processors supported (David Arcari) [1721972 1520002]
+- [x86] x86/mce: Handle varying MCA bank counts (David Arcari) [1721233 1668779]
+- [iommu] iommu/vt-d: Disable ATS support on untrusted devices (Jerry Snitselaar) [1700376 1692246]
+- [documentation] thunderbolt: Export IOMMU based DMA protection support to userspace (Jerry Snitselaar) [1700376 1692246]
+- [iommu] iommu/vt-d: Do not enable ATS for untrusted devices (Jerry Snitselaar) [1700376 1692246]
+- [iommu] iommu/vt-d: Force IOMMU on for platform opt in hint (Jerry Snitselaar) [1700376 1692246]
+- [pci] PCI / ACPI: Identify untrusted PCI devices (Myron Stowe) [1700376 1704979]
+- [acpi] ACPI / property: Allow multiple property compatible _DSD entries (Myron Stowe) [1700376 1537397]
 - [net] tcp: enforce tcp_min_snd_mss in tcp_mtu_probing() (Florian Westphal) [1719922 1719923] {CVE-2019-11479}
 - [net] tcp: add tcp_min_snd_mss sysctl (Florian Westphal) [1719922 1719923] {CVE-2019-11479}
 - [net] tcp: tcp_fragment() should apply sane memory limits (Florian Westphal) [1719857 1719858] {CVE-2019-11478}
 - [net] tcp: limit payload size of sacked skbs (Florian Westphal) [1719602 1719603] {CVE-2019-11477}
+
+* Tue Jun 18 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.6.1.el8_0]
+- [mm] mm: defer ZONE_DEVICE page initialization to the point where we init pgmap (Waiman Long) [1719635 1666538]
+- [mm] mm: create non-atomic version of SetPageReserved for init use (Waiman Long) [1719635 1666538]
+- [mm] mm: provide kernel parameter to allow disabling page init poisoning (Waiman Long) [1719635 1666538]
+- [mm] mm, slub: restore the original intention of prefetch_freepointer() (Rafael Aquini) [1718237 1714671]
+- [security] selinux: do not report error on connect(AF_UNSPEC) (Ondrej Mosnacek) [1717870 1707828]
+- [security] selinux: Check address length before reading address family (Ondrej Mosnacek) [1717870 1707828]
+- [powerpc] powerpc/tm: Fix stack pointer corruption (Desnes Augusto Nunes do Rosario) [1717869 1707635]
+- [md] dm cache metadata: Fix loading discard bitset (Mike Snitzer) [1717868 1701618]
+- [md] dm mpath: fix missing call of path selector type->end_io (Mike Snitzer) [1717804 1686227]
+- [mm] mm/memory.c: do_fault: avoid usage of stale vm_area_struct ("Herton R. Krzesinski") [1717801 1684734]
+- [net] sunrpc: fix 4 more call sites that were using stack memory with a scatterlist (Scott Mayhew) [1717800 1679183]
+- [net] sunrpc: Don't use stack buffer with scatterlist (Scott Mayhew) [1717800 1679183]
+- [scsi] scsi: mpt3sas: Fix kernel panic during expander reset (Tomas Henzl) [1717791 1677693]
+- [security] selinux: always allow mounting submounts (Ondrej Mosnacek) [1717777 1647723]
+- [drm] drm/bufs: Fix Spectre v1 vulnerability (Rob Clark) [1717382 1663467]
+- [drm] drm/ioctl: Fix Spectre v1 vulnerabilities (Rob Clark) [1717382 1663467]
+- [tools] perf annotate: Fix getting source line failure (Michael Petlan) [1716887 1614435]
+- [iommu] iommu/amd: Set exclusion range correctly (Jerry Snitselaar) [1715336 1702766]
+- [iommu] iommu/amd: Reserve exclusion range in iova-domain (Jerry Snitselaar) [1717344 1694835]
+- [kvm] KVM: PPC: Book3S: Add count cache flush parameters to kvmppc_get_cpu_char() (Vitaly Kuznetsov) [1715018 1694456]
+- [s390] kvm: s390: Fix potential spectre warnings (Thomas Huth) [1714754 1702344]
+- [drm] drm/i915/gvt: Fix mmap range check (Alex Williamson) [1713572 1713573] {CVE-2019-11085}
+- [scsi] scsi: megaraid_sas: return error when create DMA pool failed (Tomas Henzl) [1712862 1712863] {CVE-2019-11810}
+
+* Wed Jun 05 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.5.1.el8_0]
+- [kernel] sched/fair: Limit sched_cfs_period_timer() loop to avoid hard lockup (Joel Savitz) [1715345 1695651]
+- [kernel] sched/fair: Fix O(nr_cgroups) in the load balancing path (Phil Auld) [1715343 1685636] {CVE-2018-20784}
+- [kernel] sched/fair: Fix insertion in rq->leaf_cfs_rq_list (Phil Auld) [1715343 1685636] {CVE-2018-20784}
+- [kernel] sched/fair: Add tmp_alone_branch assertion (Phil Auld) [1715343 1685636] {CVE-2018-20784}
+- [kernel] sched/fair: Fix infinite loop in update_blocked_averages() by reverting a9e7f6544b9c (Phil Auld) [1715343 1685636] {CVE-2018-20784}
+- [rpmspec] apply linux-kernel-test.patch when building ("Herton R. Krzesinski") [1715340 1690534]
+- [rpmspec] Fix cross builds (Jiri Olsa) [1715339 1694956]
+- [kernel] sched/fair: Do not re-read ->h_load_next during hierarchical load calculation (Phil Auld) [1715337 1701762]
+- [kvm] KVM: PPC: Book3S HV: Save/restore vrsave register in kvmhv_p9_guest_entry() (Suraj Jitindar Singh) [1714753 1700272]
+- [powerpc] KVM: PPC: Book3S HV: Perserve PSSCR FAKE_SUSPEND bit on guest exit (Suraj Jitindar Singh) [1714751 1689768]
+- [powerpc] powerpc/powernv/ioda: Fix locked_vm counting for memory used by IOMMU tables (David Gibson) [1714746 1674410]
+- [char] ipmi_si: fix use-after-free of resource->name (Tony Camuso) [1714409 1714410] {CVE-2019-11811}
+- [x86] Update stepping values for coffee lake desktop (David Arcari) [1711048 1704800]
 
 * Thu May 16 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.4.1.el8_0]
 - [netdrv] ice: Do autoneg based on VSI state (Jonathan Toppins) [1709433 1687903]
