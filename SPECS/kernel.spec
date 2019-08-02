@@ -2242,6 +2242,9 @@ fi
 #
 #
 %changelog
+* Thu Aug 01 2019 CentOS Sources <bugs@centos.org> - 4.18.0-107.el8.centos
+- Apply debranding changes
+
 * Fri Jun 14 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-107.el8]
 - [tools] kvm: selftests: make hyperv_cpuid test pass on AMD (Vitaly Kuznetsov) [1718501]
 - [scsi] vmw_pvscsi: Fixed to work with SG_CHAIN (Ewan Milne) [1717278]
