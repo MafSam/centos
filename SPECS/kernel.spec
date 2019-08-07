@@ -33,10 +33,10 @@ Summary: The Linux kernel
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.7.1.el8_0
+%define pkgrelease 80.7.2.el8_0
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80.7.1%{?dist}
+%define specrelease 80.7.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -357,13 +357,13 @@ Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
 Source11: x509.genkey
 %if %{?released_kernel}
-Source13: centos-ca-secureboot.der 
-Source14: centossecureboot001.crt
-%define pesign_name centossecureboot001
+Source13: securebootca.cer
+Source14: secureboot.cer
+%define pesign_name redhatsecureboot301
 %else
-Source13: centos-ca-secureboot.der
-Source14: centossecureboot001.crt
-%define pesign_name centossecureboot001
+Source13: redhatsecurebootca2.cer
+Source14: redhatsecureboot003.cer
+%define pesign_name redhatsecureboot003
 %endif
 Source16: mod-extra.list
 Source17: mod-extra.sh
@@ -409,13 +409,7 @@ Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
 ## Patches needed for building this package
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-Patch1002: debrand-rh-i686-cpu.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -869,16 +863,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-ApplyOptionalPatch debrand-rh-i686-cpu.patch 
 
 # END OF PATCH APPLICATIONS
 
@@ -2094,8 +2083,13 @@ fi
 #
 #
 %changelog
-* Tue Jul 30 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.7.1.el8.centos
-- Apply debranding changes
+* Fri Jul 26 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.2.el8_0]
+- [x86] x86/entry/64: Use JMP instead of JMPQ (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/speculation: Enable Spectre v1 swapgs mitigations (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/speculation: Prepare entry code for Spectre v1 swapgs mitigations (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/cpufeatures: Combine word 11 and 12 into a new scattered features word (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/cpufeatures: Carve out CQM features retrieval (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [kernel] ptrace: Fix ->ptracer_cred handling for PTRACE_TRACEME (Aristeu Rozanski) [1730958 1730959] {CVE-2019-13272}
 
 * Mon Jun 24 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.1.el8_0]
 - [x86] Update stepping values for Whiskey Lake U/Y (David Arcari) [1722372 1704801]
