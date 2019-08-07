@@ -2083,6 +2083,9 @@ fi
 #
 #
 %changelog
+* Wed Aug 07 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.7.2.el8.centos
+- Apply debranding changes
+
 * Fri Jul 26 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.2.el8_0]
 - [x86] x86/entry/64: Use JMP instead of JMPQ (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
 - [x86] x86/speculation: Enable Spectre v1 swapgs mitigations (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
