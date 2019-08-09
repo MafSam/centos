@@ -1,0 +1,41 @@
+commit c0a1666bcb2a33e84187a15eabdcd54056be9a97
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Thu Sep 28 17:58:41 2017 +0200
+
+    KVM: VMX: use cmpxchg64
+
+    This fixes a compilation failure on 32-bit systems.
+
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+    Applied-by: Akemi Yagi <toracat@centos.org>
+
+--- a/arch/x86/kvm/vmx.c	2019-07-18 12:58:03.000000000 -0700
++++ b/arch/x86/kvm/vmx.c	2019-08-07 23:40:26.451829411 -0700
+@@ -2407,7 +2407,7 @@ static void vmx_vcpu_pi_load(struct kvm_
+ 			new.ndst = (dest << 8) & 0xFF00;
+ 
+ 		new.sn = 0;
+-	} while (cmpxchg(&pi_desc->control, old.control,
++	} while (cmpxchg64(&pi_desc->control, old.control,
+ 			new.control) != old.control);
+ 
+        /*
+@@ -12058,7 +12058,7 @@ static void __pi_post_block(struct kvm_v
+ 
+ 		/* set 'NV' to 'notification vector' */
+ 		new.nv = POSTED_INTR_VECTOR;
+-	} while (cmpxchg(&pi_desc->control, old.control,
++	} while (cmpxchg64(&pi_desc->control, old.control,
+ 			new.control) != old.control);
+ 
+ 	if (!WARN_ON_ONCE(vcpu->pre_pcpu == -1)) {
+@@ -12128,7 +12128,7 @@ static int pi_pre_block(struct kvm_vcpu
+ 
+ 		/* set 'NV' to 'wakeup vector' */
+ 		new.nv = POSTED_INTR_WAKEUP_VECTOR;
+-	} while (cmpxchg(&pi_desc->control, old.control,
++	} while (cmpxchg64(&pi_desc->control, old.control,
+ 			new.control) != old.control);
+ 
+ 	/* We should not block the vCPU if an interrupt is posted for it.  */

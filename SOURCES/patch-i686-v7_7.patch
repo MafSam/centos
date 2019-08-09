@@ -1,0 +1,84 @@
+centos 7.7 plus kerenl patch for i686 
+
+Written-by: Pablo Greco <pablo@fliagreco.com.ar>
+
+diff -aurp a/drivers/net/ethernet/intel/ice/ice_osdep.h b/drivers/net/ethernet/intel/ice/ice_osdep.h
+--- a/drivers/net/ethernet/intel/ice/ice_osdep.h	2019-07-18 16:58:03.000000000 -0300
++++ b/drivers/net/ethernet/intel/ice/ice_osdep.h	2019-08-08 23:16:36.399822146 -0300
+@@ -7,7 +7,7 @@
+ #include <linux/types.h>
+ #include <linux/io.h>
+ #ifndef CONFIG_64BIT
+-#include <linux/io-64-nonatomic-lo-hi.h>
++#include <asm-generic/io-64-nonatomic-lo-hi.h>
+ #endif
+ 
+ #define wr32(a, reg, value)	writel((value), ((a)->hw_addr + (reg)))
+diff -aurp a/drivers/net/ethernet/netronome/nfp/flower/cmsg.c b/drivers/net/ethernet/netronome/nfp/flower/cmsg.c
+--- a/drivers/net/ethernet/netronome/nfp/flower/cmsg.c	2019-07-18 16:58:03.000000000 -0300
++++ b/drivers/net/ethernet/netronome/nfp/flower/cmsg.c	2019-08-08 22:55:29.332993839 -0300
+@@ -219,7 +219,7 @@ nfp_flower_cmsg_merge_hint_rx(struct nfp
+ 	flow_cnt = msg->count + 1;
+ 
+ 	if (msg_len < struct_size(msg, flow, flow_cnt)) {
+-		nfp_flower_cmsg_warn(app, "Merge hint ctrl msg too short - %d bytes but expect %ld\n",
++		nfp_flower_cmsg_warn(app, "Merge hint ctrl msg too short - %d bytes but expect %zd\n",
+ 				     msg_len, struct_size(msg, flow, flow_cnt));
+ 		return;
+ 	}
+diff -aurp a/drivers/net/ethernet/qlogic/qed/qed_dev.c b/drivers/net/ethernet/qlogic/qed/qed_dev.c
+--- a/drivers/net/ethernet/qlogic/qed/qed_dev.c	2019-07-18 16:58:03.000000000 -0300
++++ b/drivers/net/ethernet/qlogic/qed/qed_dev.c	2019-08-08 23:17:47.859935008 -0300
+@@ -63,6 +63,9 @@
+ #include "qed_sriov.h"
+ #include "qed_vf.h"
+ #include "qed_rdma.h"
++#ifndef CONFIG_64BIT
++#include <asm-generic/io-64-nonatomic-lo-hi.h>
++#endif
+ 
+ static DEFINE_SPINLOCK(qm_lock);
+ 
+diff -aurp a/fs/gfs2/bmap.c b/fs/gfs2/bmap.c
+--- a/fs/gfs2/bmap.c	2019-07-18 16:58:03.000000000 -0300
++++ b/fs/gfs2/bmap.c	2019-08-08 22:18:24.501014640 -0300
+@@ -813,9 +813,9 @@ static int gfs2_iomap_get(struct inode *
+ 	sector_t lblock_stop;
+ 	int ret;
+ 	int eob;
+-	u64 len;
++	u64 uninitialized_var(len);
+ 	struct buffer_head *dibh = NULL, *bh;
+-	u8 height;
++	u8 uninitialized_var(height);
+ 
+ 	if (!length)
+ 		return -EINVAL;
+diff -aurp a/include/linux/fs.h b/include/linux/fs.h
+--- a/include/linux/fs.h	2019-07-18 16:58:03.000000000 -0300
++++ b/include/linux/fs.h	2019-08-08 22:18:24.496014844 -0300
+@@ -681,7 +681,7 @@ struct inode {
+ 			struct fsnotify_mark_connector __rcu *i_fsnotify_marks)
+ #endif
+ 
+-#if defined(CONFIG_IMA) && defined(CONFIG_X86_64)
++#if defined(CONFIG_IMA) && defined(CONFIG_X86)
+ 	atomic_t		i_readcount; /* struct files open RO */
+ #endif
+ 	void			*i_private; /* fs or device private pointer */
+diff -aurp a/kernel/bpf/core.c b/kernel/bpf/core.c
+--- a/kernel/bpf/core.c	2019-07-18 16:58:03.000000000 -0300
++++ b/kernel/bpf/core.c	2019-08-08 22:18:24.499014722 -0300
+@@ -1800,6 +1800,12 @@ int bpf_prog_array_copy_info(struct bpf_
+ 								     : 0;
+ }
+ 
++#if defined(CONFIG_X86_32)
++void __weak trace_bpf_jit_free(struct bpf_prog *fp)
++{
++}
++#endif
++
+ static void bpf_prog_free_deferred(struct work_struct *work)
+ {
+ 	struct bpf_prog_aux *aux;
