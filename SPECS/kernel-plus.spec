@@ -34,10 +34,10 @@ Summary: The Linux kernel
 # %%define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.7.1.el8_0
+%define pkgrelease 80.7.2.el8_0
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80.7.1%{?dist}
+%define specrelease 80.7.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2177,12 +2177,20 @@ fi
 #
 #
 %changelog
-* Tue Jul 30 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.7.1.el8_0.centos.plus]
+* Fri Aug 09 2019 Akemi Yagi <toracat@centos.org> [4.18.0-80.7.2.el8_0.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
 - Apply patches from CentOS-7 plus kernel
 - Apply driver patches imported from ELRepo
 - Apply patches for e1000 and e1000e from kernel.org [bug#16284]
+
+* Fri Jul 26 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.2.el8_0]
+- [x86] x86/entry/64: Use JMP instead of JMPQ (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/speculation: Enable Spectre v1 swapgs mitigations (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/speculation: Prepare entry code for Spectre v1 swapgs mitigations (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/cpufeatures: Combine word 11 and 12 into a new scattered features word (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [x86] x86/cpufeatures: Carve out CQM features retrieval (Josh Poimboeuf) [1724500 1724501] {CVE-2019-1125}
+- [kernel] ptrace: Fix ->ptracer_cred handling for PTRACE_TRACEME (Aristeu Rozanski) [1730958 1730959] {CVE-2019-13272}
 
 * Mon Jun 24 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.7.1.el8_0]
 - [x86] Update stepping values for Whiskey Lake U/Y (David Arcari) [1722372 1704801]
