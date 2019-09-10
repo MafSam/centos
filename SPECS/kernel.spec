@@ -2083,6 +2083,9 @@ fi
 #
 #
 %changelog
+* Tue Sep 10 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.11.1.el8.centos
+- Apply debranding changes
+
 * Tue Sep 03 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.11.1.el8_0]
 - [wireless] mwifiex: Don't abort on small, spec-compliant vendor IEs (Jarod Wilson) [1714475 1728992]
 - [wireless] mwifiex: fix 802.11n/WPA detection (Jarod Wilson) [1714475 1714476] {CVE-2019-3846}
