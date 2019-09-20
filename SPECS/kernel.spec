@@ -33,10 +33,10 @@ Summary: The Linux kernel
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 80.11.1.el8_0
+%define pkgrelease 80.11.2.el8_0
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 80.11.1%{?dist}
+%define specrelease 80.11.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2083,8 +2083,8 @@ fi
 #
 #
 %changelog
-* Tue Sep 10 2019 CentOS Sources <bugs@centos.org> - 4.18.0-80.11.1.el8.centos
-- Apply debranding changes
+* Sun Sep 15 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.11.2.el8_0]
+- [vhost] vhost: make sure log_num < in_num (Eugenio Perez) [1750881 1750882] {CVE-2019-14835}
 
 * Tue Sep 03 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-80.11.1.el8_0]
 - [wireless] mwifiex: Don't abort on small, spec-compliant vendor IEs (Jarod Wilson) [1714475 1728992]
