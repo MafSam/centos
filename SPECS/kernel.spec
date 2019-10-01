@@ -357,13 +357,13 @@ Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
 Source11: x509.genkey
 %if %{?released_kernel}
-Source13: securebootca.cer
-Source14: secureboot.cer
-%define pesign_name redhatsecureboot301
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot001.crt
+%define pesign_name centossecureboot001
 %else
-Source13: redhatsecurebootca2.cer
-Source14: redhatsecureboot003.cer
-%define pesign_name redhatsecureboot003
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot001.crt
+%define pesign_name centossecureboot001
 %endif
 Source16: mod-extra.list
 Source17: mod-extra.sh
@@ -409,7 +409,14 @@ Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+# Sources for CentOS debranding
+Source9000: centos.pem
+
 ## Patches needed for building this package
+
+Patch1000: debrand-single-cpu.patch
+Patch1001: debrand-rh_taint.patch
+Patch1002: debrand-rh-i686-cpu.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -863,11 +870,16 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
+ApplyOptionalPatch debrand-single-cpu.patch
+ApplyOptionalPatch debrand-rh_taint.patch
+ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
