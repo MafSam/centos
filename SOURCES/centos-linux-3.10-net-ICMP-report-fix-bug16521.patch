@@ -1,0 +1,48 @@
+centosplus patch [bug#16521]
+
+commit 8d65b1190ddc548b0411477f308d04f4595bac57
+Author: Duan Jiong <duanj.fnst@cn.fujitsu.com>
+Date:   Fri Sep 20 18:21:25 2013 +0800
+
+    net: raw: do not report ICMP redirects to user space
+    
+    Redirect isn't an error condition, it should leave
+    the error handler without touching the socket.
+    
+    Signed-off-by: Duan Jiong <duanj.fnst@cn.fujitsu.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+    Applied-by: Akemi Yagi <toracat@centos.org>
+
+diff --git a/net/ipv4/raw.c b/net/ipv4/raw.c
+index bfec521..193db03 100644
+--- a/net/ipv4/raw.c
++++ b/net/ipv4/raw.c
+@@ -218,8 +218,10 @@ static void raw_err(struct sock *sk, struct sk_buff *skb, u32 info)
+ 
+ 	if (type == ICMP_DEST_UNREACH && code == ICMP_FRAG_NEEDED)
+ 		ipv4_sk_update_pmtu(skb, sk, info);
+-	else if (type == ICMP_REDIRECT)
++	else if (type == ICMP_REDIRECT) {
+ 		ipv4_sk_redirect(skb, sk);
++		return;
++	}
+ 
+ 	/* Report error on raw socket, if:
+ 	   1. User requested ip_recverr.
+diff --git a/net/ipv6/raw.c b/net/ipv6/raw.c
+index 58916bb..a4ed241 100644
+--- a/net/ipv6/raw.c
++++ b/net/ipv6/raw.c
+@@ -335,8 +335,10 @@ static void rawv6_err(struct sock *sk, struct sk_buff *skb,
+ 		ip6_sk_update_pmtu(skb, sk, info);
+ 		harderr = (np->pmtudisc == IPV6_PMTUDISC_DO);
+ 	}
+-	if (type == NDISC_REDIRECT)
++	if (type == NDISC_REDIRECT) {
+ 		ip6_sk_redirect(skb, sk);
++		return;
++	}
+ 	if (np->recverr) {
+ 		u8 *payload = skb->data;
+ 		if (!inet->hdrincl)
