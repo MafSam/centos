@@ -2316,9 +2316,6 @@ fi
 #
 #
 %changelog
-* Tue Nov 05 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.el8.centos
-- Apply debranding changes
-
 * Thu Sep 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.el8]
 - [x86] perf/x86/intel: Fix spurious NMI on fixed counter (Michael Petlan) [1755110]
 - [x86] perf/x86/intel: Fix race in intel_pmu_disable_event() (Michael Petlan) [1755110]
