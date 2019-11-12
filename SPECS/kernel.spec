@@ -2317,6 +2317,9 @@ fi
 #
 #
 %changelog
+* Tue Nov 12 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.0.2.el8.centos
+- Apply debranding changes
+
 * Sun Nov 03 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.2.el8_1]
 - [drm] drm/i915: Lower RM timeout to avoid DSI hard hangs (Dave Airlie) [1766056 1756805] {CVE-2019-0154}
 - [drm] drm/i915/gen8+: Add RC6 CTX corruption WA (Dave Airlie) [1766056 1756805] {CVE-2019-0154}
