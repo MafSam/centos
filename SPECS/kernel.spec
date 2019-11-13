@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 147.0.2.el8_1
+%define pkgrelease 147.0.3.el8_1
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 147.0.2%{?dist}
+%define specrelease 147.0.3%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2317,8 +2317,8 @@ fi
 #
 #
 %changelog
-* Tue Nov 12 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.0.2.el8.centos
-- Apply debranding changes
+* Mon Nov 11 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.3.el8_1]
+- [drm] drm/i915/cmdparser: Fix jump whitelist clearing (Dave Airlie) [1756871 1756873] {CVE-2019-0155}
 
 * Sun Nov 03 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.2.el8_1]
 - [drm] drm/i915: Lower RM timeout to avoid DSI hard hangs (Dave Airlie) [1766056 1756805] {CVE-2019-0154}
