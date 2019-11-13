@@ -2317,6 +2317,9 @@ fi
 #
 #
 %changelog
+* Wed Nov 13 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.0.3.el8.centos
+- Apply debranding changes
+
 * Mon Nov 11 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.3.el8_1]
 - [drm] drm/i915/cmdparser: Fix jump whitelist clearing (Dave Airlie) [1756871 1756873] {CVE-2019-0155}
 
