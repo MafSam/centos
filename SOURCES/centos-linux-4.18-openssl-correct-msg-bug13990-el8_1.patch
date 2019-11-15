@@ -2,13 +2,13 @@ centosplus patch [big#13990]
 
 This patch was centos-linux-3.10-openssl-correct-msg-bug13990.patch in CentOS 7.
 
---- a/tools/perf/Makefile.config	2019-03-13 04:04:53.000000000 -0700
-+++ b/tools/perf/Makefile.config	2019-06-29 11:41:34.084627980 -0700
-@@ -578,7 +578,7 @@ endif
+--- a/tools/perf/Makefile.config	2019-09-26 08:14:46.000000000 -0700
++++ b/tools/perf/Makefile.config	2019-11-14 14:59:09.176688346 -0800
+@@ -592,7 +592,7 @@ endif
  
  ifndef NO_LIBCRYPTO
    ifneq ($(feature-libcrypto), 1)
--    msg := $(warning No libcrypto.h found, disables jitted code injection, please install libssl-devel or libssl-dev);
+-    msg := $(warning No libcrypto.h found, disables jitted code injection, please install openssl-devel or libssl-dev);
 +    msg := $(warning No crypto.h found, disables jitted code injection, please install openssl-devel);
      NO_LIBCRYPTO := 1
    else

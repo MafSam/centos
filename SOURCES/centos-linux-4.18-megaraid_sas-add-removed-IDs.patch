@@ -1,0 +1,34 @@
+centosplus kernel patch
+centos-linux-4.18-megaraid_sas-add-removed-IDs.patch
+
+Add device IDs removed from RHEL 8 kernels
+
+Applied-by: Akemi Yagi <toracat@centos.org>
+
+--- a/drivers/scsi/megaraid//megaraid_sas_base.c	2019-09-26 16:14:46.000000000 +0100
++++ b/drivers/scsi/megaraid//megaraid_sas_base.c	2019-11-09 10:19:59.000000000 +0000
+@@ -123,6 +123,24 @@ static void megasas_get_pd_info(struct m
+  */
+ static struct pci_device_id megasas_pci_table[] = {
+ 
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS1064R)},
++	/* xscale IOP */
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS1078R)},
++	/* ppc IOP */
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS1078DE)},
++	/* ppc IOP */
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS1078GEN2)},
++	/* gen2*/
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS0079GEN2)},
++	/* gen2*/
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS0073SKINNY)},
++	/* skinny*/
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_SAS0071SKINNY)},
++	/* skinny*/
++	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_VERDE_ZCR)},
++	/* xscale IOP, vega */
++	{PCI_DEVICE(PCI_VENDOR_ID_DELL, PCI_DEVICE_ID_DELL_PERC5)},
++	/* xscale IOP */
+ 	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_FUSION)},
+ 	/* Fusion */
+ 	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_PLASMA)},

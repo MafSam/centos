@@ -1,0 +1,39 @@
+centosplus patch  
+centos-linux-4.18-mpt3sas-add-removed-IDs.patch
+
+Add device IDs removed from RHEL 8 kernels
+
+Applied-by: Akemi Yagi <toracat@centos.org>
+
+--- a/drivers/scsi/mpt3sas/mpt3sas_scsih.c	2019-09-26 08:14:46.000000000 -0700
++++ b/drivers/scsi/mpt3sas/mpt3sas_scsih.c	2019-11-14 16:44:19.456454696 -0800
+@@ -10763,6 +10763,29 @@ bool scsih_ncq_prio_supp(struct scsi_dev
+  * The pci device ids are defined in mpi/mpi2_cnfg.h.
+  */
+ static const struct pci_device_id mpt3sas_pci_table[] = {
++
++	/* Spitfire ~ 2004 */
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2004,
++		PCI_ANY_ID, PCI_ANY_ID },
++	/* Falcon ~ 2008 */
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2008,
++		PCI_ANY_ID, PCI_ANY_ID },
++	/* Liberator ~ 2108 */
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2108_1,
++		PCI_ANY_ID, PCI_ANY_ID },
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2108_2,
++		PCI_ANY_ID, PCI_ANY_ID },
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2108_3,
++		PCI_ANY_ID, PCI_ANY_ID },
++	/* Meteor ~ 2116 */
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2116_1,
++		PCI_ANY_ID, PCI_ANY_ID },
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2116_2,
++		PCI_ANY_ID, PCI_ANY_ID },
++	/* SSS6200 */
++	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SSS6200,
++		PCI_ANY_ID, PCI_ANY_ID },
++
+ 	/* Thunderbolt ~ 2208 */
+ 	{ MPI2_MFGPAGE_VENDORID_LSI, MPI2_MFGPAGE_DEVID_SAS2208_1,
+ 		PCI_ANY_ID, PCI_ANY_ID },
