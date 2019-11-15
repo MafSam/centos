@@ -856,6 +856,12 @@ Provides: installonlypkg(kernel-module)\
 Provides: kernel%{?1:-%{1}}-modules-internal-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### plus mod\
+Provides: kernel-plus%{?1:-%{1}}-modules-internal-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-plus%{?1:-%{1}}-modules-internal-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-internal = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-plus%{?1:-%{1}}-modules-internal-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+### end of plus mod\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
