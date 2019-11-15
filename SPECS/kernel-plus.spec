@@ -441,7 +441,7 @@ Source99: filter-modules.sh
 #Source37: kernel-s390x-debug.config
 #Source38: kernel-s390x-zfcpdump.config
 Source39: kernel-x86_64.config
-Source40: kernel-x86_64-debug.config
+#Source40: kernel-x86_64-debug.config
 Source41: generate_all_configs.sh
 
 Source42: process_configs.sh
@@ -500,7 +500,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux kernel for Red Hat Enterprise
+This is the package which provides the Linux kernel for CentOS
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux kernel releases. This means
@@ -509,7 +509,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in Red Hat Enterprise Linux, enhancements for
+updates for supported hardware in CentOS Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -766,11 +766,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n kernel-plus-abi-whitelists
-Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
+Summary: The CentOS Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n kernel-plus-abi-whitelists
-The kABI package contains information pertaining to the Red Hat Enterprise
+The kABI package contains information pertaining to the CentOS
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -780,8 +780,8 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kabidw-base
-The kabidw-base package contains data describing the current ABI of the Red Hat
-Enterprise Linux kernel, suitable for the kabi-dw tool.
+The kabidw-base package contains data describing the current ABI of the 
+CentOS Linux kernel, suitable for the kabi-dw tool.
 %endif
 
 #
@@ -859,7 +859,7 @@ Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
 %{nil}
 
 #
@@ -1642,7 +1642,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
