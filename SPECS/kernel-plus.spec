@@ -39,7 +39,7 @@
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define dist .el8_1.centos.plus
+%define dist .el8.centos.plus
 # define buildid .local
 
 %define rpmversion 4.18.0
@@ -2427,7 +2427,7 @@ fi
 - Apply driver patches imported from ELRepo
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
 - Apply patche for e1000 from kernel.org [bug#16284]
-- Enabled be2net, iwl4965 and iwl3945
+- Enabled some SCSI devices, be2net, iwl4965 and iwl3945
 
 * Thu Sep 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.el8]
 - [x86] perf/x86/intel: Fix spurious NMI on fixed counter (Michael Petlan) [1755110]
