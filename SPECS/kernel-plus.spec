@@ -2422,12 +2422,12 @@ fi
 %changelog
 * Thu Nov 14 2019 Akemi Yagi <toracat@centos.org> [4.18.0-147.el8.centos.plus]
 - Apply debranding changes
-- Modify config file for x86_64 with extra features turned on including some network adapters, ReiserFS, TOMOYO
+- Modify config file for x86_64 with extra features turned on including some network adapters,
+  some SCSI adapters, ReiserFS, TOMOYO
 - Apply patches from CentOS-7 plus kernel
 - Apply driver patches imported from ELRepo
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
-- Apply patche for e1000 from kernel.org [bug#16284]
-- Enabled some SCSI devices, be2net, iwl4965 and iwl3945
+- Apply patches for e1000 from kernel.org [bug#16284]
 
 * Thu Sep 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.el8]
 - [x86] perf/x86/intel: Fix spurious NMI on fixed counter (Michael Petlan) [1755110]
