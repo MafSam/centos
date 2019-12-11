@@ -495,6 +495,7 @@ Source9000: centos.pem
 Patch1000: debrand-single-cpu.patch
 Patch1001: debrand-rh_taint.patch
 #Patch1002: debrand-rh-i686-cpu.patch 
+Patch1003: centos-fix-exported-sql-viewer.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -1052,6 +1053,7 @@ ApplyOptionalPatch debrand-rh_taint.patch
 #ApplyOptionalPatch debrand-rh-i686-cpu.patch 
 
 %if 0%{?rhel} == 7
+ApplyOptionalPatch centos-fix-exported-sql-viewer.patch
 sed -i 's/strip_size=.*/strip_size=$(stat -c %s $vmz.$$)/g' arch/powerpc/boot/wrapper
 %endif
 
