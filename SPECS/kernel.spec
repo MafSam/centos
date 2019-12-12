@@ -2154,6 +2154,10 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
 fi}\
 %if 0%{?rhel} == 7 \
 %{expand:\
+if [ -f /etc/sysconfig/kernel ]; then\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel%{?-v:-%{-v*}}-core$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+fi}\
+%{expand:\
 %{_sbindir}/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 }\
 %endif \
