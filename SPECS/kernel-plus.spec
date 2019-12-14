@@ -487,6 +487,7 @@ Patch10007: centos-linux-4.18-drivers-drivers-net-e1000.patch-bug16284.patch
 #Patch10008: centos-linux-4.18-drivers-net-e1000e-bug16284.patch
 Patch10009: centos-linux-4.18-megaraid_sas-add-removed-IDs.patch
 Patch10010: centos-linux-4.18-mpt3sas-add-removed-IDs.patch
+Patch10011: centos-linux-4.18-xfrm_fix_memleak.patch
 # end of plus mod
 
 Source9000: centos.pem
@@ -1075,6 +1076,7 @@ ApplyOptionalPatch centos-linux-4.18-drivers-drivers-net-e1000.patch-bug16284.pa
 #ApplyOptionalPatch centos-linux-4.18-drivers-net-e1000e-bug16284.patch
 ApplyOptionalPatch centos-linux-4.18-megaraid_sas-add-removed-IDs.patch
 ApplyOptionalPatch centos-linux-4.18-mpt3sas-add-removed-IDs.patch
+ApplyOptionalPatch centos-linux-4.18-xfrm_fix_memleak.patch
 # end of plus mod
 
 # End of CentOS Modification
@@ -2429,6 +2431,7 @@ fi
 - Apply driver patches imported from ELRepo
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
 - Apply patches for e1000 from kernel.org [bug#16284]
+- Apply patch to fix xfrm memleak [RHBZ#1780470]
 
 * Mon Nov 11 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.3.el8_1]
 - [drm] drm/i915/cmdparser: Fix jump whitelist clearing (Dave Airlie) [1756871 1756873] {CVE-2019-0155}
