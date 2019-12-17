@@ -2317,6 +2317,9 @@ fi
 #
 #
 %changelog
+* Tue Dec 17 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.3.1.el8.centos
+- Apply debranding changes
+
 * Tue Nov 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.3.1.el8_1]
 - [x86] kvm: svm: taint module and print taint message iff nested is enabled (Bandan Das) [1776114 1775410]
 
