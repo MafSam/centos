@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 84
+%define stable_update 94
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -623,9 +623,6 @@ Patch309: arm64-rockchip-add-initial-Rockpro64.patch
 Patch310: arm64-rk3399-add-idle-states.patch
 
 Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
-
-# https://patchwork.kernel.org/patch/10686407/
-Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
 
 # From 4.20, fix eth link/act lights on 3B+
 Patch334: bcm2837-fix-eth-leds.patch
@@ -2242,6 +2239,10 @@ fi
 #
 #
 %changelog
+* Thu Jan  9 2020 Pablo Greco <pgreco@centosproject.org> - 4.19.94-300
+- Linux v4.19.94
+- Remove upstreamed patches
+
 * Sat Nov 16 2019 Pablo Greco <pgreco@centosproject.org> - 4.19.84-300
 - Linux v4.19.84
 
