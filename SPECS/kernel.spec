@@ -2435,6 +2435,9 @@ fi
 #
 #
 %changelog
+* Tue Jan 21 2020 CentOS Sources <bugs@centos.org> - 4.18.0-167.el8.centos
+- Apply debranding changes
+
 * Sat Dec 14 2019 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-167.el8]
 - [tools] libbpf: Refactor relocation handling (Yauheni Kaliuta) [1772081]
 - [tools] libbpf: Fix call relocation offset calculation bug (Yauheni Kaliuta) [1772081]
