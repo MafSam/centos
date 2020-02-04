@@ -2317,6 +2317,9 @@ fi
 #
 #
 %changelog
+* Tue Feb 04 2020 CentOS Sources <bugs@centos.org> - 4.18.0-147.5.1.el8.centos
+- Apply debranding changes
+
 * Tue Jan 14 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.5.1.el8_1]
 - [powerpc] powerpc/shared: Use static key to detect shared processor (Phil Auld) [1781114 1767529]
 - [powerpc] powerpc/vcpu: Assume dedicated processors as non-preempt (Phil Auld) [1781114 1767529]
