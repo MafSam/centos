@@ -19,7 +19,7 @@
 %global distro_build 147
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 147.3.1.el8_1
+%define pkgrelease 147.5.1.el8_1
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 147.3.1%{?dist}
+%define specrelease 147.5.1%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -387,23 +387,33 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
 %else # released_kernel
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot003
 
 %endif # released_kernel
 
@@ -453,14 +463,7 @@ Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
 ## Patches needed for building this package
-
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-#Patch1002: debrand-rh-i686-cpu.patch 
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -470,7 +473,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux kernel for CentOS 
+This is the package which provides the Linux kernel for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux kernel releases. This means
@@ -479,7 +482,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS  Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -708,11 +711,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n kernel-abi-whitelists
-Summary: The CentOS  Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n kernel-abi-whitelists
-The kABI package contains information pertaining to the CentOS 
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -722,8 +725,8 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kabidw-base
-The kabidw-base package contains data describing the current ABI of the CentOS
- Linux kernel, suitable for the kabi-dw tool.
+The kabidw-base package contains data describing the current ABI of the Red Hat
+Enterprise Linux kernel, suitable for the kabi-dw tool.
 %endif
 
 #
@@ -795,7 +798,7 @@ Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -968,17 +971,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch 
-
 
 # END OF PATCH APPLICATIONS
 
@@ -1548,7 +1545,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
@@ -2320,8 +2317,41 @@ fi
 #
 #
 %changelog
-* Tue Dec 17 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.3.1.el8.centos
-- Apply debranding changes
+* Tue Jan 14 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.5.1.el8_1]
+- [powerpc] powerpc/shared: Use static key to detect shared processor (Phil Auld) [1781114 1767529]
+- [powerpc] powerpc/vcpu: Assume dedicated processors as non-preempt (Phil Auld) [1781114 1767529]
+
+* Mon Dec 16 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.4.1.el8_1]
+- [block] blk-mq: apply normal plugging for HDD (Ming Lei) [1782181 1759380]
+- [block] blk-mq: honor IO scheduler for multiqueue devices (Ming Lei) [1782181 1759380]
+- [block] blk-mq: simplify blk_mq_make_request() (Ming Lei) [1782181 1759380]
+- [block] blk-mq: remove blk_mq_put_ctx() (Ming Lei) [1782181 1759380]
+- [x86] kvm: vmx: use MSR_IA32_TSX_CTRL to hard-disable TSX on guest that lack it (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: vmx: implement MSR_IA32_TSX_CTRL disable RTM functionality (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: implement MSR_IA32_TSX_CTRL effect on CPUID (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: do not modify masked bits of shared MSRs (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: fix presentation of TSX feature in ARCH_CAPABILITIES (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm/x86: Export MDS_NO=0 to guests when TSX is enabled (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [fs] cifs: Fix cifsInodeInfo lock_sem deadlock when reconnect occurs (Leif Sahlberg) [1778693 1765979]
+- [fs] cifs: avoid using MID 0xFFFF (Leif Sahlberg) [1778693 1765979]
+- [fs] cifs: Fix retry mid list corruption on reconnects (Leif Sahlberg) [1778693 1765979]
+- [fs] smb3: fix unmount hang in open_shroot (Leif Sahlberg) [1781113 1757670]
+- [fs] CIFS: fix deadlock in cached root handling (Leif Sahlberg) [1781113 1757670]
+- [fs] Fix match_server check to allow for auto dialect negotiate (Leif Sahlberg) [1781113 1757670]
+- [fs] SMB3: retry on STATUS_INSUFFICIENT_RESOURCES instead of failing write (Leif Sahlberg) [1781113 1757670]
+- [fs] cifs: fix panic in smb2_reconnect (Leif Sahlberg) [1781113 1757670]
+- [fs] cifs: fix strcat buffer overflow and reduce raciness in smb21_set_oplock_level() (Leif Sahlberg) [1781113 1757670]
+- [fs] smb3: fix signing verification of large reads (Dave Wysochanski) [1781110 1753114]
+- [scsi] scsi: lpfc: Fix port relogin failure due to GID_FT interaction (Dick Kennedy) [1781108 1733217]
+- [fs] xfs: fix missing ILOCK unlock when xfs_setattr_nonsize fails due to EDQUOT (Bill O'Donnell) [1778692 1739607]
+- [net] cfg80211: wext: avoid copying malformed SSIDs (Jarod Wilson) [1778633 1778634] {CVE-2019-17133}
+- [block] blkcg: perpcu_ref init/exit should be done from blkg_alloc/free() (Ming Lei) [1777766 1741392]
+- [fs] userfaultfd_release: always remove uffd flags and clear vm_userfaultfd_ctx (Alex Gladkov) [1777389 1749763] {CVE-2019-14898}
+- [netdrv] mwifiex: Fix three heap overflow at parsing element in cfg80211_ap_settings (Jarod Wilson) [1776618 1775484] {CVE-2019-14814 CVE-2019-14815 CVE-2019-14816}
+- [netdrv] mwifiex: fix possible heap overflow in mwifiex_process_country_ie() (Jarod Wilson) [1776209 1776210] {CVE-2019-14895}
+- [netdrv] mwifiex: Fix heap overflow in mmwifiex_process_tdls_action_frame() (Jarod Wilson) [1776161 1776162] {CVE-2019-14901}
+- [netdrv] rtlwifi: Fix potential overflow on P2P code (Jarod Wilson) [1775222 1775223] {CVE-2019-17666}
+- [pci] hv: Avoid use of hv_pci_dev->pci_slot after freeing it (Mohammed Gamal) [1764635 1737569]
 
 * Tue Nov 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.3.1.el8_1]
 - [x86] kvm: svm: taint module and print taint message iff nested is enabled (Bandan Das) [1776114 1775410]
