@@ -16,10 +16,10 @@
 # For internal testing builds during development, it should be 0.
 %global released_kernel 0
 
-%global distro_build 168
+%global distro_build 177
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 168.el8
+%define pkgrelease 177.el8
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 168%{?dist}
+%define specrelease 177%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -116,7 +116,7 @@
 # The kernel tarball/base version
 %define kversion 4.18
 
-%define with_gcov %{?_with_gcov: 1} %{?!_with_gcov: 0}
+%define with_gcov %{?_with_gcov:1}%{?!_with_gcov:0}
 
 # turn off debug kernel and kabichk for gcov builds
 %if %{with_gcov}
@@ -321,6 +321,9 @@ ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: %{name}-core-uname-r = %{KVERREL}%{?variant}
 Requires: %{name}-modules-uname-r = %{KVERREL}%{?variant}
+%if %{with_realtime}
+Requires: rt-setup
+%endif
 %endif
 
 
@@ -341,6 +344,7 @@ BuildRequires: sparse
 BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
 BuildRequires: java-devel
+BuildRequires: libbpf-devel
 %ifnarch s390x
 BuildRequires: numactl-devel
 %endif
@@ -416,25 +420,37 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
-%else # released_kernel
+# released_kernel
+%else
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot003
 
-%endif # released_kernel
+# released_kernel
+%endif
 
 Source16: mod-extra.list
 Source17: mod-blacklist.sh
@@ -498,7 +514,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for CentOS
+This is the package which provides the Linux %{name} for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -507,7 +523,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -527,6 +543,7 @@ Requires(pre): linux-firmware >= 20191202-96.gite8a0f4c9\
 Requires(preun): systemd >= 200\
 Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
+Conflicts: kexec-tools < 2.0.20-8\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
@@ -627,8 +644,8 @@ This package provides debug information for the perf python bindings.
 # the python_sitearch macro should already be defined from above
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python3_sitearch}/perf.*so(\.debug)?|XXX' -o python3-perf-debuginfo.list}
 
-
-%endif # with_perf
+# with_perf
+%endif
 
 %if %{with_tools}
 %package -n %{name}-tools
@@ -687,7 +704,8 @@ This package provides debug information for package %{name}-tools.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|.*%%{_bindir}/intel-speed-select(\.debug)?|XXX' -o %{name}-tools-debuginfo.list}
 
-%endif # with_tools
+# with_tools
+%endif
 
 %if %{with_bpftool}
 
@@ -708,7 +726,8 @@ This package provides debug information for the bpftool package.
 
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_sbindir}/bpftool(\.debug)?|XXX' -o bpftool-debuginfo.list}
 
-%endif # with_bpftool
+# with_bpftool
+%endif
 
 %if %{with_selftests}
 
@@ -725,7 +744,8 @@ Kernel sample programs and selftests.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_libexecdir}/(ksamples|kselftests)/.*|XXX' -o selftests-debuginfo.list}
 
-%endif # with_selftests
+# with_selftests
+%endif
 
 %if %{with_gcov}
 %package gcov
@@ -736,11 +756,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The CentOS Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the CentOS
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -750,7 +770,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the CentOS
+The package contains data describing the current ABI of the Red Hat Enterprise
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -823,7 +843,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -933,7 +953,8 @@ Provides: installonlypkg(kernel)\
 %description zfcpdump-core
 The kernel package contains the Linux kernel (vmlinuz) for use by the
 zfcpdump infrastructure.
-%endif # with_zfcpdump
+# with_zfcpdump
+%endif
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
 %kernel_variant_package debug
@@ -1243,7 +1264,8 @@ BuildKernel() {
     if [ "$KernelExtension" == "gz" ]; then
         gzip -f9 $SignImage
     fi
-    %endif # signkernel
+    # signkernel
+    %endif
 
     $CopyKernel $KernelImage \
                 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
@@ -1319,7 +1341,8 @@ BuildKernel() {
     if [ -e $RPM_SOURCE_DIR/Module.kabi_%{_target_cpu}$Flavour ]; then
         cp $RPM_SOURCE_DIR/Module.kabi_%{_target_cpu}$Flavour $RPM_BUILD_ROOT/Module.kabi
         $RPM_SOURCE_DIR/check-kabi -k $RPM_BUILD_ROOT/Module.kabi -s Module.symvers || exit 1
-        rm $RPM_BUILD_ROOT/Module.kabi # for now, don't keep it around.
+        # for now, don't keep it around.
+        rm $RPM_BUILD_ROOT/Module.kabi
     else
         echo "**** NOTE: Cannot find reference Module.kabi file. ****"
     fi
@@ -1330,7 +1353,8 @@ BuildKernel() {
     if [ -e $RPM_SOURCE_DIR/Module.kabi_dup_%{_target_cpu}$Flavour ]; then
         cp $RPM_SOURCE_DIR/Module.kabi_dup_%{_target_cpu}$Flavour $RPM_BUILD_ROOT/Module.kabi
         $RPM_SOURCE_DIR/check-kabi -k $RPM_BUILD_ROOT/Module.kabi -s Module.symvers || exit 1
-        rm $RPM_BUILD_ROOT/Module.kabi # for now, don't keep it around.
+        # for now, don't keep it around.
+        rm $RPM_BUILD_ROOT/Module.kabi
     else
         echo "**** NOTE: Cannot find DUP reference Module.kabi file. ****"
     fi
@@ -1670,7 +1694,7 @@ BuildKernel %make_target %kernel_image %{with_vdso_install}
 %endif
 
 %global perf_make \
-  make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix} PYTHON=%{__python3}
+  make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 prefix=%{_prefix} PYTHON=%{__python3}
 %if %{with_perf}
 # perf
 # make sure check-headers.sh is executable
@@ -1732,7 +1756,6 @@ popd
 pushd tools/testing/selftests
 # We need to install here because we need to call make with ARCH set which
 # doesn't seem possible to do in the install section.
-%{make} -s ARCH=$Arch V=1 TARGETS="bpf net" INSTALL_PATH=%{buildroot}%{_libexecdir}/kselftests install
 %{make} -s ARCH=$Arch V=1 TARGETS="bpf livepatch net" INSTALL_PATH=%{buildroot}%{_libexecdir}/kselftests install
 popd
 %endif
@@ -1827,7 +1850,8 @@ docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
 mkdir -p $docdir
 tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
-%endif # with_doc
+# with_doc
+%endif
 
 # We have to do the headers install before the tools install because the
 # kernel headers_install will remove any header files in /usr/include that
@@ -1878,7 +1902,8 @@ mkdir -p $INSTALL_KABI_PATH
 
 # install kabi releases directories
 tar xjvf %{SOURCE300} -C $INSTALL_KABI_PATH
-%endif  # with_kernel_abi_whitelists
+# with_kernel_abi_whitelists
+%endif
 
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
@@ -2244,7 +2269,8 @@ fi
 %files -f python3-perf-debuginfo.list -n python3-perf-debuginfo
 %defattr(-,root,root)
 %endif
-%endif # with_perf
+# with_perf
+%endif
 
 %if %{with_tools}
 %ifarch %{cpupowerarchs}
@@ -2265,10 +2291,12 @@ fi
 %{_mandir}/man8/turbostat*
 %{_bindir}/intel-speed-select
 %endif
-%else # !cpupowerarchs
+# !cpupowerarchs
+%else
 %files -n %{name}-tools
 %defattr(-,root,root)
-%endif # cpupowerarchs
+# cpupowerarchs
+%endif
 %{_bindir}/tmon
 %{_bindir}/iio_event_monitor
 %{_bindir}/iio_generic_buffer
@@ -2293,7 +2321,8 @@ fi
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
-%endif # with_tools
+# with_tools
+%endif
 
 %if %{with_bpftool}
 %files -n bpftool
@@ -2432,6 +2461,497 @@ fi
 #
 #
 %changelog
+* Mon Feb 10 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-177.el8]
+- [kernel] timers/nohz: Update NOHZ load in remote tick (Scott Wood) [1791434]
+- [kernel] sched/core: Don't skip remote tick for idle CPUs (Scott Wood) [1791434]
+- [drm] drm/amdgpu/vi: silence an uninitialized variable warning (Lyude Paul) [1792565]
+- [drm] drm: panel-lvds: Potential Oops in probe error handling (Lyude Paul) [1792565]
+- [drm] drm/i915: Fix pid leak with banned clients (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: allow direct upload save restore list for raven2 (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Reorder detect_edp_sink_caps before link settings read (Lyude Paul) [1792565]
+- [drm] drm/i915: Add missing include file <linux/math64.h> (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: enable gfxoff for raven1 refresh (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/discovery: reserve discovery data at the top of VRAM (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: cleanup creating BOs at fixed location (v2) (Lyude Paul) [1792565]
+- [drm] drm/tegra: Fix ordering of cleanup code (Lyude Paul) [1792565]
+- [drm] drm/i915/gen9: Clear residual context state on context switch (Lyude Paul) [1792565]
+- [drm] drm/i915: Add Wa_1407352427:icl,ehl (Lyude Paul) [1792565]
+- [drm] drm/dp_mst: correct the shifting in DP_REMOTE_I2C_READ (Lyude Paul) [1792565]
+- [drm] drm/fb-helper: Round up bits_per_pixel if possible (Lyude Paul) [1792565]
+- [drm] drm/i915: Add Wa_1408615072 and Wa_1407596294 to icl, ehl (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/smu: add metrics table lock for vega20 (v2) (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/smu: add metrics table lock for navi (v2) (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/smu: add metrics table lock (Lyude Paul) [1792565]
+- [drm] drm/nouveau/kms/nv50-: fix panel scaling (Lyude Paul) [1792565 1741114]
+- [drm] drm/nouveau: Fix drm-core using atomic code-paths on pre-nv50 hardware (Lyude Paul) [1792565]
+- [drm] drm/nouveau: Move the declaration of struct nouveau_conn_atom up a bit (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Reset steer fifo before unblanking the stream (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Change the delay time before enabling FEC (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Fixed kernel panic when booting with DP-to-HDMI dongle (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: add cache flush workaround to gfx8 emit_fence (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: add check before enabling/disabling broadcast mode (Lyude Paul) [1792565]
+- [drm] drm: limit to INT_MAX in create_blob ioctl (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: Call find_vma under mmap_sem (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: fix uninitialized variable pasid_mapping_needed (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: fix bad DMA from INTERRUPT_CNTL2 (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: Avoid accidental thread reactivation (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: fix potential double drop fence reference (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: disallow direct upload save restore list from gfx driver (Lyude Paul) [1792565]
+- [gpu] gpu: host1x: Allocate gather copy for host1x (Lyude Paul) [1792565]
+- [drm] drm/tegra: sor: Use correct SOR index on Tegra210 (Lyude Paul) [1792565]
+- [drm] drm/amd/display: correctly populate dpp refclk in fpga (Lyude Paul) [1792565]
+- [drm] drm: Don't free jobs in wait_event_interruptible() (Lyude Paul) [1792565]
+- [drm] drm/gma500: fix memory disclosures due to uninitialized bytes (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: fix amdgpu trace event print string format error (Lyude Paul) [1792565]
+- [drm] drm/amd/powerplay: avoid disabling ECC if RAS is enabled for VEGA20 (Lyude Paul) [1792565]
+- [drm] drm/bridge: dw-hdmi: Restore audio when setting a mode (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Program DWB watermarks from correct state (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Fix dongle_caps containing stale information (Lyude Paul) [1792565]
+- [drm] drm/amd/display: add new active dongle to existent w/a (Lyude Paul) [1792565]
+- [drm] drm/amd/display: refactor Device ID for external chips (Lyude Paul) [1792565]
+- [drm] drm/amd/display: wait for set pipe mcp command completion (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Properly round nominal frequency for SPD (Lyude Paul) [1792565]
+- [drm] drm/drm_vblank: Change EINVAL by the correct errno (Lyude Paul) [1792565]
+- [drm] drm/amdkfd: Fix MQD size calculation (Lyude Paul) [1792565]
+- [drm] drm/bridge: dw-hdmi: Refuse DDC/CI transfers on the internal I2C controller (Lyude Paul) [1792565]
+- [drm] drm/amd/display: set minimum abm backlight level (Lyude Paul) [1792565]
+- [drm] drm/amd/display: load iram for abm 2.3 (Lyude Paul) [1792565]
+- [drm] drm/amd/powerplay: A workaround to GPU RESET on APU (Lyude Paul) [1792565]
+- [drm] drm/amdkfd: fix a potential NULL pointer dereference (v2) (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Set number of pipes to 1 if the second pipe was disabled (Lyude Paul) [1792565]
+- [drm] drm/amd/display: Handle virtual signal type in disable_link() (Lyude Paul) [1792565]
+- [drm] drm/ttm: return -EBUSY on pipelining with no_gpu_wait (v2) (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: grab the id mgr lock while accessing passid_mapping (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/sriov: add ring_stop before ring_create in psp v11 code (Lyude Paul) [1792565]
+- [drm] drm/bridge: analogix-anx78xx: silence -EPROBE_DEFER warnings (Lyude Paul) [1792565]
+- [drm] drm/amd/display: verify stream link before link test (Lyude Paul) [1792565]
+- [drm] drm: Use EOPNOTSUPP, not ENOTSUPP (Lyude Paul) [1792565]
+- [drm] drm/mipi-dbi: fix a loop in debugfs code (Lyude Paul) [1792565]
+- [drm] drm: mst: Fix query_payload ack reply struct (Lyude Paul) [1792565]
+- [drm] Revert "drm/virtio: switch virtio_gpu_wait_ioctl() to gem helper." (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: add invalidate semaphore limit for SRIOV and picasso in gmc9 (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: avoid using invalidate semaphore for picasso (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/gfx10: re-init clear state buffer after gpu reset (Lyude Paul) [1792565]
+- [drm] drm/amdgpu/gfx10: explicitly wait for cp idle after halt/unhalt (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: invalidate mmhub semaphore workaround in gmc9/gmc10 (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: set adev->num_vmhubs for gmc6, 7, 8 (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: Export function to flush TLB of specific vm hub (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: add new member in amdgpu_device for vmhub counts per asic chip (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: rename AMDGPU_GFXHUB/MMHUB macro with hub number (Lyude Paul) [1792565]
+- [drm] drm/amdgpu: initialize vm_inv_eng0_sem for gfxhub and mmhub (Lyude Paul) [1792565]
+- [drm] drm/amd/display: add default clocks if not able to fetch them (Lyude Paul) [1792565]
+- [drm] drm/amd/display: re-enable wait in pipelock, but add timeout (Lyude Paul) [1792565]
+- [drm] drm/dp_mst: Correct the bug in drm_dp_update_payload_part1() (Lyude Paul) [1792565]
+- [drm] drm/radeon: fix r1xx/r2xx register checker for POT textures (Lyude Paul) [1792565]
+- [drm] drm/i915/fbc: Disable fbc by default on all glk+ (Lyude Paul) [1792565]
+- [drm] drm/nouveau/kms/nv50-: Limit MST BPC to 8 (Lyude Paul) [1792565 1773804]
+- [drm] drm/nouveau/kms/nv50-: Store the bpc we're using in nv50_head_atom (Lyude Paul) [1792565 1773804]
+- [drm] drm/nouveau/kms/nv50-: Call outp_atomic_check_view() before handling PBN (Lyude Paul) [1792565 1773804]
+- [drm] drm/mgag200: Flag all G200 SE A machines as broken wrt <startadd> (Lyude Paul) [1792565]
+- [drm] drm/mgag200: Add workaround for HW that does not support 'startadd' (Lyude Paul) [1792565]
+- [drm] drm/mgag200: Store flags from PCI driver data in device structure (Lyude Paul) [1792565]
+- [drm] drm/mgag200: Extract device type from flags (Lyude Paul) [1792565]
+- [dma-buf] dma-buf: Fix memory leak in sync_file_merge() (Lyude Paul) [1792565]
+- [video] video/hdmi: Fix AVI bar unpack (Lyude Paul) [1792565]
+- [drm] drm: damage_helper: Fix race checking plane->state->fb (Lyude Paul) [1792565]
+- [drm] drm/i915: Fix detection for a CMP-V PCH (Lyude Paul) [1792565]
+- [x86] Mark AMD Ryzen 7 as supported (David Arcari) [1797317]
+- [x86] Mark AMD Ryzen 5 as supported (David Arcari) [1718051]
+- [mm] mm/sparse.c: reset section's mem_map when fully deactivated (Pingfan Liu) [1797848]
+- [drm] drm/mgag200: Don't unpin the current cursor image's buffer (Lyude Paul) [1784290]
+- [drm] drm/mgag200: Set cursor scanout address to correct BO (Lyude Paul) [1784290]
+- [drm] drm/mgag200: Pin displayed cursor BO to video memory (Lyude Paul) [1784290]
+- [tools] Correction to manpage of cpupower (Prarit Bhargava) [1796139]
+- [fs] cifs: fix soft mounts hanging in the reconnect code (Dave Wysochanski) [1795429]
+- [net] ipv6_stub: use ip6_dst_lookup_flow instead of ip6_dst_lookup (Sabrina Dubroca) [1774440]
+- [net] ipv6: add net argument to ip6_dst_lookup_flow (Sabrina Dubroca) [1774440]
+- [netdrv] can: peak_usb: fix slab info leak (Guillaume Nault) [1787486] {CVE-2019-19534}
+- [netdrv] vxlan: fix tos value before xmit (Hangbin Liu) [1786075]
+- [net] netfilter: nft_tproxy: Fix port selector on Big Endian (Phil Sutter) [1781481]
+- [net] devlink: Change devlink health locking mechanism (Petr Oros) [1785997]
+- [net] xfrm: Fix memleak on xfrm state destroy (Xin Long) [1780470]
+- [net] erspan: remove the incorrect mtu limit for erspan (Hangbin Liu) [1783871]
+- [net] ieee802154: enforce CAP_NET_RAW for raw sockets (Andrea Claudi) [1779495] {CVE-2019-17053}
+- [net] netfilter: masquerade: don't flush all conntracks if only one address deleted on device (Patrick Talbert) [1772334]
+
+* Tue Feb 04 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-176.el8]
+- [mm] memcg: Add preemption point in accumulate_memcg_tree() (Waiman Long) [1795049]
+- [edac] EDAC: skx_common: downgrade message importance on missing PCI device (Aristeu Rozanski) [1775511]
+- [infiniband] IB/core: Do not notify GID change event of an unregistered device (Kamal Heib) [1787333]
+- [infiniband] IB/core: Let IB core distribute cache update events (Kamal Heib) [1787333]
+- [arm64] arm64: kexec: always reset to EL2 if present (Bhupesh Sharma) [1794805]
+- [tools] perf header: Use last modification time for timestamp (Michael Petlan) [1791258]
+- [netdrv] net/mlx5e: Enable all available stats for uplink reps (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Create q counters on uplink representors (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Convert rep stats to mlx5e_stats_grp-based infra (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: IPoIB, use separate stats groups (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Convert stats groups array to array of group pointers (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Declare stats groups via macro (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Profile specific stats groups (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Move uplink rep init/cleanup code into own functions (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Add discard counters per priority (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5e: Add port buffer's congestion counters (Alaa Hleihel) [1786321]
+- [netdrv] net/mlx5: Expose HW capability bits for port buffer per priority congestion counters (Alaa Hleihel) [1786321]
+- [netdrv] qede: Fix multicast mac configuration (Manish Chopra) [1784894]
+- [thunderbolt] thunderbolt: Drop unnecessary read when writing LC command in Ice Lake (Jarod Wilson) [1784568]
+- [thunderbolt] thunderbolt: Fix lockdep circular locking depedency warning (Jarod Wilson) [1784568]
+- [thunderbolt] thunderbolt: Read DP IN adapter first two dwords in one go (Jarod Wilson) [1784568]
+
+* Fri Jan 31 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-175.el8]
+- [pci] PCI/PM: Move pci_dev_wait() definition earlier (Myron Stowe) [1794266]
+- [pci] PCI/PM: Add missing link delays required by the PCIe spec (Myron Stowe) [1794266]
+- [pci] PCI/PM: Add pcie_wait_for_link_delay() (Myron Stowe) [1794266]
+- [pci] PCI/PM: Return error when changing power state from D3cold (Myron Stowe) [1794266]
+- [pci] PCI/PM: Decode D3cold power state correctly (Myron Stowe) [1794266]
+- [pci] PCI/PM: Fold __pci_complete_power_transition() into its caller (Myron Stowe) [1794266]
+- [pci] PCI/PM: Avoid exporting __pci_complete_power_transition() (Myron Stowe) [1794266]
+- [pci] PCI/PM: Fold __pci_start_power_transition() into its caller (Myron Stowe) [1794266]
+- [pci] PCI/PM: Use pci_power_up() in pci_set_power_state() (Myron Stowe) [1794266]
+- [pci] PCI/PM: Move power state update away from pci_power_up() (Myron Stowe) [1794266]
+- [pci] PCI/PM: Remove unused pci_driver.suspend_late() hook (Myron Stowe) [1794266]
+- [pci] PCI/PM: Remove unused pci_driver.resume_early() hook (Myron Stowe) [1794266]
+- [xen] xen-platform: Convert to generic power management (Myron Stowe) [1794266]
+- [pci] PCI/PM: Simplify pci_set_power_state() (Myron Stowe) [1794266]
+- [pci] PCI/PM: Expand PM reset messages to mention D3hot (not just D3) (Myron Stowe) [1794266]
+- [pci] PCI/PM: Apply D2 delay as milliseconds, not microseconds (Myron Stowe) [1794266]
+- [pci] PCI/PM: Use pci_WARN() to include device information (Myron Stowe) [1794266]
+- [pci] PCI/PM: Use PCI dev_printk() wrappers for consistency (Myron Stowe) [1794266]
+- [pci] PCI/PM: Make power management op coding style consistent (Myron Stowe) [1794266]
+- [pci] PCI/PM: Run resume fixups before disabling wakeup events (Myron Stowe) [1794266]
+- [pci] PCI/PM: Clear PCIe PME Status even for legacy power management (Myron Stowe) [1794266]
+- [pci] PCI/PM: Always return devices to D0 when thawing (Myron Stowe) [1794266]
+- [pci] PCI: PM: Fix pci_power_up() (Myron Stowe) [1794266]
+- [pci] PCI: Make pcie_downstream_port() available outside of access.c (Myron Stowe) [1794266]
+- [pci] PCI: Add pci_info_ratelimited() to ratelimit PCI separately (Myron Stowe) [1794266]
+- [pci] PCI: PM: Simplify bus-level hibernation callbacks (Myron Stowe) [1794266]
+- [pci] PCI: Do not poll for PME if the device is in D3cold (Myron Stowe) [1794266]
+- [pci] PCI: PM: Replace pci_dev_keep_suspended() with two functions (Myron Stowe) [1794266]
+- [pci] PCI: PM: Avoid resuming devices in D3hot during system suspend (Myron Stowe) [1794266]
+- [pci] PCI: PM: Avoid skipping bus-level PM on platforms without ACPI (Myron Stowe) [1794266]
+- [pci] treewide: Switch printk users from pf and pF to ps and pS, respectively (Myron Stowe) [1794266]
+- [sound] ALSA: Use the legacy HDA driver as default for Intel DSP platforms (Jaroslav Kysela) [1793227]
+- [nvme] nvme: nvme_mpath_init remove multipath check (David Milburn) [1790958]
+- [mm] mm/page-writeback.c: don't break integrity writeback on ->writepage() error (Christoph von Recklinghausen) [1782117]
+- [arm64] arm64: Revert support for execute-only user mappings (Jeremy Linton) [1788629]
+- [powerpc] powerpc/papr_scm: Don't enable direct map for a region by default (Steve Best) [1795706]
+
+* Thu Jan 30 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-174.el8]
+- [tools] selftests/eeh: Bump EEH wait time to 60s (Steve Best) [1783199]
+- [tools] tools/kvm_stat: Fix kvm_exit filter name (Gavin Shan) [1780345]
+- [infiniband] RDMA/bnxt_re: Report more number of completion vectors (Selvin Xavier) [1788037 1753515]
+- [infiniband] RDMA/bnxt_re: Fix Send Work Entry state check while polling completions (Selvin Xavier) [1788037]
+- [infiniband] RDMA/bnxt_re: Fix missing le16_to_cpu (Selvin Xavier) [1788037]
+- [infiniband] RDMA/bnxt_re: Avoid freeing MR resources if dereg fails (Selvin Xavier) [1788037 1737147]
+- [infiniband] RDMA/bnxt_re: Fix stat push into dma buffer on gen p5 devices (Selvin Xavier) [1788037 1771855]
+- [infiniband] RDMA/bnxt_re: Fix chip number validation Broadcom's Gen P5 series (Selvin Xavier) [1788037 1783943]
+- [netdrv] net/mlx5e: Clear VF config when switching modes (mohamad meib) [1787276]
+- [base] drivers/base/memory.c: cache memory blocks in xarray to accelerate lookup fixup (David Hildenbrand) [1789900]
+- [base] drivers/base/memory.c: cache memory blocks in xarray to accelerate lookup (David Hildenbrand) [1789900]
+- [base] drivers/base/memory.c: drop the mem_sysfs_mutex (David Hildenbrand) [1789900]
+- [base] driver/base/memory.c: validate memory block size early (David Hildenbrand) [1789900]
+- [fs] block: Don't revalidate bdev of hidden gendisk (David Milburn) [1779342]
+- [scsi] scsi: virtio_scsi: unplug LUNs when events missed (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: implement request batching (Maxim Levitsky) [1614188]
+- [scsi] scsi: core: fix dh and multipathing for SCSI hosts without request batching (Maxim Levitsky) [1614188]
+- [scsi] scsi: core: fix missing .cleanup_rq for SCSI hosts without request batching (Maxim Levitsky) [1614188]
+- [scsi] scsi: core: add support for request batching (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: Use struct_size() helper (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: remove unused 'affinity_hint_set' (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: Use HCTX_TYPE_DEFAULT for blk_mq_tag_set->map (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: don't send sc payload with tmfs (Maxim Levitsky) [1614188]
+- [scsi] scsi: virtio_scsi: Remove per-target data because it is no longer used (Maxim Levitsky) [1614188]
+- [powerpc] powerpc/pseries/lparcfg: Fix display of Maximum Memory (Steve Best) [1795622]
+- [powerpc] powernv: Don't reprogram SLW image on every KVM guest entry/exit (Laurent Vivier) [1751078]
+- [x86] Mark certain versions of Comet Lake as supported (David Arcari) [1794198]
+- [s390] s390/dasd: Disable Thin Provisioning to prevent data loss (Philipp Rudo) [1793461]
+
+* Fri Jan 24 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-173.el8]
+- [x86] kvm: x86/mmu: Take slots_lock when using kvm_mmu_zap_all_fast() (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] kvm: x86: disable shattered huge page recovery for PREEMPT_RT (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [documentation] documentation: Add ITLB_MULTIHIT documentation (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] kvm: x86: mmu: Recovery of shattered NX large pages (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [virt] kvm: Add helper function for creating VM worker threads (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] kvm: mmu: ITLB_MULTIHIT mitigation (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [kernel] cpu/speculation: Uninline and export CPU mitigations helpers (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] cpu: Add Tremont to the cpu vulnerability whitelist (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] bugs: Add ITLB_MULTIHIT bug infrastructure (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [x86] kvm: vmx, svm: always run with EFER.NXE=1 when shadow paging is active (Paolo Bonzini) [1690344] {CVE-2018-12207}
+- [crypto] crypto: hmac - fix memory leak in hmac_init_tfm() (Herbert Xu) [1775858]
+- [crypto] crypto: hash - fix incorrect HASH_MAX_DESCSIZE (Herbert Xu) [1775858]
+- [nvme] nvme: Translate more status codes to blk_status_t (Gopal Tiwari) [1781537]
+- [include] nvme: resync include/linux/nvme.h with nvmecli (Gopal Tiwari) [1781537]
+- [netdrv] hv_netvsc: Fix memory leak when removing rndis device (Mohammed Gamal) [1733007]
+- [fs] cifs: Fix memory allocation in __smb2_handle_cancelled_cmd() (Dave Wysochanski) [1793182]
+- [tools] perf c2c: Fix report with offline cpus (Michael Petlan) [1744903]
+- [kernel] locking/rwsem: Fix kernel crash when spinning on RWSEM_OWNER_UNKNOWN (Waiman Long) [1793028]
+- [mm] mm/memory_hotplug: don't free usage map when removing a re-added early section (Pingfan Liu) [1787269]
+- [netdrv] iavf: remove current MAC address filter on VF reset (Stefan Assmann) [1735725 1738738]
+- [dma] dma-mapping: fix handling of dma-ranges for reserved memory (again) (Jerry Snitselaar) [1784691]
+
+* Tue Jan 21 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-172.el8]
+- [fs] pnfs/filelayout: enable LAYOUTGET on OPEN (Steve Dickson) [1756140]
+- [fs] NFSD fixing possible null pointer derefering in copy offload (Benjamin Coddington) [1763220]
+- [fs] nfsd: Ensure CLONE persists data and metadata changes to the target file (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Fix backchannel latency metrics (Benjamin Coddington) [1763220]
+- [fs] NFSv4.x: Drop the slot if nfs4_delegreturn_prepare waits for layoutreturn (Benjamin Coddington) [1763220]
+- [fs] NFSv4.x: Handle bad/dead sessions correctly in nfs41_sequence_process() (Benjamin Coddington) [1763220]
+- [fs] NFS: Fix an RCU lock leak in nfs4_refresh_delegation_stateid() (Benjamin Coddington) [1763220]
+- [fs] NFSv4: Don't allow a cached open with a revoked delegation (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Fix svcauth_gss_proxy_init() (Benjamin Coddington) [1763220]
+- [net] SUNRPC: The TCP back channel mustn't disappear while requests are outstanding (Benjamin Coddington) [1763220]
+- [net] xprtrdma: Close window between waking RPC senders and posting Receives (Benjamin Coddington) [1763220]
+- [net] xprtrdma: Connection becomes unstable after a reconnect (Benjamin Coddington) [1763220]
+- [net] xprtrdma: Add unique trace points for posting Local Invalidate WRs (Benjamin Coddington) [1763220]
+- [net] sunrpc: fix crash when cache_head become valid before update (Benjamin Coddington) [1763220]
+- [fs] nfsd4: fix up replay_matches_cache() (Benjamin Coddington) [1763220]
+- [fs] NFSv4: Fix leak of clp->cl_acceptor string (Benjamin Coddington) [1763220]
+- [fs] pNFS: Ensure we do clear the return-on-close layout stateid on fatal errors (Benjamin Coddington) [1763220]
+- [fs] NFS: Fix O_DIRECT accounting of number of bytes read/written (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Fix another issue with MIC buffer space (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Fix buffer handling of GSS MIC without slack (Benjamin Coddington) [1763220]
+- [fs] Revert "NFSv4/flexfiles: Abort I/O early if the layout segment was invalidated" (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Don't handle errors if the bind/connect succeeded (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Fix congestion window race with disconnect (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Don't try to parse incomplete RPC messages (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Don't receive TCP data into a request buffer that has been reset (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Dequeue the request from the receive queue while we're re-encoding (Benjamin Coddington) [1763220]
+- [net] SUNRPC: Handle connection breakages correctly in call_status() (Benjamin Coddington) [1763220]
+- [net] xprtrdma: Toggle XPRT_CONGESTED in xprtrdma's slot methods (Benjamin Coddington) [1763220]
+- [fs] NFS: Ensure O_DIRECT reports an error if the bytes read/written is 0 (Benjamin Coddington) [1763220]
+- [fs] NFSv4/pnfs: Fix a page lock leak in nfs_pageio_resend() (Benjamin Coddington) [1763220]
+- [fs] NFS: Fix regression whereby fscache errors are appearing on 'nofsc' mounts (Benjamin Coddington) [1763220]
+- [fs] NFSv4: Fix a potential sleep while atomic in nfs4_do_reclaim() (Benjamin Coddington) [1763220]
+- [fs] NFSv4.1: Only reap expired delegations (Benjamin Coddington) [1763220]
+- [fs] NFSv4.1: Fix open stateid recovery (Benjamin Coddington) [1763220]
+- [fs] NFSv4: Fix a credential refcount leak in nfs41_check_delegation_stateid (Benjamin Coddington) [1763220]
+- [fs] NFSv4: Handle the special Linux file open access mode (Benjamin Coddington) [1763220]
+- [fs] nfsd: Fix overflow causing non-working mounts on 1 TB machines (Benjamin Coddington) [1763220]
+- [md] md: make sure desc_nr less than MD_SB_DISKS (Nigel Croxon) [1769057]
+- [md] md: raid1: check rdev before reference in raid1_sync_request func (Nigel Croxon) [1769057]
+- [md] md/raid10: prevent access of uninitialized resync_pages offset (Nigel Croxon) [1769057]
+- [md] md: avoid invalid memory access for array sb->dev_roles (Nigel Croxon) [1769057]
+- [md] md/raid1: avoid soft lockup under high load (Nigel Croxon) [1769057]
+- [md] md: no longer compare spare disk superblock events in super_load (Nigel Croxon) [1769057]
+- [md] md: improve handling of bio with REQ_PREFLUSH in md_flush_request() (Nigel Croxon) [1769057]
+- [md] md/bitmap: avoid race window between md_bitmap_resize and bitmap_file_clear_bit (Nigel Croxon) [1769057]
+- [md] md/raid0: Fix an error message in raid0_make_request() (Nigel Croxon) [1769057]
+- [md] md/raid0: fix warning message for parameter default_layout (Nigel Croxon) [1769057]
+- [netdrv] net/mlx5: DR, Init lists that are used in rule's member (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, No need for atomic refcount for internal SW steering resources (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Create multiple destination action from dr_create_fte (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Add support for multiple destination table action (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Align dest FT action creation to API (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Pass table flags at creation to lower layer (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Create multi-destination table for SW-steering use (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Create FTE entry in the FW from SW-steering (Alaa Hleihel) [1775986]
+- [netdrv] net/mlx5: DR, Use attributes struct for FW flow table creation (Alaa Hleihel) [1775986]
+- [drm] drm/amd/display: fix struct init in update_bounding_box (Don Dutile) [1784621]
+- [tools] perf/x86/pmu-events: Fix Kernel_Utilization metric (Michael Petlan) [1788434]
+- [tools] perf vendor events intel: Update all the Intel JSON metrics from TMAM 3.6 (Michael Petlan) [1788434]
+- [tools] perf vendor events intel: Update CascadelakeX events to v1.05 (Michael Petlan) [1788434]
+- [tools] cpupower: mperf_monitor: Update cpupower to use the RDPRU instruction (Janakarajan Natarajan) [1766357]
+- [tools] cpupower: mperf_monitor: Introduce per_cpu_schedule flag (Janakarajan Natarajan) [1766357]
+- [tools] cpupower: Move needs_root variable into a sub-struct (Janakarajan Natarajan) [1766357]
+- [mm] coredump: fix race condition between collapse_huge_page() and core dumping (Andrea Arcangeli) [1722986]
+- [mm] memcg, oom: don't require __GFP_FS when invoking memcg OOM killer (Waiman Long) [1791170]
+- [uapi] mm: move MAP_SYNC to asm-generic/mman-common.h (Jeff Moyer) [1791539]
+
+* Fri Jan 17 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-171.el8]
+- [linux] ptr_ring: wrap back ->producer in __ptr_ring_swap_queue() (Lu Lu) [1663784]
+- [virtio] virtio-balloon: fix managed page counts when migrating pages between zones (David Hildenbrand) [1689800]
+- [infiniband] IB/mlx4: Follow mirror sequence of device add during device removal (mohamad meib) [1786042]
+- [netdrv] gve: Fix the queue page list allocated pages count (Patricio Noyola) [1789114]
+- [netdrv] gve: fix dma sync bug where not all pages synced (David Awogbemila) [1790957]
+- [netdrv] gve: Fixes DMA synchronization (David Awogbemila) [1789027]
+- [net] SUNRPC: Ignore queue transmission errors on successful transmission (Benjamin Coddington) [1769367]
+- [net] Revert "SUNRPC: Micro-optimise when the task is known not to be sleeping" (Benjamin Coddington) [1769367]
+- [net] SUNRPC: Fix up calculation of client message length (Benjamin Coddington) [1769367]
+- [net] Merge tag 'nfs-rdma-for-5.1-1' of git://git.linux-nfs.org/projects/anna/linux-nfs (Benjamin Coddington) [1769367]
+- [char] tpm: Revert "tpm_tis_core: Turn on the TPM before probing IRQ's" (Jerry Snitselaar) [1789088]
+- [char] tpm: Revert "tpm_tis_core: Set TPM_CHIP_FLAG_IRQ before probing for interrupts" (Jerry Snitselaar) [1789088]
+- [tools] perf jvmti: Link against tools/lib/ctype.h to have weak strlcpy() (Michael Petlan) [1786048]
+- [tools] perf jvmti: Link against tools/lib/string.o to have weak strlcpy() (Michael Petlan) [1786048]
+- [kernel] kprobes: Show address of kprobes if kallsyms does (Michael Petlan) [1747099]
+- [kernel] genirq/debugfs: Reset domain debugfs_file on removal of the debugfs file (Mohammed Gamal) [1782640]
+- [powerpc] powerpc: Fix 32-bit KVM-PR lockup and host crash with MacOS guest (Steve Best) [1789594]
+
+* Tue Jan 14 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-170.el8]
+- [platform] x86: intel_pmc_core: Add Comet Lake (CML) platform support to intel_pmc_core driver (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Fix the SoC naming inconsistency (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core_pltdrv: Module removal warning fix (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Do not ioremap RAM (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_ipc: Remove dev_err() usage after platform_get_irq() (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Add ICL-NNPI support to PMC Core (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Attach using APCI HID "INT33A1" (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: transform Pkg C-state residency from TSC ticks into microseconds (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc: no need to check return value of debugfs_create functions (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Allow to dump debug registers on S0ix failure (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Convert to a platform_driver (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_ipc: Don't map non-used optional resources (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_ipc: Apply same width for offset definitions (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_ipc: Use BIT() macro (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_core: Mark local function static (Lenny Szubowicz) [1773793]
+- [platform] x86: intel_pmc_ipc: adding error handling (Lenny Szubowicz) [1773793]
+- [mm] memory_hotplug: cleanup __remove_pages() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: drop local variables in shrink_zone_span() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: don't check for "all holes" in shrink_zone_span() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: we always have a zone in find_(smallest|biggest)_section_pfn (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: poison memmap in remove_pfn_range_from_zone() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: shrink zones when offlining memory (Christoph von Recklinghausen) [1766491]
+- [mm] memmap_init: update variable name in memmap_init_zone (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: don't access uninitialized memmaps in shrink_zone_span() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: fix try_offline_node() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: fix updating the node span (Christoph von Recklinghausen) [1766491]
+- [mm] hugetlbfs: don't access uninitialized memmaps in pfn_range_valid_gigantic() (Christoph von Recklinghausen) [1766491]
+- [mm] memory_hotplug: don't access uninitialized memmaps in shrink_pgdat_span() (Christoph von Recklinghausen) [1766491]
+- [mm] page_owner: don't access uninitialized memmaps when reading /proc/pagetypeinfo (Christoph von Recklinghausen) [1766491]
+- [mm] memory-failure.c: don't access uninitialized memmaps in memory_failure() (Christoph von Recklinghausen) [1766491]
+- [fs] proc/page.c: don't access uninitialized memmaps in fs/proc/page.c (Christoph von Recklinghausen) [1766491]
+- [base] base/memory.c: don't access uninitialized memmaps in soft_offline_page_store() (Christoph von Recklinghausen) [1766491]
+- [base] base/node.c: simplify unregister_memory_block_under_nodes() (Christoph von Recklinghausen) [1766491]
+- [kernel] /proc/kpagecount: return 0 for special pages that are never mapped (Christoph von Recklinghausen) [1766491]
+- [netdrv] fm10k: fix fm10k_get_fault_pf to read correct address (Neil Horman) [1721716]
+- [netdrv] fm10k: convert NON_Q_VECTORS(hw) into NON_Q_VECTORS (Neil Horman) [1721716]
+- [netdrv] fm10k: mark unused parameters with __always_unused (Neil Horman) [1721716]
+- [netdrv] fm10k: cast page_addr to u8 * when incrementing it (Neil Horman) [1721716]
+- [netdrv] fm10k: explicitly return 0 on success path in function (Neil Horman) [1721716]
+- [netdrv] fm10k: remove needless initialization of size local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: remove needless assignment of err local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: remove unnecessary variable initializer (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce scope of the ring variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the result local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the local msg variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the local i variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the err variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the tx_buffer variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of the q_idx local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of local err variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce the scope of qv local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce scope of *p local variable (Neil Horman) [1721716]
+- [netdrv] fm10k: reduce scope of the err variable (Neil Horman) [1721716]
+- [netdrv] fm10k: Use dev_get_drvdata (Neil Horman) [1721716]
+- [crypto] crypto: qat - Silence smp_processor_id() warning (Neil Horman) [1723573]
+- [crypto] crypto: qat - use struct_size() helper (Neil Horman) [1723573]
+- [crypto] crypto: qat - do not offload zero length requests (Neil Horman) [1723573]
+- [crypto] crypto: qat - return error for block ciphers for invalid requests (Neil Horman) [1723573]
+- [crypto] crypto: qat - return proper error code in setkey (Neil Horman) [1723573]
+- [crypto] crypto: qat - fix block size for aes ctr mode (Neil Horman) [1723573]
+- [crypto] crypto: qat - update iv after encryption or decryption operations (Neil Horman) [1723573]
+- [crypto] crypto: qat - add check for negative offset in alg precompute function (Neil Horman) [1723573]
+- [crypto] crypto: qat - remove spin_lock in qat_ablkcipher_setkey (Neil Horman) [1723573]
+- [crypto] treewide: Add SPDX license identifier - Makefile/Kconfig (Neil Horman) [1723573]
+- [crypto] crypto: shash - remove shash_desc::flags (Neil Horman) [1723573]
+- [crypto] crypto: rsa - unimplement sign/verify for raw RSA backends (Neil Horman) [1723573]
+- [hv] Revert "hv: vmbus: Implement suspend/resume for VSC drivers for hibernation" (Mohammed Gamal) [1788082]
+- [hv] Revert "hv: vmbus: Ignore the offers when resuming from hibernation" (Mohammed Gamal) [1788082]
+- [hv] Revert "hv: vmbus: Suspend/resume the vmbus itself for hibernation" (Mohammed Gamal) [1788082]
+- [hv] Revert "hv: vmbus: Clean up hv_sock channels by force upon suspend" (Mohammed Gamal) [1788082]
+- [hv] Revert "hv: vmbus: Suspend after cleaning up hv_sock and sub channels" (Mohammed Gamal) [1788082]
+- [hv] Revert "hv: vmbus: Resume after fixing up old primary channels" (Mohammed Gamal) [1788082]
+- [hv] Revert "vmbus: Fix harmless building warnings without CONFIG_PM_SLEEP" (Mohammed Gamal) [1788082]
+- [x86] kvm: vmx: Introduce handle_unexpected_vmexit and handle WAITPKG vmexit (Paul Lai) [1494707]
+- [x86] kvm: vmx: Emulate MSR IA32_UMWAIT_CONTROL (Paul Lai) [1494707]
+- [x86] kvm: x86: Add support for user wait instructions (Paul Lai) [1494707]
+- [tools] tools arch x86: Update tools's copy of cpufeatures.h (Paul Lai) [1494707]
+- [kvm] KVM: x86: expose AVX512_BF16 feature to guest (Paul Lai) [1642539]
+- [x86] x86/cpufeatures: Enumerate the new AVX512 BFLOAT16 instructions (Paul Lai) [1642539]
+- [block] rbd: silence bogus uninitialized warning in rbd_object_map_update_finish() (Jeff Layton) [1777961]
+- [fs] ceph: increment/decrement dio counter on async requests (Jeff Layton) [1777961]
+- [fs] ceph: take the inode lock before acquiring cap refs (Jeff Layton) [1777961]
+- [scsi] scsi: lpfc: fix build failure with DEBUGFS disabled (Dick Kennedy) [1784863]
+- [scsi] Revert "storvsc: setup 1:1 mapping between hardware queue and CPU queue" (Cathy Avery) [1787594]
+- [tools] perf session: Return error code for perf_session__new() function on failure (Michael Petlan) [1754995]
+- [tools] perf header: Fix false warning when there are no duplicate cache entries (Michael Petlan) [1776499]
+- [firmware] efi/memreserve: Register reservations as 'reserved' in /proc/iomem (Bhupesh Sharma) [1772730]
+- [firmware] efi/memreserve: deal with memreserve entries in unmapped memory (Bhupesh Sharma) [1772730]
+- [powerpc] powerpc/powernv: Avoid re-registration of imc debugfs directory (Diego Domingos) [1781098]
+- [powerpc] powerpc/powernv: Return for invalid IMC domain (Diego Domingos) [1781098]
+
+* Fri Jan 10 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-169.el8]
+- [tools] perf tools: Allow to link with libbpf dynamicaly (Michael Petlan) [1781570]
+- [tools] perf probe: Fix spelling mistake "addrees" -> "address" (Michael Petlan) [1760227]
+- [tools] perf probe: Trace a magic number if variable is not found (Michael Petlan) [1760227]
+- [tools] perf probe: Support DW_AT_const_value constant value (Michael Petlan) [1760227]
+- [tools] perf probe: Support multiprobe event (Michael Petlan) [1760227]
+- [tools] perf probe: Generate event name with line number (Michael Petlan) [1760227]
+- [tools] perf probe: Do not show non representive lines by perf-probe -L (Michael Petlan) [1760227]
+- [tools] perf probe: Verify given line is a representive line (Michael Petlan) [1760227]
+- [tools] perf probe: Show correct statement line number by perf probe -l (Michael Petlan) [1760227]
+- [tools] perf probe: Skip overlapped location on searching variables (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to show calling lines of inlined functions (Michael Petlan) [1760227]
+- [tools] perf probe: Filter out instances except for inlined subroutine and subprogram (Michael Petlan) [1760227]
+- [tools] perf probe: Skip end-of-sequence and non statement lines (Michael Petlan) [1760227]
+- [tools] perf probe: Return a better scope DIE if there is no best scope (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to show ranges of variables in functions without entry_pc (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to show inlined function callsite without entry_pc (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to list probe event with correct line number (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to probe an inline function which has no entry pc (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to probe a function which has no entry pc (Michael Petlan) [1760227]
+- [tools] perf probe: Fix wrong address verification (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to show function entry line as probe-able (Michael Petlan) [1760227]
+- [tools] perf probe: Walk function lines in lexical blocks (Michael Petlan) [1760227]
+- [tools] perf probe: Fix to find range-only function instance (Michael Petlan) [1760227]
+- [scsi] qla2xxx: Fix incorrect SFUB length used for Secure Flash Update MB Cmd (Himanshu Madhani) [1782598]
+- [scsi] qla2xxx: Added support for MPI and PEP regions for ISP28XX (Himanshu Madhani) [1782598]
+- [scsi] qla2xxx: Correctly retrieve and interpret active flash region (Himanshu Madhani) [1782598]
+- [nvme] nvme: Add quirk for LiteON CL1 devices running FW 22301111 (Perry Yuan) [1769179]
+- [nvme] nvme-pci: Save PCI state before putting drive into deepest state (Perry Yuan) [1769180]
+- [infiniband] rdma/cxgb4: Fix spelling mistake "immedate" -> "immediate" (Vishal Kulkarni) [1725823]
+- [infiniband] rdma/cxgb4: Fix null pointer dereference on alloc_skb failure (Vishal Kulkarni) [1725823]
+- [infiniband] iw_cxgb4: Fix qpid leak (Vishal Kulkarni) [1725823]
+- [netdrv] net/mlx5e: Use correct enum to determine uplink port (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix concurrency issues between config flow and XSK (mohamad meib) [1786113]
+- [infiniband] IB/mlx5: Fix steering rule of drop and count (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: ethtool, Fix analysis of speed setting (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix translation of link mode into speed (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix free peer_flow when refcount is 0 (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix freeing flow with kfree() and not kvfree() (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix SFF 8472 eeprom length (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Query global pause state before setting prio2buffer (mohamad meib) [1786113]
+- [netdrv] net/mlx5e: Fix TXQ indices to be sequential (mohamad meib) [1786113]
+- [infiniband] RDMA/mlx5: Fix a race with mlx5_ib_update_xlt on an implicit MR (mohamad meib) [1786113]
+- [netdrv] ath10k: Fix a NULL-ptr-deref bug in ath10k_usb_alloc_urb_from_pipe (Jarod Wilson) [1783853] {CVE-2019-15099}
+- [netdrv] revert "[netdrv] ice: mark driver as tech-preview" (Jonathan Toppins) [1783062]
+- [netdrv] ibmvnic: Fix typo in retry check (Steve Best) [1783775]
+- [netdrv] ibmveth: Detect unsupported packets before sending to the hypervisor (Steve Best) [1784904]
+- [netdrv] igc: add additional delay during phy hw reset (David Arcari) [1782824]
+- [net] bridge: fix regression in br_mdb_fill_info() (Petr Oros) [1783888]
+- [net] bpf: Emit audit messages upon successful prog load and unload (Jiri Olsa) [1781266]
+- [fs] fuse: fix leak of fuse_io_priv (Miklos Szeredi) [1777009]
+- [fs] virtiofs: Check contents of options string (Vivek Goyal) [1783426]
+- [fs] exec: Fix mem leak in kernel_read_file (Eric Sandeen) [1683731] {CVE-2019-8980}
+- [lib] sbitmap: only queue kyber's wait callback if not already active (Ming Lei) [1784544]
+- [fs] CIFS: Fix NULL-pointer dereference in smb2_push_mandatory_locks (Dave Wysochanski) [1788202]
+- [kernel] ftrace: Check for successful allocation of hash (Desnes Augusto Nunes do Rosario) [1719414]
+- [kernel] ftrace: Check for empty hash and comment the race with registering probes (Desnes Augusto Nunes do Rosario) [1719414]
+- [kernel] ftrace: Fix NULL pointer dereference in t_probe_next() (Desnes Augusto Nunes do Rosario) [1719414]
+- [iommu] vt-d: Allocate reserved region for ISA with correct permission (Jerry Snitselaar) [1778041]
+- [iommu] set group default domain before creating direct mappings (Jerry Snitselaar) [1778041]
+- [iommu] vt-d: Fix dmar pte read access not set error (Jerry Snitselaar) [1778041]
+- [iommu] vt-d: Set ISA bridge reserved region as relaxable (Jerry Snitselaar) [1778041]
+- [iommu] fix KASAN use-after-free in iommu_insert_resv_region (Auger Eric) [1777014]
+- [platform] platform/x86: dell-laptop: fix rfkill functionality (Jarod Wilson) [1725878]
+- [mm] mm/hugetlb: defer freeing of huge pages if in non-task context (Waiman Long) [1780015]
+- [mm] powerpc/book3s64/hash: Use secondary hash for bolted mapping if the primary is full (Steve Best) [1783159]
+- [mm] powerpc/pseries: Don't fail hash page table insert for bolted mapping (Steve Best) [1783159]
+- [powerpc] powerpc/pseries: Don't opencode HPTE_V_BOLTED (Steve Best) [1783159]
+- [powerpc] powerpc/perf: Disable trace_imc pmu (Steve Best) [1785573]
+- [powerpc] powerpc/spinlocks: Include correct header for static key (Phil Auld) [1767529]
+- [powerpc] powerpc/shared: Use static key to detect shared processor (Phil Auld) [1767529]
+- [powerpc] powerpc/vcpu: Assume dedicated processors as non-preempt (Phil Auld) [1767529]
+- [arm64] arm64: compat: Workaround Neoverse-N1 #1542419 for compat user-space (Jeremy Linton) [1757828]
+- [arm64] arm64: Fake the IminLine size on systems affected by Neoverse-N1 #1542419 (Jeremy Linton) [1757828]
+- [arm64] arm64: errata: Hide CTR_EL0.DIC on systems affected by Neoverse-N1 #1542419 (Jeremy Linton) [1757828]
+- [arm64] arm64: Handle erratum 1418040 as a superset of erratum 1188873 (Jeremy Linton) [1757828]
+- [arm64] arm64: errata: Add workaround for Cortex-A76 erratum #1463225 (Jeremy Linton) [1757828]
+- [arm64] arm64: Kconfig: Tidy up errata workaround help text (Jeremy Linton) [1757828]
+- [arm64] arm64: Apply ARM64_ERRATUM_1188873 to Neoverse-N1 (Jeremy Linton) [1757828]
+- [arm64] arm64: Add part number for Neoverse N1 (Jeremy Linton) [1757828]
+- [arm64] arm64: Make ARM64_ERRATUM_1188873 depend on COMPAT (Jeremy Linton) [1757828]
+- [clocksource] arm64: Restrict ARM64_ERRATUM_1188873 mitigation to AArch32 (Jeremy Linton) [1757828]
+- [arm64] arm64: arch_timer: avoid unused function warning (Jeremy Linton) [1757828]
+- [arm64] arm64: Add workaround for Cortex-A76 erratum 1286807 (Jeremy Linton) [1757828]
+
 * Tue Jan 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-168.el8]
 - [kernel] audit: remove redundant condition check in kauditd_thread() (Richard Guy Briggs) [1716002]
 - [kernel] audit: Report suspicious O_CREAT usage (Richard Guy Briggs) [1716002]
