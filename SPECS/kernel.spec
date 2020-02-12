@@ -494,6 +494,8 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+Source9000: centos.pem
+
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -1032,6 +1034,8 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
