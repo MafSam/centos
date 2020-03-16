@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 109
+%define stable_update 110
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2239,6 +2239,9 @@ fi
 #
 #
 %changelog
+* Mon Mar 16 2020 Pablo Greco <pgreco@centosproject.org> - 4.19.110-300
+- Linux v4.19.110
+
 * Sat Mar 14 2020 Pablo Greco <pgreco@centosproject.org> - 4.19.109-300
 - Linux v4.19.109
 
