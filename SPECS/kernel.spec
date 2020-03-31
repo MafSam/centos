@@ -60,7 +60,7 @@ Summary: The Linux kernel
 
 # define buildid .local
 
-%if 0%{?fedora}
+%if 0%{?fedora}%{?centos}
 %define primary_target fedora
 %else
 %define primary_target rhel
@@ -465,7 +465,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%if 0%{?fedora}
+%if 0%{?fedora}%{?centos}
 %define nobuildarches i386
 %else
 %define nobuildarches i386 i686
@@ -484,7 +484,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%if 0%{?fedora}
+%if 0%{?fedora}%{?centos}
 %define cpupowerarchs %{ix86} x86_64 ppc64le %{arm} aarch64
 %else
 %define cpupowerarchs i686 x86_64 ppc64le aarch64
@@ -536,7 +536,7 @@ BuildRequires: kmod, patch, bash, tar, git-core
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
 BuildRequires: net-tools, hostname, bc, elfutils-devel
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires: dwarves
 %endif
 # Used to mangle unversioned shebangs to be Python 3
@@ -1546,8 +1546,9 @@ pathfix.py -i "%{__python3} %{py3_shbang_opts}" -p -n \
 	tools/perf/tests/attr.py \
 	tools/perf/scripts/python/stat-cpi.py \
 	tools/perf/scripts/python/sched-migration.py \
+	tools/testing/selftests/drivers/net/mlxsw/sharedbuffer_configuration.py \
 	Documentation \
-	scripts/clang-tools
+	scripts/clang-tools/*.py
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -2818,6 +2819,7 @@ fi
 %{_bindir}/lsgpio
 %{_bindir}/gpio-hammer
 %{_bindir}/gpio-event-mon
+%{_bindir}/gpio-watch
 %{_mandir}/man1/kvm_stat*
 %{_bindir}/kvm_stat
 
@@ -2853,6 +2855,7 @@ fi
 %{_mandir}/man8/bpftool-net.8.gz
 %{_mandir}/man8/bpftool-feature.8.gz
 %{_mandir}/man8/bpftool-btf.8.gz
+%{_mandir}/man8/bpftool-struct_ops.8.gz
 
 %if %{with_debuginfo}
 %files -f bpftool-debuginfo.list -n bpftool-debuginfo
