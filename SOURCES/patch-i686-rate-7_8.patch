@@ -1,0 +1,11 @@
+diff -aurp a/sound/core/oss/rate.c b/sound/core/oss/rate.c
+--- a/sound/core/oss/rate.c	2019-10-05 05:27:35.000000000 -0300
++++ b/sound/core/oss/rate.c	2020-03-30 17:08:39.702962016 -0300
+@@ -22,6 +22,7 @@
+ #include <linux/time.h>
+ #include <sound/core.h>
+ #include <sound/pcm.h>
++#include <linux/overflow.h>
+ #include "pcm_plugin.h"
+ 
+ #define SHIFT	11
