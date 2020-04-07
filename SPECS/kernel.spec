@@ -2317,6 +2317,9 @@ fi
 #
 #
 %changelog
+* Tue Apr 07 2020 CentOS Sources <bugs@centos.org> - 4.18.0-147.8.1.el8.centos
+- Apply debranding changes
+
 * Tue Feb 25 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.8.1.el8_1]
 - rebuild, due infrastructure issues last kernel build wasn't signed properly [1807231 1807216]
 
