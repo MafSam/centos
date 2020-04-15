@@ -19,7 +19,7 @@
 %global distro_build 147
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 147.0.3.el8_1
+%define pkgrelease 147.8.1.el8_1
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 147.0.3%{?dist}
+%define specrelease 147.8.1%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -168,10 +168,6 @@
 %define with_bpftool 0
 %endif
 
-%if %{?rhel}<=7
-%define with_kabichk 0
-%endif
-
 # turn off kABI DUP check and DWARF-based check if kABI check is disabled
 %if !%{with_kabichk}
 %define with_kabidupchk 0
@@ -203,10 +199,6 @@
 %define all_arch_configs kernel-%{version}-*.config
 %endif
 
-%if 0%{?rhel} == 7
-%define with_bootwrapper 0
-%endif
-
 # sparse blows up on ppc
 %ifnarch ppc64le
 %define with_sparse 0
@@ -236,9 +228,6 @@
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
-%if 0%{?rhel} == 7
-%define with_bootwrapper 1
-%endif
 %define all_arch_configs kernel-%{version}-ppc64le*.config
 %define kcflags -O3
 %endif
@@ -286,11 +275,7 @@
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%if 0%{?rhel} == 7
-%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.28-2
-%else
 %define kernel_prereq  coreutils, systemd >= 203-2, /usr/bin/kernel-install
-%endif
 %define initrd_prereq  dracut >= 027
 
 
@@ -315,19 +300,8 @@ Requires: kernel-modules-uname-r = %{KVERREL}%{?variant}
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
-%if 0%{?rhel} == 7
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl, make, diffutils, gawk, python-devel, python2-rpm-macros
-%else
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
-%endif
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, python3-devel
-%if 0%{?rhel} == 7
-BuildRequires:  devtoolset-8-build
-BuildRequires:  devtoolset-8-binutils
-BuildRequires:  devtoolset-8-gcc
-BuildRequires:  devtoolset-8-make
-BuildRequires:  python3-rpm-macros
-%endif
 BuildRequires: net-tools, hostname, bc, bison, flex, elfutils-devel
 %if %{with_doc}
 BuildRequires: xmlto, asciidoc, python3-sphinx
@@ -350,19 +324,11 @@ BuildRequires: pciutils-devel
 %endif
 %endif
 %if %{with_bpftool}
-%if %{?rhel}>7
 BuildRequires: python3-docutils
-%else
-BuildRequires: python-docutils
-%endif
 BuildRequires: zlib-devel binutils-devel
 %endif
 %if %{with_selftests}
-%if 0%{?rhel} == 7
-BuildRequires: libcap-devel libcap-ng-devel llvm-toolset-7.0 numactl-devel rsync
-%else
 BuildRequires: libcap-devel libcap-ng-devel llvm-toolset numactl-devel rsync
-%endif
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
@@ -421,23 +387,33 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
 %else # released_kernel
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot003
 
 %endif # released_kernel
 
@@ -487,15 +463,7 @@ Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
 ## Patches needed for building this package
-
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-#Patch1002: debrand-rh-i686-cpu.patch 
-Patch1003: centos-fix-exported-sql-viewer.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -505,7 +473,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux kernel for CentOS 
+This is the package which provides the Linux kernel for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux kernel releases. This means
@@ -514,7 +482,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS  Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -615,57 +583,24 @@ This package provides debug information for the perf package.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/traceevent/plugins/.*|.*%%{_libdir}/libperf-jvmti.so(\.debug)?|XXX' -o perf-debuginfo.list}
 
-%if 0%{?rhel} == 7
-%package -n python-perf
-%else
 %package -n python3-perf
-%endif
 Summary: Python bindings for apps which will manipulate perf events
 Group: Development/Libraries
-%if 0%{?rhel} == 7
-%description -n python-perf
-The python-perf package contains a module that permits applications
-%else
 %description -n python3-perf
 The python3-perf package contains a module that permits applications
-%endif
 written in the Python programming language to use the interface
 to manipulate perf events.
 
-%if 0%{?rhel} == 7
-%package -n python-perf-debuginfo
-%else
 %package -n python3-perf-debuginfo
-%endif
 Summary: Debug information for package perf python bindings
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%if 0%{?rhel} == 7
-%description -n python-perf-debuginfo
-%else
 %description -n python3-perf-debuginfo
-%endif
 This package provides debug information for the perf python bindings.
 
-%if 0%{?rhel} == 7
-%if %{with_bootwrapper}
-%package bootwrapper
-Summary: Boot wrapper files for generating combined kernel + initrd images
-Group: Development/System
-Requires: gzip binutils
-%description bootwrapper
-kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
-files combining both kernel and initial ramdisk.
-%endif
-%endif
-
 # the python_sitearch macro should already be defined from above
-%if 0%{?rhel} == 7
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python_sitearch}/perf.*so(\.debug)?|XXX' -o python-perf-debuginfo.list}
-%else
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python3_sitearch}/perf.*so(\.debug)?|XXX' -o python3-perf-debuginfo.list}
-%endif
 
 
 %endif # with_perf
@@ -776,11 +711,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n kernel-abi-whitelists
-Summary: The CentOS  Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n kernel-abi-whitelists
-The kABI package contains information pertaining to the CentOS 
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -790,8 +725,8 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kabidw-base
-The kabidw-base package contains data describing the current ABI of the CentOS
- Linux kernel, suitable for the kabi-dw tool.
+The kabidw-base package contains data describing the current ABI of the Red Hat
+Enterprise Linux kernel, suitable for the kabi-dw tool.
 %endif
 
 #
@@ -863,7 +798,7 @@ Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -981,11 +916,6 @@ input and output, etc.
 %endif
 
 %prep
-%if 0%{?rhel} == 7
-source scl_source enable devtoolset-8 || :
-source scl_source enable llvm-toolset-7.0 || :
-%endif
-
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
 %if !%{with_up}
@@ -1041,21 +971,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch 
-
-%if 0%{?rhel} == 7
-ApplyOptionalPatch centos-fix-exported-sql-viewer.patch
-sed -i 's/strip_size=.*/strip_size=$(stat -c %s $vmz.$$)/g' arch/powerpc/boot/wrapper
-%endif
 
 # END OF PATCH APPLICATIONS
 
@@ -1067,7 +987,6 @@ mv COPYING COPYING-%{version}
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
 
-%if 0%{?rhel}>7
 # Do not use "ambiguous" python shebangs. RHEL 8 now has a new script
 # (/usr/lib/rpm/redhat/brp-mangle-shebangs), which forces us to specify a
 # "non-ambiguous" python shebang for scripts we ship in buildroot. This
@@ -1082,7 +1001,6 @@ pathfix.py -i %{__python3} -p -n \
 	tools/perf/scripts/python/stat-cpi.py \
 	tools/perf/scripts/python/sched-migration.py \
 	Documentation
-%endif
 
 %define make make %{?cross_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}"
 
@@ -1137,10 +1055,6 @@ cd ..
 ### build
 ###
 %build
-%if 0%{?rhel} == 7
-source scl_source enable devtoolset-8 || :
-source scl_source enable llvm-toolset-7.0 || :
-%endif
 
 %if %{with_sparse}
 %define sparse_mflags	C=1
@@ -1631,7 +1545,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
@@ -1683,13 +1597,8 @@ BuildKernel %make_target %kernel_image %{with_vdso_install} zfcpdump
 BuildKernel %make_target %kernel_image %{with_vdso_install}
 %endif
 
-%if 0%{?rhel} == 7
-%global perf_make \
-  make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix} PYTHON=%{__python}
-%else
 %global perf_make \
   make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix} PYTHON=%{__python3}
-%endif
 %if %{with_perf}
 # perf
 # make sure check-headers.sh is executable
@@ -1832,10 +1741,6 @@ find Documentation -type d | xargs chmod u+w
 ###
 
 %install
-%if 0%{?rhel} == 7
-source scl_source enable devtoolset-8 || :
-source scl_source enable llvm-toolset-7.0 || :
-%endif
 
 cd linux-%{KVERREL}
 
@@ -1958,7 +1863,6 @@ popd
 pushd tools/iio
 %{tools_make} DESTDIR=%{buildroot} install
 popd
-%if 0%{?rhel} > 7
 pushd tools/gpio
 %{tools_make} DESTDIR=%{buildroot} install
 popd
@@ -1966,7 +1870,6 @@ pushd tools/kvm/kvm_stat
 make INSTALL_ROOT=%{buildroot} install-tools
 make INSTALL_ROOT=%{buildroot} install-man
 popd
-%endif
 %endif
 
 %if %{with_bpftool}
@@ -2026,11 +1929,6 @@ HEADERS_CHKSUM=$(export LC_ALL=C; find $RPM_BUILD_ROOT/usr/include -type f -name
 # export the checksum via usr/include/linux/version.h, so the dynamic
 # find-provides can grab the hash to update it accordingly
 echo "#define KERNEL_HEADERS_CHECKSUM \"$HEADERS_CHKSUM\"" >> $RPM_BUILD_ROOT/usr/include/linux/version.h
-%endif
-%if 0%{?rhel} == 7
-%if %{with_bootwrapper}
-make %{?cross_opts} ARCH=%{hdrarch} DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
-%endif
 %endif
 
 ###
@@ -2114,17 +2012,6 @@ fi\
 #	%%kernel_variant_posttrans [<subpackage>]
 # More text can follow to go at the end of this variant's %%post.
 #
-%if 0%{?rhel} == 7
-%define kernel_variant_posttrans() \
-%{expand:%%posttrans %{?1:%{1}-}core}\
-if [ -x %{_sbindir}/weak-modules ]\
-then\
-    %{_sbindir}/weak-modules --add-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
-fi\
-%{_sbindir}/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-%{_sbindir}/new-kernel-pkg --package kernel%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
-%{nil}
-%else
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
 if [ -x %{_sbindir}/weak-modules ]\
@@ -2133,7 +2020,6 @@ then\
 fi\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
-%endif
 
 #
 # This macro defines a %%post script for a kernel package and its devel package.
@@ -2152,31 +2038,12 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-%if 0%{?rhel} == 7 \
-%{expand:\
-if [ -f /etc/sysconfig/kernel ]; then\
-  /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel%{?-v:-%{-v*}}-core$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
-fi}\
-%{expand:\
-%{_sbindir}/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-}\
-%endif \
 %{nil}
 
 #
 # This macro defines a %%preun script for a kernel package.
 #	%%kernel_variant_preun <subpackage>
 #
-%if 0%{?rhel} == 7
-%define kernel_variant_preun() \
-%{expand:%%preun %{?1:%{1}-}core}\
-%{_sbindir}/new-kernel-pkg --rminitrd --rmmoddep --remove %{KVERREL}%{?1:.%{1}} || exit $?\
-if [ -x %{_sbindir}/weak-modules ]\
-then\
-    %{_sbindir}/weak-modules --remove-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
-fi\
-%{nil}
-%else
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1:%{1}-}core}\
 /bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
@@ -2185,7 +2052,6 @@ then\
     %{_sbindir}/weak-modules --remove-kernel %{KVERREL}%{?1:+%{1}} || exit $?\
 fi\
 %{nil}
-%endif
 
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
@@ -2257,25 +2123,15 @@ fi
 %doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
 %{_docdir}/perf-tip/tips.txt
 
-%if 0%{?rhel} == 7
-%files -n python-perf
-%defattr(-,root,root)
-%{python_sitearch}/*
-%else
 %files -n python3-perf
 %defattr(-,root,root)
 %{python3_sitearch}/*
-%endif
 
 %if %{with_debuginfo}
 %files -f perf-debuginfo.list -n perf-debuginfo
 %defattr(-,root,root)
 
-%if 0%{?rhel} == 7
-%files -f python-perf-debuginfo.list -n python-perf-debuginfo
-%else
 %files -f python3-perf-debuginfo.list -n python3-perf-debuginfo
-%endif
 %defattr(-,root,root)
 %endif
 %endif # with_perf
@@ -2306,13 +2162,11 @@ fi
 %{_bindir}/iio_event_monitor
 %{_bindir}/iio_generic_buffer
 %{_bindir}/lsiio
-%if 0%{?rhel} > 7
 %{_bindir}/lsgpio
 %{_bindir}/gpio-hammer
 %{_bindir}/gpio-event-mon
 %{_mandir}/man1/kvm_stat*
 %{_bindir}/kvm_stat
-%endif
 
 %if %{with_debuginfo}
 %files -f kernel-tools-debuginfo.list -n kernel-tools-debuginfo
@@ -2355,16 +2209,6 @@ fi
 %{_libexecdir}/kselftests
 %endif
 
-%if 0%{?rhel} == 7
-%if %{with_bootwrapper}
-%files bootwrapper
-%defattr(-,root,root)
-/usr/sbin/*
-%exclude /usr/sbin/bpftool
-%{_libdir}/kernel-wrapper
-%endif
-%endif
-
 # empty meta-package
 %ifnarch %nobuildarches noarch
 %files
@@ -2395,35 +2239,20 @@ fi
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING-%{version}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
-%if 0%{?rhel} == 7\
-/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
-/lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
-/%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
-%else\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
 %ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
-%endif\
 %ifarch aarch64\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/dtb \
 %ghost /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
 %attr(0600, root, root) /lib/modules/%{KVERREL}%{?3:+%{3}}/System.map\
-%if 0%{?rhel} == 7\
-/boot/System.map-%{KVERREL}%{?3:+%{3}}\
-%else\
 %ghost %attr(0600, root, root) /boot/System.map-%{KVERREL}%{?3:+%{3}}\
-%endif\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/symvers.gz\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/config\
-%if 0%{?rhel} == 7\
-/boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
-/boot/config-%{KVERREL}%{?3:+%{3}}\
-%else\
 %ghost %attr(0600, root, root) /boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
-%ghost %attr(0644, root, root) /boot/config-%{KVERREL}%{?3:+%{3}}\
-%endif\
 %ghost %attr(0600, root, root) /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
+%ghost %attr(0644, root, root) /boot/config-%{KVERREL}%{?3:+%{3}}\
 %dir /lib/modules\
 %dir /lib/modules/%{KVERREL}%{?3:+%{3}}\
 %dir /lib/modules/%{KVERREL}%{?3:+%{3}}/kernel\
@@ -2488,13 +2317,171 @@ fi
 #
 #
 %changelog
-* Wed Nov 13 2019 CentOS Sources <bugs@centos.org> - 4.18.0-147.0.3.el8.centos
-- Apply debranding changes
+* Tue Feb 25 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.8.1.el8_1]
+- rebuild, due infrastructure issues last kernel build wasn't signed properly [1807231 1807216]
 
-* Mon Nov 11 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.3.el8_1]
+* Fri Feb 21 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.7.1.el8_1]
+- [hid] hiddev: do cleanup in failure of opening a device (Benjamin Tissoires) [1803458 1803460] {CVE-2019-19527}
+- [hid] hiddev: avoid opening a disconnected device (Benjamin Tissoires) [1803458 1803460] {CVE-2019-19527}
+- [nvme] nvmet: fix discover log page when offsets are used (Gopal Tiwari) [1801216 1745836]
+- [netdrv] ibmvnic: Serialize device queries (Steve Best) [1794060 1778037]
+- [netdrv] ibmvnic: Bound waits for device queries (Steve Best) [1794060 1778037]
+- [netdrv] ibmvnic: Terminate waiting device threads after loss of service (Steve Best) [1794060 1778037]
+- [netdrv] ibmvnic: Fix completion structure initialization (Steve Best) [1794060 1778037]
+- [netdrv] ibmvnic: Ignore H_FUNCTION return from H_EOI to tolerate XIVE mode (Steve Best) [1794060 1778037]
+- [tools] selftests/powerpc: Fix compile error on tlbie_test due to newer gcc (Desnes Augusto Nunes do Rosario) [1794058 1755707]
+- [tools] selftests/powerpc: Add test case for tlbie vs mtpidr ordering issue (Desnes Augusto Nunes do Rosario) [1794058 1755707]
+- [powerpc] powerpc/mm: Fixup tlbie vs mtpidr/mtlpidr ordering issue on POWER9 (Desnes Augusto Nunes do Rosario) [1794058 1755707]
+- [powerpc] powerpc/book3s64/radix: Rename CPU_FTR_P9_TLBIE_BUG feature flag (Desnes Augusto Nunes do Rosario) [1794058 1755707]
+- [powerpc] powerpc/book3s64/mm: Don't do tlbie fixup for some hardware revisions (Desnes Augusto Nunes do Rosario) [1794058 1755707]
+
+* Mon Feb 17 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.6.1.el8_1]
+- [crypto] crypto: chelsio - count incomplete block in IV (Jonathan Toppins) [1798527 1725813]
+- [crypto] crypto: chelsio - Fix softlockup with heavy I/O (Jonathan Toppins) [1798527 1725813]
+- [crypto] crypto: chelsio - Fix NULL pointer dereference (Jonathan Toppins) [1798527 1725813]
+- [nvme] nvme: Treat discovery subsystems as unique subsystems (Ewan Milne) [1798381 1757525]
+- [mm] mm/page-writeback.c: don't break integrity writeback on ->writepage() error (Christoph von Recklinghausen) [1797962 1782117]
+- [lib] crc-t10dif: crc_t10dif_mutex can be static (Vladis Dronov) [1797961 1769462]
+- [lib] crc-t10dif: Allow current transform to be inspected in sysfs (Vladis Dronov) [1797961 1769462]
+- [lib] crc-t10dif: Pick better transform if one becomes available (Vladis Dronov) [1797961 1769462]
+- [crypto] api - Introduce notifier for new crypto algorithms (Vladis Dronov) [1797961 1769462]
+- [block] blk-mq: make sure that line break can be printed (Ming Lei) [1797960 1741462]
+- [block] blk-mq: avoid sysfs buffer overflow with too many CPU cores (Ming Lei) [1797960 1741462]
+- [scsi] hpsa: update driver version (Joseph Szczypek) [1797519 1761968]
+- [scsi] scsi: hpsa: add missing hunks in reset-patch (Joseph Szczypek) [1797519 1761968]
+- [arm64] arm64: compat: Workaround Neoverse-N1 #1542419 for compat user-space (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Fake the IminLine size on systems affected by Neoverse-N1 #1542419 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: errata: Hide CTR_EL0.DIC on systems affected by Neoverse-N1 #1542419 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Handle erratum 1418040 as a superset of erratum 1188873 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: errata: Add workaround for Cortex-A76 erratum #1463225 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Kconfig: Tidy up errata workaround help text (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Apply ARM64_ERRATUM_1188873 to Neoverse-N1 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Add part number for Neoverse N1 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Make ARM64_ERRATUM_1188873 depend on COMPAT (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Restrict ARM64_ERRATUM_1188873 mitigation to AArch32 (Mark Salter) [1797518 1757828]
+- [arm64] arm64: arch_timer: avoid unused function warning (Mark Salter) [1797518 1757828]
+- [arm64] arm64: Add workaround for Cortex-A76 erratum 1286807 (Mark Salter) [1797518 1757828]
+- [md] dm snapshot: rework COW throttling to fix deadlock (Mike Snitzer) [1796490 1758605]
+- [md] dm snapshot: introduce account_start_copy() and account_end_copy() (Mike Snitzer) [1796490 1758605]
+- [block] fix memleak of bio integrity data (Ming Lei) [1795338 1779898]
+- [powerpc] xive: Prevent page fault issues in the machine crash handler (Diego Domingos) [1795337 1756116]
+- [scsi] scsi: megaraid_sas: IRQ poll to avoid CPU hard lockups (Tomas Henzl) [1795335 1726251]
+- [powerpc] powerpc/perf: Disable trace_imc pmu (Steve Best) [1794061 1785573]
+- [s390] s390/qeth: ensure linear access to packet headers (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: guard against runt packets (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: handle skb allocation error gracefully (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: drop unwanted packets earlier in RX path (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: support per-frame invalidation (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: gather more detailed RX dropped/error statistics (Philipp Rudo) [1794059 1781085]
+- [s390] s390/net: Mark expected switch fall-throughs (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: consolidate skb RX processing in L3 driver (Philipp Rudo) [1794059 1781085]
+- [s390] s390/qeth: remove RX seqno in skb->cb (Philipp Rudo) [1794059 1781085]
+- [powerpc] kvm: ppc: book3s hv: Flush link stack on guest exit to host kernel (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] book3s64: Fix link stack flush on context switch (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] 64s: support nospectre_v2 cmdline option (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] fsl: Update Spectre v2 reporting (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] fsl: Add nospectre_v2 command line argument (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] fsl: Fix spectre_v2 mitigations reporting (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] 64: Make meltdown reporting Book3S 64 specific (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [powerpc] 64: Disable the speculation barrier from the command line (Gustavo Duarte) [1794056 1777686] {CVE-2019-18660}
+- [firmware] efi/memreserve: Register reservations as 'reserved' in /proc/iomem (Bhupesh Sharma) [1792200 1772730]
+- [firmware] efi/memreserve: deal with memreserve entries in unmapped memory (Bhupesh Sharma) [1792200 1772730]
+- [s390] s390/cpum_sf: save TOD clock base in SDBs for time conversion (Philipp Rudo) [1792198 1743504]
+- [s390] s390/sclp: Fix bit checked for has_sipl (Philipp Rudo) [1791408 1748347]
+- [scsi] qla2xxx: Fix incorrect SFUB length used for Secure Flash Update MB Cmd (Himanshu Madhani) [1790350 1782598]
+- [scsi] qla2xxx: Added support for MPI and PEP regions for ISP28XX (Himanshu Madhani) [1790350 1782598]
+- [scsi] qla2xxx: Correctly retrieve and interpret active flash region (Himanshu Madhani) [1790350 1782598]
+- [powerpc] powerpc/tm: Fix FP/VMX unavailable exceptions inside a transaction (Gustavo Duarte) [1788862 1750653] {CVE-2019-15030}
+- [powerpc] powerpc/tm: Fix restoring FP/VMX facility incorrectly on interrupts (Gustavo Duarte) [1791630 1750653] {CVE-2019-15031}
+- [scsi] scsi: qla2xxx: Fix different size DMA Alloc/Unmap (Himanshu Madhani) [1788206 1753031]
+- [scsi] qla2xxx: call dma_free_coherent with correct size in all cases in qla24xx_sp_unmap (Himanshu Madhani) [1788206 1753031]
+- [fs] devpts_pty_kill(): don't bother with d_delete() (Eric Sandeen) [1783959 1772718]
+- [fs] devpts: always delete dcache dentry-s in dput() (Eric Sandeen) [1783959 1772718]
+
+* Tue Jan 14 2020 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.5.1.el8_1]
+- [powerpc] powerpc/shared: Use static key to detect shared processor (Phil Auld) [1781114 1767529]
+- [powerpc] powerpc/vcpu: Assume dedicated processors as non-preempt (Phil Auld) [1781114 1767529]
+
+* Mon Dec 16 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.4.1.el8_1]
+- [block] blk-mq: apply normal plugging for HDD (Ming Lei) [1782181 1759380]
+- [block] blk-mq: honor IO scheduler for multiqueue devices (Ming Lei) [1782181 1759380]
+- [block] blk-mq: simplify blk_mq_make_request() (Ming Lei) [1782181 1759380]
+- [block] blk-mq: remove blk_mq_put_ctx() (Ming Lei) [1782181 1759380]
+- [x86] kvm: vmx: use MSR_IA32_TSX_CTRL to hard-disable TSX on guest that lack it (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: vmx: implement MSR_IA32_TSX_CTRL disable RTM functionality (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: implement MSR_IA32_TSX_CTRL effect on CPUID (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: do not modify masked bits of shared MSRs (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm: x86: fix presentation of TSX feature in ARCH_CAPABILITIES (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [x86] kvm/x86: Export MDS_NO=0 to guests when TSX is enabled (Paolo Bonzini) [1781660 1779553] {CVE-2019-19338}
+- [fs] cifs: Fix cifsInodeInfo lock_sem deadlock when reconnect occurs (Leif Sahlberg) [1778693 1765979]
+- [fs] cifs: avoid using MID 0xFFFF (Leif Sahlberg) [1778693 1765979]
+- [fs] cifs: Fix retry mid list corruption on reconnects (Leif Sahlberg) [1778693 1765979]
+- [fs] smb3: fix unmount hang in open_shroot (Leif Sahlberg) [1781113 1757670]
+- [fs] CIFS: fix deadlock in cached root handling (Leif Sahlberg) [1781113 1757670]
+- [fs] Fix match_server check to allow for auto dialect negotiate (Leif Sahlberg) [1781113 1757670]
+- [fs] SMB3: retry on STATUS_INSUFFICIENT_RESOURCES instead of failing write (Leif Sahlberg) [1781113 1757670]
+- [fs] cifs: fix panic in smb2_reconnect (Leif Sahlberg) [1781113 1757670]
+- [fs] cifs: fix strcat buffer overflow and reduce raciness in smb21_set_oplock_level() (Leif Sahlberg) [1781113 1757670]
+- [fs] smb3: fix signing verification of large reads (Dave Wysochanski) [1781110 1753114]
+- [scsi] scsi: lpfc: Fix port relogin failure due to GID_FT interaction (Dick Kennedy) [1781108 1733217]
+- [fs] xfs: fix missing ILOCK unlock when xfs_setattr_nonsize fails due to EDQUOT (Bill O'Donnell) [1778692 1739607]
+- [net] cfg80211: wext: avoid copying malformed SSIDs (Jarod Wilson) [1778633 1778634] {CVE-2019-17133}
+- [block] blkcg: perpcu_ref init/exit should be done from blkg_alloc/free() (Ming Lei) [1777766 1741392]
+- [fs] userfaultfd_release: always remove uffd flags and clear vm_userfaultfd_ctx (Alex Gladkov) [1777389 1749763] {CVE-2019-14898}
+- [netdrv] mwifiex: Fix three heap overflow at parsing element in cfg80211_ap_settings (Jarod Wilson) [1776618 1775484] {CVE-2019-14814 CVE-2019-14815 CVE-2019-14816}
+- [netdrv] mwifiex: fix possible heap overflow in mwifiex_process_country_ie() (Jarod Wilson) [1776209 1776210] {CVE-2019-14895}
+- [netdrv] mwifiex: Fix heap overflow in mmwifiex_process_tdls_action_frame() (Jarod Wilson) [1776161 1776162] {CVE-2019-14901}
+- [netdrv] rtlwifi: Fix potential overflow on P2P code (Jarod Wilson) [1775222 1775223] {CVE-2019-17666}
+- [pci] hv: Avoid use of hv_pci_dev->pci_slot after freeing it (Mohammed Gamal) [1764635 1737569]
+
+* Tue Nov 26 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.3.1.el8_1]
+- [x86] kvm: svm: taint module and print taint message iff nested is enabled (Bandan Das) [1776114 1775410]
+
+* Fri Nov 22 2019 Herton R. Krzesinski <herton@redhat.com> [4.18.0-147.2.1.el8_1]
+- [sched] fair: Scale bandwidth quota and period without losing quota/period ratio precision (Phil Auld) [1773568 1706247]
+- [sched] fair: Fix -Wunused-but-set-variable warnings (Phil Auld) [1773568 1706247]
+- [sched] fair: Fix low cpu usage with high throttling by removing expiration of cpu-local slices (Phil Auld) [1773568 1706247]
+- [powerpc] powerpc/pseries: Track LMB nid instead of using device tree (Steve Best) [1772110 1758742]
+- [powerpc] powerpc/pseries/memory-hotplug: Only update DT once per memory DLPAR request (Steve Best) [1772110 1758742]
+- [powerpc] powerpc/rtas: allow rescheduling while changing cpu states (Steve Best) [1772109 1758651]
+- [powerpc] powerpc/pseries/mobility: use cond_resched when updating device tree (Steve Best) [1772109 1758651]
+- [netdrv] i40e: Do not check VF state in i40e_ndo_get_vf_config (Stefan Assmann) [1770177 1752498]
+- [fs] CIFS: Fix use after free of file info structures (Dave Wysochanski) [1767357 1757865]
+- [fs] cifs: use cifsInodeInfo->open_file_lock while iterating to avoid a panic (Dave Wysochanski) [1767357 1757865]
+- [netdrv] net/ibmvnic: prevent more than one thread from running in reset (Steve Best) [1764830 1756943]
+- [netdrv] net/ibmvnic: unlock rtnl_lock in reset so linkwatch_event can run (Steve Best) [1764830 1756943]
+- [netdrv] ibmvnic: Warn unknown speed message only when carrier is present (Steve Best) [1764832 1749873]
+- [netdrv] net/ibmvnic: Fix missing { in __ibmvnic_reset (Steve Best) [1764832 1749873]
+- [netdrv] net/ibmvnic: free reset work of removed device from queue (Steve Best) [1764832 1749873]
+- [netdrv] ibmvnic: Do not process reset during or after device removal (Steve Best) [1764832 1749873]
+- [cpuidle] cpuidle: governor: Add new governors to cpuidle_governors again (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle-haltpoll: do not set an owner to allow modunload (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle-haltpoll: set haltpoll as preferred governor (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: allow governor switch on cpuidle_register_driver() (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: Add cpuidle.governor= command line parameter (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle-haltpoll: vcpu hotplug support (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle-haltpoll: disable host side polling when kvm virtualized (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: add haltpoll governor (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: header file stubs must be "static inline" (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] governors: unify last_state_idx (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: add poll_limit_ns to cpuidle_device structure (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: poll_state: Fix default time limit (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: poll_state: Disregard disable idle states (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: poll_state: Revise loop termination condition (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle: menu: Fix wakeup statistics updates for polling state (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] cpuidle-haltpoll: return -ENODEV on modinit failure (Marcelo Tosatti) [1764831 1759282]
+- [cpuidle] add cpuidle-haltpoll driver (Marcelo Tosatti) [1764831 1759282]
+- [x86] kvm: x86: add host poll control msrs (Vitaly Kuznetsov) [1764831 1749495]
+- [s390] s390/setup: Fix kernel lock down for s390 (Philipp Rudo) [1764827 1748343]
+- [powerpc] powerpc: Allow flush_(inval_)dcache_range to work across ranges >4GB (Steve Best) [1764826 1744062]
+- [fs] mm/huge_memory: fix vmf_insert_pfn_{pmd, pud}() crash, handle unaligned addresses (Jeff Moyer) [1764825 1743159]
+- [mm] mm/huge_memory.c: fix modifying of page protection by insert_pfn_pmd() (Jeff Moyer) [1764825 1743159]
+- [pci] PCI: hv: Use bytes 4 and 5 from instance ID as the PCI domain numbers (Mohammed Gamal) [1764634 1671288]
+- [pci] PCI: hv: Detect and fix Hyper-V PCI domain number collision (Mohammed Gamal) [1764634 1671288]
+
+* Tue Nov 12 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.1.1.el8_1]
+- [arm64] arm64/sve: Fix wrong free for task->thread.sve_state (Andrew Jones) [1767358 1756450]
 - [drm] drm/i915/cmdparser: Fix jump whitelist clearing (Dave Airlie) [1756871 1756873] {CVE-2019-0155}
-
-* Sun Nov 03 2019 Frantisek Hrbata <fhrbata@redhat.com> [4.18.0-147.0.2.el8_1]
 - [drm] drm/i915: Lower RM timeout to avoid DSI hard hangs (Dave Airlie) [1766056 1756805] {CVE-2019-0154}
 - [drm] drm/i915/gen8+: Add RC6 CTX corruption WA (Dave Airlie) [1766056 1756805] {CVE-2019-0154}
 - [drm] drm/i915/cmdparser: Ignore Length operands during command matching (Dave Airlie) [1756871 1756873] {CVE-2019-0155}
