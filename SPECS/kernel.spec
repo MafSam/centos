@@ -517,7 +517,7 @@ Source9000: centos.pem
 Patch999999: linux-kernel-test.patch
 
 Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
+#Patch1001: debrand-rh_taint.patch
 #Patch1002: debrand-rh-i686-cpu.patch
 
 # END OF PATCH DEFINITIONS
@@ -1056,7 +1056,7 @@ mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
+#ApplyOptionalPatch debrand-rh_taint.patch
 #ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
