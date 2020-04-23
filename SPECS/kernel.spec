@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 s390x ppc64le
+%ifarch x86_64 aarch64
 %global signkernel 1
 %else
 %global signkernel 0
@@ -435,34 +435,24 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: securebootca.cer
-Source13: secureboot.cer
-Source14: secureboot_s390.cer
-Source15: secureboot_ppc.cer
+Source12: centos-ca-secureboot.der
+Source13: centossecureboot001.crt
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot301
-%endif
-%ifarch s390x
-%define secureboot_key %{SOURCE14}
-%define pesign_name redhatsecureboot302
-%endif
-%ifarch ppc64le
-%define secureboot_key %{SOURCE15}
-%define pesign_name redhatsecureboot303
+%define pesign_name centossecureboot001
 %endif
 
 # released_kernel
 %else
 
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot003.cer
+Source12: centos-ca-secureboot.der
+Source13: centossecureboot001.crt
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot003
+%define pesign_name centossecureboot001
 
 # released_kernel
 %endif
@@ -519,17 +509,23 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+Source9000: centos.pem
+
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
+
+Patch1000: debrand-single-cpu.patch
+Patch1001: debrand-rh_taint.patch
+#Patch1002: debrand-rh-i686-cpu.patch
 
 # END OF PATCH DEFINITIONS
 
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for Red Hat Enterprise
+This is the package which provides the Linux %{name} for CentOS
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -538,7 +534,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in Red Hat Enterprise Linux, enhancements for
+updates for supported hardware in CentOS Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -771,11 +767,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
+Summary: The CentOS Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the Red Hat Enterprise
+The kABI package contains information pertaining to the CentOS
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -785,7 +781,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the Red Hat Enterprise
+The package contains data describing the current ABI of the CentOS
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -1053,9 +1049,15 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
+
+ApplyOptionalPatch debrand-single-cpu.patch
+ApplyOptionalPatch debrand-rh_taint.patch
+#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 
