@@ -2461,6 +2461,9 @@ fi
 #
 #
 %changelog
+* Tue Apr 28 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.el8.centos
+- Apply debranding changes
+
 * Fri Mar 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.el8]
 - [kvm] KVM: PPC: Book3S HV: Use __gfn_to_pfn_memslot in HPT page fault handler (Sam Bobroff) [1815491]
 - [net] tcp: also NULL skb->dev when copy was needed (Florian Westphal) [1775961]
