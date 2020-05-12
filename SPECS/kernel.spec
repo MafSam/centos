@@ -2462,6 +2462,9 @@ fi
 #
 #
 %changelog
+* Tue May 12 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.1.2.el8.centos
+- Apply debranding changes
+
 * Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
 - [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
 - [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
