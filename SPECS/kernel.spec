@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.el8
+%define pkgrelease 193.1.2.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193%{?dist}
+%define specrelease 193.1.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -54,6 +54,7 @@
 # All should default to 1 (enabled) and be flipped to 0 (disabled)
 # by later arch-specific checks.
 
+%define _with_kabidupchk 1
 # The following build options are enabled by default.
 # Use either --without <opt> in your rpmbuild command or force values
 # to 0 in here to disable them.
@@ -420,24 +421,34 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
 # released_kernel
 %else
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot003
 
 # released_kernel
 %endif
@@ -494,13 +505,6 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-#Patch1002: debrand-rh-i686-cpu.patch
-
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -511,7 +515,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for CentOS
+This is the package which provides the Linux %{name} for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -520,7 +524,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -753,11 +757,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The CentOS Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the CentOS
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -767,7 +771,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the CentOS
+The package contains data describing the current ABI of the Red Hat Enterprise
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -840,7 +844,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -1035,17 +1039,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
-
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1644,7 +1642,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
@@ -2464,8 +2462,22 @@ fi
 #
 #
 %changelog
-* Tue Apr 28 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.el8.centos
-- Apply debranding changes
+* Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
+- [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
+- [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
+
+* Mon Apr 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.1.el8_2]
+- [x86] kvm: x86: clear stale x86_emulate_ctxt->intercept value (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: vmx: check descriptor table exits on instruction emulation (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Check IO instruction VM-exit conditions (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Refactor IO bitmap checks into helper function (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Don't emulate instructions in guest mode (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [sound] ALSA: usb-audio: set the interface format after resume on Dell WD19 (Perry Yuan) [1821376 1807965]
+- [kernel] sched: Avoid scale real weight down to zero (Phil Auld) [1819909 1808562]
+- [netdrv] hv_netvsc: Fix unwanted rx_table reset (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix tx_table init in rndis_set_subchannel() (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix send_table offset in case of a host bug (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix offset usage in netvsc_send_table() (Mohammed Gamal) [1817945 1805950]
 
 * Fri Mar 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.el8]
 - [kvm] KVM: PPC: Book3S HV: Use __gfn_to_pfn_memslot in HPT page fault handler (Sam Bobroff) [1815491]
