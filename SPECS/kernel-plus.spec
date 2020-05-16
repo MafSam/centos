@@ -39,14 +39,14 @@
 %global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
-%define dist .el8.centos.plus
+%define dist .el8_2.centos.plus
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.el8
+%define pkgrelease 193.1.2.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193%{?dist}
+%define specrelease 193.1.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -54,6 +54,8 @@
 # These are the kernels that are built IF the architecture allows it.
 # All should default to 1 (enabled) and be flipped to 0 (disabled)
 # by later arch-specific checks.
+
+%define _with_kabidupchk 1
 
 # The following build options are enabled by default.
 # Use either --without <opt> in your rpmbuild command or force values
@@ -2554,7 +2556,7 @@ fi
 #
 #
 %changelog
-* Fri May 08 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.el8.centos.plus]
+* Thu May 14 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.1.2.el8_2.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters,
   some SCSI adapters, ReiserFS, TOMOYO
@@ -2562,6 +2564,23 @@ fi
 - Apply driver patches imported from ELRepo
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
 - Apply patches for e1000 from kernel.org [bug#16284]
+
+* Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
+- [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
+- [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
+
+* Mon Apr 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.1.el8_2]
+- [x86] kvm: x86: clear stale x86_emulate_ctxt->intercept value (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: vmx: check descriptor table exits on instruction emulation (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Check IO instruction VM-exit conditions (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Refactor IO bitmap checks into helper function (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [x86] kvm: nvmx: Don't emulate instructions in guest mode (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
+- [sound] ALSA: usb-audio: set the interface format after resume on Dell WD19 (Perry Yuan) [1821376 1807965]
+- [kernel] sched: Avoid scale real weight down to zero (Phil Auld) [1819909 1808562]
+- [netdrv] hv_netvsc: Fix unwanted rx_table reset (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix tx_table init in rndis_set_subchannel() (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix send_table offset in case of a host bug (Mohammed Gamal) [1817945 1805950]
+- [netdrv] hv_netvsc: Fix offset usage in netvsc_send_table() (Mohammed Gamal) [1817945 1805950]
 
 * Fri Mar 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.el8]
 - [kvm] KVM: PPC: Book3S HV: Use __gfn_to_pfn_memslot in HPT page fault handler (Sam Bobroff) [1815491]
