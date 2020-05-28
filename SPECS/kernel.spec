@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 s390x ppc64le
+%ifarch x86_64 aarch64
 %global signkernel 1
 %else
 %global signkernel 0
@@ -193,6 +193,10 @@
 %define with_bpftool 0
 %endif
 
+%if %{?rhel}<=7
+%define with_kabichk 0
+%endif
+
 # turn off kABI DUP check and DWARF-based check if kABI check is disabled
 %if !%{with_kabichk}
 %define with_kabidupchk 0
@@ -224,6 +228,10 @@
 %define all_arch_configs %{name}-%{version}-*.config
 %endif
 
+%if 0%{?rhel} == 7
+%define with_bootwrapper 0
+%endif
+
 # sparse blows up on ppc
 %ifnarch ppc64le
 %define with_sparse 0
@@ -253,6 +261,9 @@
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
+%if 0%{?rhel} == 7
+%define with_bootwrapper 1
+%endif
 %define all_arch_configs %{name}-%{version}-ppc64le*.config
 %define kcflags -O3
 %endif
@@ -300,7 +311,11 @@
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
+%if 0%{?rhel} == 7
+%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.28-2
+%else
 %define kernel_prereq  coreutils, systemd >= 203-2, /usr/bin/kernel-install
+%endif
 %define initrd_prereq  dracut >= 027
 
 
@@ -332,8 +347,19 @@ Requires: rt-setup
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
+%if 0%{?rhel} == 7
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl, make, diffutils, gawk, python-devel, python2-rpm-macros
+%else
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
+%endif
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, python3-devel
+%if 0%{?rhel} == 7
+BuildRequires:  devtoolset-8-build
+BuildRequires:  devtoolset-8-binutils
+BuildRequires:  devtoolset-8-gcc
+BuildRequires:  devtoolset-8-make
+BuildRequires:  python3-rpm-macros
+%endif
 BuildRequires: net-tools, hostname, bc, bison, flex, elfutils-devel, dwarves
 %if %{with_doc}
 BuildRequires: xmlto, asciidoc, python3-sphinx
@@ -357,11 +383,19 @@ BuildRequires: pciutils-devel
 %endif
 %endif
 %if %{with_bpftool}
+%if %{?rhel}>7
 BuildRequires: python3-docutils
+%else
+BuildRequires: python-docutils
+%endif
 BuildRequires: zlib-devel binutils-devel
 %endif
 %if %{with_selftests}
+%if 0%{?rhel} == 7
+BuildRequires: libcap-devel libcap-ng-devel llvm-toolset-7.0 numactl-devel rsync
+%else
 BuildRequires: libcap-devel libcap-ng-devel llvm-toolset numactl-devel rsync
+%endif
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
@@ -421,34 +455,24 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: securebootca.cer
-Source13: secureboot.cer
-Source14: secureboot_s390.cer
-Source15: secureboot_ppc.cer
+Source12: centos-ca-secureboot.der
+Source13: centossecureboot001.crt
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot301
-%endif
-%ifarch s390x
-%define secureboot_key %{SOURCE14}
-%define pesign_name redhatsecureboot302
-%endif
-%ifarch ppc64le
-%define secureboot_key %{SOURCE15}
-%define pesign_name redhatsecureboot303
+%define pesign_name centossecureboot001
 %endif
 
 # released_kernel
 %else
 
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot003.cer
+Source12: centos-ca-secureboot.der
+Source13: centossecureboot001.crt
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot003
+%define pesign_name centossecureboot001
 
 # released_kernel
 %endif
@@ -493,9 +517,9 @@ Source211: Module.kabi_dup_ppc64le
 Source212: Module.kabi_dup_s390x
 Source213: Module.kabi_dup_x86_64
 
-Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
 Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 %endif
+Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
 
 %if %{with_realtime}
 Source400: mod-kvm.list
@@ -505,7 +529,14 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+# Sources for CentOS debranding
+Source9000: centos.pem
+
 ## Patches needed for building this package
+
+Patch1000: debrand-single-cpu.patch
+Patch1001: debrand-rh_taint.patch
+#Patch1002: debrand-rh-i686-cpu.patch
 
 # empty final patch to facilitate testing of kernel patches
 Patch999999: linux-kernel-test.patch
@@ -515,7 +546,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for Red Hat Enterprise
+This is the package which provides the Linux %{name} for CentOS 
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -524,7 +555,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in Red Hat Enterprise Linux, enhancements for
+updates for supported hardware in CentOS Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -626,26 +657,57 @@ This package provides debug information for the perf package.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/traceevent/plugins/.*|.*%%{_libdir}/libperf-jvmti.so(\.debug)?|XXX' -o perf-debuginfo.list}
 
+%if 0%{?rhel} == 7
+%package -n python-perf
+%else
 %package -n python3-perf
+%endif
 Summary: Python bindings for apps which will manipulate perf events
 Group: Development/Libraries
+%if 0%{?rhel} == 7
+%description -n python-perf
+The python-perf package contains a module that permits applications
+%else
 %description -n python3-perf
 The python3-perf package contains a module that permits applications
+%endif
 written in the Python programming language to use the interface
 to manipulate perf events.
 
+%if 0%{?rhel} == 7
+%package -n python-perf-debuginfo
+%else
 %package -n python3-perf-debuginfo
+%endif
 Summary: Debug information for package perf python bindings
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
+%if 0%{?rhel} == 7
+%description -n python-perf-debuginfo
+%else
 %description -n python3-perf-debuginfo
+%endif
 This package provides debug information for the perf python bindings.
+%endif #with_perf
+
+%if 0%{?rhel} == 7
+%if %{with_bootwrapper}
+%package bootwrapper
+Summary: Boot wrapper files for generating combined kernel + initrd images
+Group: Development/System
+Requires: gzip binutils
+%description bootwrapper
+kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
+files combining both kernel and initial ramdisk.
+%endif
+%endif
 
 # the python_sitearch macro should already be defined from above
+%if 0%{?rhel} == 7
+%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python_sitearch}/perf.*so(\.debug)?|XXX' -o python-perf-debuginfo.list}
+%else
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python3_sitearch}/perf.*so(\.debug)?|XXX' -o python3-perf-debuginfo.list}
-
-# with_perf
 %endif
 
 %if %{with_tools}
@@ -757,11 +819,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
+Summary: The CentOS Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the Red Hat Enterprise
+The kABI package contains information pertaining to the CentOS
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -771,7 +833,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the Red Hat Enterprise
+The package contains data describing the current ABI of the CentOS
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -844,7 +906,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
 %{nil}
 
 #
@@ -984,6 +1046,11 @@ input and output, etc.
 %endif
 
 %prep
+%if 0%{?rhel} == 7
+source scl_source enable devtoolset-8 || :
+source scl_source enable llvm-toolset-7.0 || :
+%endif
+
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
 %if !%{with_up}
@@ -1039,9 +1106,14 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
+ApplyOptionalPatch debrand-single-cpu.patch
+ApplyOptionalPatch debrand-rh_taint.patch
+#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 ApplyOptionalPatch linux-kernel-test.patch
 
@@ -1063,6 +1135,7 @@ mv COPYING COPYING-%{version}
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
 
+%if 0%{?rhel}>7
 # Do not use "ambiguous" python shebangs. RHEL 8 now has a new script
 # (/usr/lib/rpm/redhat/brp-mangle-shebangs), which forces us to specify a
 # "non-ambiguous" python shebang for scripts we ship in buildroot. This
@@ -1077,6 +1150,7 @@ pathfix.py -i %{__python3} -p -n \
 	tools/perf/scripts/python/stat-cpi.py \
 	tools/perf/scripts/python/sched-migration.py \
 	Documentation
+%endif
 
 %define make make %{?cross_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}"
 
@@ -1131,6 +1205,10 @@ cd ..
 ### build
 ###
 %build
+%if 0%{?rhel} == 7
+source scl_source enable devtoolset-8 || :
+source scl_source enable llvm-toolset-7.0 || :
+%endif
 
 %if %{with_sparse}
 %define sparse_mflags	C=1
@@ -1642,7 +1720,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
@@ -1694,8 +1772,13 @@ BuildKernel %make_target %kernel_image %{with_vdso_install} zfcpdump
 BuildKernel %make_target %kernel_image %{with_vdso_install}
 %endif
 
+%if 0%{?rhel} == 7
+%global perf_make \
+  make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 prefix=%{_prefix} PYTHON=%{__python}
+%else
 %global perf_make \
   make EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 prefix=%{_prefix} PYTHON=%{__python3}
+%endif
 %if %{with_perf}
 # perf
 # make sure check-headers.sh is executable
@@ -1841,6 +1924,10 @@ find Documentation -type d | xargs chmod u+w
 ###
 
 %install
+%if 0%{?rhel} == 7
+source scl_source enable devtoolset-8 || :
+source scl_source enable llvm-toolset-7.0 || :
+%endif
 
 cd linux-%{KVERREL}
 
@@ -1968,6 +2055,7 @@ popd
 pushd tools/iio
 %{tools_make} DESTDIR=%{buildroot} install
 popd
+%if 0%{?rhel} > 7
 pushd tools/gpio
 %{tools_make} DESTDIR=%{buildroot} install
 popd
@@ -1975,6 +2063,7 @@ pushd tools/kvm/kvm_stat
 make INSTALL_ROOT=%{buildroot} install-tools
 make INSTALL_ROOT=%{buildroot} install-man
 popd
+%endif
 %endif
 
 %if %{with_bpftool}
@@ -2040,6 +2129,12 @@ HEADERS_CHKSUM=$(export LC_ALL=C; find $RPM_BUILD_ROOT/usr/include -type f -name
 # export the checksum via usr/include/linux/version.h, so the dynamic
 # find-provides can grab the hash to update it accordingly
 echo "#define KERNEL_HEADERS_CHECKSUM \"$HEADERS_CHKSUM\"" >> $RPM_BUILD_ROOT/usr/include/linux/version.h
+%endif
+
+%if 0%{?rhel} == 7
+%if %{with_bootwrapper}
+make %{?cross_opts} ARCH=%{hdrarch} DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
+%endif
 %endif
 
 ###
@@ -2138,6 +2233,18 @@ fi\
 #	%%kernel_variant_posttrans [<subpackage>]
 # More text can follow to go at the end of this variant's %%post.
 #
+
+%if 0%{?rhel} == 7
+%define kernel_variant_posttrans() \
+%{expand:%%posttrans %{?1:%{1}-}core}\
+if [ -x %{_sbindir}/weak-modules ]\
+then\
+    %{_sbindir}/weak-modules --add-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
+fi\
+%{_sbindir}/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+%{_sbindir}/new-kernel-pkg --package kernel%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
+%{nil}
+%else
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
 %if !%{with_realtime}\
@@ -2148,6 +2255,7 @@ fi\
 %endif\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
+%endif
 
 #
 # This macro defines a %%post script for a kernel package and its devel package.
@@ -2166,12 +2274,31 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
+%if 0%{?rhel} == 7 \
+%{expand:\
+if [ -f /etc/sysconfig/kernel ]; then\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=kernel%{?-v:-%{-v*}}-core$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+fi}\
+%{expand:\
+%{_sbindir}/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+}\
+%endif \
 %{nil}
 
 #
 # This macro defines a %%preun script for a kernel package.
 #	%%kernel_variant_preun <subpackage>
 #
+%if 0%{?rhel} == 7
+%define kernel_variant_preun() \
+%{expand:%%preun %{?1:%{1}-}core}\
+%{_sbindir}/new-kernel-pkg --rminitrd --rmmoddep --remove %{KVERREL}%{?1:.%{1}} || exit $?\
+if [ -x %{_sbindir}/weak-modules ]\
+then\
+    %{_sbindir}/weak-modules --remove-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
+fi\
+%{nil}
+%else
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1:%{1}-}core}\
 /bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
@@ -2182,6 +2309,7 @@ then\
 fi\
 %endif\
 %{nil}
+%endif
 
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
@@ -2258,16 +2386,25 @@ fi
 %{_sysconfdir}/bash_completion.d/perf
 %doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
 %{_docdir}/perf-tip/tips.txt
-
+%if 0%{?rhel} == 7
+%files -n python-perf
+%defattr(-,root,root)
+%{python_sitearch}/*
+%else
 %files -n python3-perf
 %defattr(-,root,root)
 %{python3_sitearch}/*
+%endif
 
 %if %{with_debuginfo}
 %files -f perf-debuginfo.list -n perf-debuginfo
 %defattr(-,root,root)
 
+%if 0%{?rhel} == 7
+%files -f python-perf-debuginfo.list -n python-perf-debuginfo
+%else
 %files -f python3-perf-debuginfo.list -n python3-perf-debuginfo
+%endif
 %defattr(-,root,root)
 %endif
 # with_perf
@@ -2302,11 +2439,13 @@ fi
 %{_bindir}/iio_event_monitor
 %{_bindir}/iio_generic_buffer
 %{_bindir}/lsiio
+%if 0%{?rhel} > 7
 %{_bindir}/lsgpio
 %{_bindir}/gpio-hammer
 %{_bindir}/gpio-event-mon
 %{_mandir}/man1/kvm_stat*
 %{_bindir}/kvm_stat
+%endif
 
 %if %{with_debuginfo}
 %files -f %{name}-tools-debuginfo.list -n %{name}-tools-debuginfo
@@ -2351,6 +2490,16 @@ fi
 %{_libexecdir}/kselftests
 %endif
 
+%if 0%{?rhel} == 7
+%if %{with_bootwrapper}
+%files bootwrapper
+%defattr(-,root,root)
+/usr/sbin/*
+%exclude /usr/sbin/bpftool
+%{_libdir}/kernel-wrapper
+%endif
+%endif
+
 # empty meta-package
 %ifnarch %nobuildarches noarch
 %files
@@ -2381,20 +2530,35 @@ fi
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING-%{version}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
+%if 0%{?rhel} == 7\
+/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
+/%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
+%else\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
 %ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
+%endif\
 %ifarch aarch64\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/dtb \
 %ghost /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
 %attr(0600, root, root) /lib/modules/%{KVERREL}%{?3:+%{3}}/System.map\
+%if 0%{?rhel} == 7\
+/boot/System.map-%{KVERREL}%{?3:+%{3}}\
+%else\
 %ghost %attr(0600, root, root) /boot/System.map-%{KVERREL}%{?3:+%{3}}\
+%endif\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/symvers.gz\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/config\
+%if 0%{?rhel} == 7\
+/boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
+/boot/config-%{KVERREL}%{?3:+%{3}}\
+%else\
 %ghost %attr(0600, root, root) /boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
-%ghost %attr(0600, root, root) /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
 %ghost %attr(0644, root, root) /boot/config-%{KVERREL}%{?3:+%{3}}\
+%endif\
+%ghost %attr(0600, root, root) /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
 %dir /lib/modules\
 %dir /lib/modules/%{KVERREL}%{?3:+%{3}}\
 %dir /lib/modules/%{KVERREL}%{?3:+%{3}}/kernel\
@@ -2462,9 +2626,6 @@ fi
 #
 #
 %changelog
-* Tue May 12 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.1.2.el8.centos
-- Apply debranding changes
-
 * Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
 - [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
 - [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
