@@ -220,6 +220,10 @@ Summary: The Linux kernel
 %define with_selftests 0
 # no ipa_clone for now
 %define with_ipaclones 0
+# no whitelist
+%define with_kernel_abi_whitelists 0
+%define with_kabidw_base 0
+%define with_kabidwchk 0
 %endif
 
 %if %{with_verbose}
