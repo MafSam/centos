@@ -2462,6 +2462,9 @@ fi
 #
 #
 %changelog
+* Tue Jun 09 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.6.3.el8.centos
+- Apply debranding changes
+
 * Mon Jun 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.3.el8_2]
 - rebuild to enable xt_u32 module (Jiri Benc) [1840800 1840799 1834769 1838190]
 
