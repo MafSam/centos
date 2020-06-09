@@ -43,10 +43,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.1.2.el8_2
+%define pkgrelease 193.6.3.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.1.2%{?dist}
+%define specrelease 193.6.3%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2556,7 +2556,7 @@ fi
 #
 #
 %changelog
-* Thu May 14 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.1.2.el8_2.centos.plus]
+* Thu Jun 09 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.6.3.el8_2.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters,
   some SCSI adapters, ReiserFS, TOMOYO
@@ -2565,9 +2565,59 @@ fi
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
 - Apply patches for e1000 from kernel.org [bug#16284]
 
-* Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
+* Mon Jun 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.3.el8_2]
+- rebuild to enable xt_u32 module (Jiri Benc) [1840800 1840799 1834769 1838190]
+
+* Tue May 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.2.el8_2]
+- [documentation] x86/speculation: Add Ivy Bridge to affected list (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [documentation] x86/speculation: Add SRBDS vulnerability and mitigation documentation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/speculation: Add Special Register Buffer Data Sampling (SRBDS) mitigation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/cpu: Add 'table' argument to cpu_matches() (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/cpu: Add a steppings field to struct x86_cpu_id (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+
+* Fri May 22 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.1.el8_2]
+- [char] tpm: ibmvtpm: retry on H_CLOSED in tpm_ibmvtpm_send() (Steve Best) [1827632 1808048]
+- [netdrv] bonding: fix active-backup transition after link failure (Jarod Wilson) [1838477 1819408]
+- [netdrv] bonding: fix state transition issue in link monitoring (Jarod Wilson) [1838477 1819408]
+- [kernel] sched/fair: Allow a per-CPU kthread waking a task to stack on the same CPU, to fix XFS performance regression (Phil Auld) [1834517 1745111]
+- [block] block, bfq: fix use-after-free in bfq_idle_slice_timer_body (Ming Lei) [1835531 1835532] {CVE-2020-12657}
+- [kvm] KVM: x86: use raw clock values consistently (Marcelo Tosatti) [1822498 1768622]
+- [kvm] KVM: x86: reorganize pvclock_gtod_data members (Marcelo Tosatti) [1822498 1768622]
+- [kvm] KVM: x86: switch KVMCLOCK base to monotonic raw clock (Marcelo Tosatti) [1822498 1768622]
+
+* Thu May 21 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.5.1.el8_2]
+- [fs] nfs: fix NULL deference in nfs4_get_valid_delegation ("J. Bruce Fields") [1837969 1831553]
+
+* Fri May 15 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.4.1.el8_2]
+- [bluetooth] Revert "Bluetooth: btusb: driver to enable the usb-wakeup feature" (Gopal Tiwari) [1827620 1811534]
 - [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
 - [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
+
+* Tue May 12 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.3.1.el8_2]
+- [kernel] sched/isolation: Allow "isolcpus=" to skip unknown sub-parameters (Peter Xu) [1832367 1799014]
+- [firmware] efi: fix a mistype in comments mentioning efivar_entry_iter_begin() (Vladis Dronov) [1829527 1804417]
+- [firmware] efi: add a sanity check to efivar_store_raw() (Vladis Dronov) [1829527 1804417]
+- [firmware] efi: fix a race and a buffer overflow while reading efivars via sysfs (Vladis Dronov) [1829527 1804417]
+- [net] net/smc: keep vlan_id for SMC-R in smc_listen_work() (Philipp Rudo) [1827631 1796890]
+
+* Mon May 04 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.2.1.el8_2]
+- [net] vti[6]: fix packet tx through bpf_redirect() in XinY cases (Sabrina Dubroca) [1821375 1795145]
+- [net] xfrm interface: fix packet tx through bpf_redirect() (Sabrina Dubroca) [1821375 1795145]
+- [net] vti[6]: fix packet tx through bpf_redirect() (Sabrina Dubroca) [1821375 1795145]
+- [scripts] redhat: fix modpost.c prerequisites (Frantisek Hrbata) [1828229 1818499]
+- [infiniband] IB/core: Avoid deadlock during netlink message handling (Kamal Heib) [1821381 1818986]
+- [infiniband] RDMA/core: Support netlink commands in non init_net net namespaces (Kamal Heib) [1821381 1818986]
+- [misc] mei: me: add comet point (lake) H device ids (Ken Cox) [1825262 1815355]
+- [misc] mei: me: add comet point (lake) LP device ids (Ken Cox) [1825262 1815355]
+- [misc] mei: define dma ring buffer sizes for PCH12 HW and newer (Ken Cox) [1825262 1815355]
+- [misc] mei: hbm: define dma ring setup protocol (Ken Cox) [1825262 1815355]
+- [net] SUNRPC: fix krb5p mount to provide large enough buffer in rq_rcvsize (Steve Dickson) [1826219 1825388]
+- [mm] mm, numa: fix bad pmd by atomically check for pmd_trans_huge when marking page tables prot_numa (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix flags for pmd migration when split (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: relocate flush_cache_range() in migrate_misplaced_transhuge_page() (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix mmu_notifier in migrate_misplaced_transhuge_page() (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix MADV_DONTNEED vs migrate_misplaced_transhuge_page race condition (Rafael Aquini) [1827619 1763878]
+- [md] Revert "dm: always call blk_queue_split() in dm_process_bio()" (Mike Snitzer) [1821382 1820705]
 
 * Mon Apr 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.1.el8_2]
 - [x86] kvm: x86: clear stale x86_emulate_ctxt->intercept value (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
