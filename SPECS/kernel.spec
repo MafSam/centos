@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.1.2.el8_2
+%define pkgrelease 193.6.3.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.1.2%{?dist}
+%define specrelease 193.6.3%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -421,24 +421,34 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
 # released_kernel
 %else
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
 
 %define secureboot_ca %{SOURCE12}
 %define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define pesign_name redhatsecureboot003
 
 # released_kernel
 %endif
@@ -495,13 +505,6 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-#Patch1002: debrand-rh-i686-cpu.patch
-
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -512,7 +515,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for CentOS
+This is the package which provides the Linux %{name} for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -521,7 +524,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -754,11 +757,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The CentOS Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the CentOS
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -768,7 +771,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the CentOS
+The package contains data describing the current ABI of the Red Hat Enterprise
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -841,7 +844,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -1036,17 +1039,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
-
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1645,7 +1642,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
     %ifarch s390x ppc64le
@@ -2465,12 +2462,59 @@ fi
 #
 #
 %changelog
-* Tue May 12 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.1.2.el8.centos
-- Apply debranding changes
+* Mon Jun 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.3.el8_2]
+- rebuild to enable xt_u32 module (Jiri Benc) [1840800 1840799 1834769 1838190]
 
-* Thu May 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.2.el8_2]
+* Tue May 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.2.el8_2]
+- [documentation] x86/speculation: Add Ivy Bridge to affected list (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [documentation] x86/speculation: Add SRBDS vulnerability and mitigation documentation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/speculation: Add Special Register Buffer Data Sampling (SRBDS) mitigation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/cpu: Add 'table' argument to cpu_matches() (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+- [x86] x86/cpu: Add a steppings field to struct x86_cpu_id (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+
+* Fri May 22 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.1.el8_2]
+- [char] tpm: ibmvtpm: retry on H_CLOSED in tpm_ibmvtpm_send() (Steve Best) [1827632 1808048]
+- [netdrv] bonding: fix active-backup transition after link failure (Jarod Wilson) [1838477 1819408]
+- [netdrv] bonding: fix state transition issue in link monitoring (Jarod Wilson) [1838477 1819408]
+- [kernel] sched/fair: Allow a per-CPU kthread waking a task to stack on the same CPU, to fix XFS performance regression (Phil Auld) [1834517 1745111]
+- [block] block, bfq: fix use-after-free in bfq_idle_slice_timer_body (Ming Lei) [1835531 1835532] {CVE-2020-12657}
+- [kvm] KVM: x86: use raw clock values consistently (Marcelo Tosatti) [1822498 1768622]
+- [kvm] KVM: x86: reorganize pvclock_gtod_data members (Marcelo Tosatti) [1822498 1768622]
+- [kvm] KVM: x86: switch KVMCLOCK base to monotonic raw clock (Marcelo Tosatti) [1822498 1768622]
+
+* Thu May 21 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.5.1.el8_2]
+- [fs] nfs: fix NULL deference in nfs4_get_valid_delegation ("J. Bruce Fields") [1837969 1831553]
+
+* Fri May 15 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.4.1.el8_2]
+- [bluetooth] Revert "Bluetooth: btusb: driver to enable the usb-wakeup feature" (Gopal Tiwari) [1827620 1811534]
 - [net] netlabel: cope with NULL catmap (Paolo Abeni) [1827249 1827251] {CVE-2020-10711}
 - [mm] s390/mm: fix page table upgrade vs 2ndary address mode accesses (Vladis Dronov) [1828153 1828154] {CVE-2020-11884}
+
+* Tue May 12 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.3.1.el8_2]
+- [kernel] sched/isolation: Allow "isolcpus=" to skip unknown sub-parameters (Peter Xu) [1832367 1799014]
+- [firmware] efi: fix a mistype in comments mentioning efivar_entry_iter_begin() (Vladis Dronov) [1829527 1804417]
+- [firmware] efi: add a sanity check to efivar_store_raw() (Vladis Dronov) [1829527 1804417]
+- [firmware] efi: fix a race and a buffer overflow while reading efivars via sysfs (Vladis Dronov) [1829527 1804417]
+- [net] net/smc: keep vlan_id for SMC-R in smc_listen_work() (Philipp Rudo) [1827631 1796890]
+
+* Mon May 04 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.2.1.el8_2]
+- [net] vti[6]: fix packet tx through bpf_redirect() in XinY cases (Sabrina Dubroca) [1821375 1795145]
+- [net] xfrm interface: fix packet tx through bpf_redirect() (Sabrina Dubroca) [1821375 1795145]
+- [net] vti[6]: fix packet tx through bpf_redirect() (Sabrina Dubroca) [1821375 1795145]
+- [scripts] redhat: fix modpost.c prerequisites (Frantisek Hrbata) [1828229 1818499]
+- [infiniband] IB/core: Avoid deadlock during netlink message handling (Kamal Heib) [1821381 1818986]
+- [infiniband] RDMA/core: Support netlink commands in non init_net net namespaces (Kamal Heib) [1821381 1818986]
+- [misc] mei: me: add comet point (lake) H device ids (Ken Cox) [1825262 1815355]
+- [misc] mei: me: add comet point (lake) LP device ids (Ken Cox) [1825262 1815355]
+- [misc] mei: define dma ring buffer sizes for PCH12 HW and newer (Ken Cox) [1825262 1815355]
+- [misc] mei: hbm: define dma ring setup protocol (Ken Cox) [1825262 1815355]
+- [net] SUNRPC: fix krb5p mount to provide large enough buffer in rq_rcvsize (Steve Dickson) [1826219 1825388]
+- [mm] mm, numa: fix bad pmd by atomically check for pmd_trans_huge when marking page tables prot_numa (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix flags for pmd migration when split (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: relocate flush_cache_range() in migrate_misplaced_transhuge_page() (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix mmu_notifier in migrate_misplaced_transhuge_page() (Rafael Aquini) [1827619 1763878]
+- [mm] mm: thp: fix MADV_DONTNEED vs migrate_misplaced_transhuge_page race condition (Rafael Aquini) [1827619 1763878]
+- [md] Revert "dm: always call blk_queue_split() in dm_process_bio()" (Mike Snitzer) [1821382 1820705]
 
 * Mon Apr 27 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.1.1.el8_2]
 - [x86] kvm: x86: clear stale x86_emulate_ctxt->intercept value (Jon Maloy) [1824398 1806817] {CVE-2020-2732}
