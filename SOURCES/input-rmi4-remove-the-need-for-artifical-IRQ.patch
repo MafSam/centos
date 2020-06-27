@@ -1,4 +1,4 @@
-From 0a74d0f27e8d60e427b447a041bc061917d85fac Mon Sep 17 00:00:00 2001
+From 3facfea2652542c1f822441a05421dcfc5d381fe Mon Sep 17 00:00:00 2001
 From: Benjamin Tissoires <benjamin.tissoires@redhat.com>
 Date: Mon, 3 Apr 2017 18:18:21 +0200
 Subject: [PATCH] Input: rmi4 - remove the need for artificial IRQ in case of
@@ -22,10 +22,10 @@ Signed-off-by: Lyude <lyude@redhat.com>
  3 files changed, 75 insertions(+), 114 deletions(-)
 
 diff --git a/drivers/hid/hid-rmi.c b/drivers/hid/hid-rmi.c
-index 9e33165250a3..e7e33a160b47 100644
+index 9ce22ac..0b069d9 100644
 --- a/drivers/hid/hid-rmi.c
 +++ b/drivers/hid/hid-rmi.c
-@@ -316,19 +316,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
+@@ -323,19 +323,12 @@ static int rmi_input_event(struct hid_device *hdev, u8 *data, int size)
  {
  	struct rmi_data *hdata = hid_get_drvdata(hdev);
  	struct rmi_device *rmi_dev = hdata->xport.rmi_dev;
@@ -45,7 +45,7 @@ index 9e33165250a3..e7e33a160b47 100644
  	return 1;
  }
  
-@@ -586,56 +579,6 @@ static const struct rmi_transport_ops hid_rmi_ops = {
+@@ -593,56 +586,6 @@ static const struct rmi_transport_ops hid_rmi_ops = {
  	.reset		= rmi_hid_reset,
  };
  
@@ -102,7 +102,7 @@ index 9e33165250a3..e7e33a160b47 100644
  static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
  {
  	struct rmi_data *data = NULL;
-@@ -708,18 +651,11 @@ static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
+@@ -715,18 +658,11 @@ static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
  
  	mutex_init(&data->page_mutex);
  
@@ -122,10 +122,10 @@ index 9e33165250a3..e7e33a160b47 100644
  	data->xport.ops = &hid_rmi_ops;
  
 diff --git a/drivers/input/rmi4/rmi_driver.c b/drivers/input/rmi4/rmi_driver.c
-index fc3ab93b7aea..35bc90141db8 100644
+index 258d5fe..f7298e3 100644
 --- a/drivers/input/rmi4/rmi_driver.c
 +++ b/drivers/input/rmi4/rmi_driver.c
-@@ -185,34 +185,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
+@@ -182,34 +182,47 @@ void rmi_set_attn_data(struct rmi_device *rmi_dev, unsigned long irq_status,
  	attn_data.data = fifo_data;
  
  	kfifo_put(&drvdata->attn_fifo, attn_data);
@@ -165,10 +165,10 @@ index fc3ab93b7aea..35bc90141db8 100644
  
 -	if (count) {
 -		kfree(attn_data.data);
--		attn_data.data = NULL;
+-		drvdata->attn_data.data = NULL;
 -	}
 +	kfree(attn_data.data);
-+	attn_data.data = NULL;
++	drvdata->attn_data.data = NULL;
  
  	if (!kfifo_is_empty(&drvdata->attn_fifo))
 -		return rmi_irq_fn(irq, dev_id);
@@ -187,7 +187,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  
  	return IRQ_HANDLED;
  }
-@@ -220,7 +233,6 @@ static irqreturn_t rmi_irq_fn(int irq, void *dev_id)
+@@ -217,7 +230,6 @@ static irqreturn_t rmi_irq_fn(int irq, void *dev_id)
  static int rmi_irq_init(struct rmi_device *rmi_dev)
  {
  	struct rmi_device_platform_data *pdata = rmi_get_platform_data(rmi_dev);
@@ -195,7 +195,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  	int irq_flags = irq_get_trigger_type(pdata->irq);
  	int ret;
  
-@@ -238,8 +250,6 @@ static int rmi_irq_init(struct rmi_device *rmi_dev)
+@@ -235,8 +247,6 @@ static int rmi_irq_init(struct rmi_device *rmi_dev)
  		return ret;
  	}
  
@@ -204,7 +204,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  	return 0;
  }
  
-@@ -889,23 +899,27 @@ void rmi_enable_irq(struct rmi_device *rmi_dev, bool clear_wake)
+@@ -886,23 +896,27 @@ void rmi_enable_irq(struct rmi_device *rmi_dev, bool clear_wake)
  	if (data->enabled)
  		goto out;
  
@@ -248,7 +248,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  
  out:
  	mutex_unlock(&data->enabled_mutex);
-@@ -925,20 +939,22 @@ void rmi_disable_irq(struct rmi_device *rmi_dev, bool enable_wake)
+@@ -922,20 +936,22 @@ void rmi_disable_irq(struct rmi_device *rmi_dev, bool enable_wake)
  		goto out;
  
  	data->enabled = false;
@@ -285,7 +285,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  	}
  
  out:
-@@ -984,6 +1000,8 @@ static int rmi_driver_remove(struct device *dev)
+@@ -981,6 +997,8 @@ static int rmi_driver_remove(struct device *dev)
  	irq_domain_remove(data->irqdomain);
  	data->irqdomain = NULL;
  
@@ -294,7 +294,7 @@ index fc3ab93b7aea..35bc90141db8 100644
  	rmi_f34_remove_sysfs(rmi_dev);
  	rmi_free_function_list(rmi_dev);
  
-@@ -1221,9 +1239,15 @@ static int rmi_driver_probe(struct device *dev)
+@@ -1219,9 +1237,15 @@ static int rmi_driver_probe(struct device *dev)
  		}
  	}
  
@@ -314,10 +314,10 @@ index fc3ab93b7aea..35bc90141db8 100644
  	if (data->f01_container->dev.driver) {
  		/* Driver already bound, so enable ATTN now. */
 diff --git a/include/linux/rmi.h b/include/linux/rmi.h
-index 5ef5c7c412a7..21f48f2807de 100644
+index 7b22366..307a651 100644
 --- a/include/linux/rmi.h
 +++ b/include/linux/rmi.h
-@@ -366,6 +366,7 @@ struct rmi_driver_data {
+@@ -363,6 +363,7 @@ struct rmi_driver_data {
  
  	struct rmi4_attn_data attn_data;
  	DECLARE_KFIFO(attn_fifo, struct rmi4_attn_data, 16);
@@ -326,5 +326,5 @@ index 5ef5c7c412a7..21f48f2807de 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 -- 
-2.17.1
+2.18.2
 
