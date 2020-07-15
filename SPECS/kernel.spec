@@ -2865,7 +2865,11 @@ fi
 %ghost /boot/System.map-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/symvers.gz\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/config\
+%if 0%{?rhel} == 7\
+/boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
+%else\
 %ghost /boot/symvers-%{KVERREL}%{?3:+%{3}}.gz\
+%endif\
 %ghost /boot/config-%{KVERREL}%{?3:+%{3}}\
 %ghost /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
 %dir /lib/modules\
