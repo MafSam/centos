@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 49
+%define stable_update 51
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -876,6 +876,9 @@ Patch603: 0001-e1000e-Add-support-for-Comet-Lake.patch
 
 #KVM fix
 Patch700: 0001-arm64-kvm-Fix-IDMAP-overlap-with-HYP-VA.patch
+
+#Wireguard
+Patch800: wireguard.patch
 
 #CentOS
 Patch9999: 0001-Fix-mt7615.patch
@@ -2925,6 +2928,10 @@ fi
 #
 #
 %changelog
+* Tue Jul 14 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.51-200
+- Update to 5.4.51
+- Backport Wireguard support
+
 * Sat Jun 27 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.49-200
 - Update to 5.4.49
 
