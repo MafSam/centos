@@ -43,10 +43,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.6.3.el8_2
+%define pkgrelease 193.13.2.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.6.3%{?dist}
+%define specrelease 193.13.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2277,6 +2277,17 @@ fi\
 %endif\
 %{nil}
 
+# plus kernel mod
+
+### re-generate initramfs upon microcode_ctl update
+
+%triggerin -n %{name}-core -- microcode_ctl
+KVERSION=%{version}-%{release}.%{_target_cpu}
+if [ -e "/lib/modules/$KVERSION/modules.dep" ]; then
+    %{_bindir}/dracut -f --kver $KVERSION
+fi
+# end of plus kernel mod
+
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
 %if %{with_realtime}
@@ -2556,7 +2567,7 @@ fi
 #
 #
 %changelog
-* Thu Jun 09 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.6.3.el8_2.centos.plus]
+* Tue Jul 21 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.13.2.el8_2.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters,
   some SCSI adapters, ReiserFS, TOMOYO
@@ -2564,16 +2575,111 @@ fi
 - Apply driver patches imported from ELRepo
 - Add device IDs that have been removed from RHEL 8 kernels (megaraid_sas and mpt3sas)
 - Apply patches for e1000 from kernel.org [bug#16284]
+- Added a triggerin scriptlet to rebuild the initramfs image
+  when the system microcode package is updated [bug#17562]
 
-* Mon Jun 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.3.el8_2]
-- rebuild to enable xt_u32 module (Jiri Benc) [1840800 1840799 1834769 1838190]
+* Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.2.el8_2]
+- Rebuild to get kernel image properly signed (Bruno Meneguele)
 
-* Tue May 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.2.el8_2]
+* Tue Jul 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.1.el8_2]
+- [x86] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service (Lenny Szubowicz) [1846180 1824005]
+
+* Thu Jul 02 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.12.1.el8_2]
+- [net] openvswitch: simplify the ovs_dp_cmd_new (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: fix possible memleak on destroy flow-table (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: add likely in flow_lookup (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: simplify the flow_hash (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: optimize flow-mask looking up (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: optimize flow mask cache hash collision (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: shrink the mask array if necessary (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: convert mask list in mask array (Eelco Chaudron) [1851235 1819202]
+- [net] openvswitch: add flow-mask cache for performance (Eelco Chaudron) [1851235 1819202]
+- [net] netfilter: nf_tables: use-after-free in dynamic operations (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: add missing ->release_ops() in error path of newrule() (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_compat: use .release_ops and remove list of extension (Phil Sutter) [1845164 1757933]
+- [vfio] vfio/pci: Fix SR-IOV VF handling with MMIO blocking (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [pci] PCI: pciehp: Fix MSI interrupt race (Myron Stowe) [1852045 1779610]
+- [kernel] smp: Allow smp_call_function_single_async() to insert locked csd (Peter Xu) [1851406 1830014]
+- [x86] kvm: Clean up host's steal time structure (Jon Maloy) [1795128 1813987] {CVE-2019-3016}
+- [x86] kvm: Make sure KVM_VCPU_FLUSH_TLB flag is not missed (Jon Maloy) [1795128 1813987] {CVE-2019-3016}
+- [virt] x86/kvm: Cache gfn to pfn translation (Jon Maloy) [1795128 1813987] {CVE-2019-3016}
+- [virt] x86/kvm: Introduce kvm_(un)map_gfn() (Jon Maloy) [1795128 1813987] {CVE-2019-3016}
+- [x86] kvm: Be careful not to clear KVM_VCPU_FLUSH_TLB bit (Jon Maloy) [1795128 1813987] {CVE-2019-3016}
+
+* Fri Jun 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.11.1.el8_2]
+- [net] netfilter: conntrack: fix infinite loop on rmmod (Florian Westphal) [1851005 1832381]
+- [net] netfilter: conntrack: allow insertion of clashing entries (Florian Westphal) [1851003 1821404]
+- [net] netfilter: conntrack: split resolve_clash function (Florian Westphal) [1851003 1821404]
+- [net] netfilter: conntrack: place confirm-bit setting in a helper (Florian Westphal) [1851003 1821404]
+- [net] netfilter: never get/set skb->tstamp (Florian Westphal) [1851003 1821404]
+- [net] netfilter: conntrack: remove two args from resolve_clash (Florian Westphal) [1851003 1821404]
+- [net] netfilter: conntrack: tell compiler to not inline nf_ct_resolve_clash (Florian Westphal) [1851003 1821404]
+- [x86] mm: Fix mremap not considering huge pmd devmap (Rafael Aquini) [1843440 1843441] {CVE-2020-10757}
+- [x86] x86/vector: Remove warning on managed interrupt migration (Peter Xu) [1848545 1812331]
+- [s390] s390/cio: fix virtio-ccw DMA without PV (Philipp Rudo) [1842620 1814787]
+
+* Fri Jun 19 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.10.1.el8_2]
+- [misc] dma-mapping: zero memory returned from dma_alloc_* (Philipp Rudo) [1847453 1788928]
+- [nvme] nvme-multipath: fix crash in nvme_mpath_clear_ctrl_paths (Gopal Tiwari) [1846405 1781927]
+- [net] netfilter: nf_tables: fix infinite loop when expr is not available (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: autoload modules from the abort path (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: remove WARN and add NLA_STRING upper limits (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: store transaction list locally while requesting module (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: use-after-free in failing rule with bound set (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_meta: skip EAGAIN if nft_meta_bridge is not a module (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: force module load in case select_ops() returns -EAGAIN (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: add nft_expr_type_request_module() (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: bogus EBUSY in helper removal from transaction (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: fix set double-free in abort path (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_compat: don't use refcount_inc on newly allocated entry (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: unbind set in rule from commit path (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_compat: destroy function must not have side effects (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_compat: make lists per netns (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nft_compat: use refcnt_t type for nft_xt reference count (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: fix suspicious RCU usage in nft_chain_stats_replace() (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: asynchronous release (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: split set destruction in deactivate and destroy phase (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: flow event notifier must use transaction mutex (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: use dedicated mutex to guard transactions (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: avoid global info storage (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: take module reference when starting a batch (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: make valid_genid callback mandatory (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nf_tables: add and use helper for module autoload (Phil Sutter) [1845164 1757933]
+- [net] netfilter: nat: never update the UDP checksum when it's 0 (Guillaume Nault) [1847128 1794714]
+- [x86] x86/speculation: PR_SPEC_FORCE_DISABLE enforcement for indirect branches (Waiman Long) [1847395 1847396] {CVE-2020-10768}
+- [x86] x86/speculation: Prevent rogue cross-process SSBD shutdown (Waiman Long) [1847357 1847358] {CVE-2020-10766}
+- [x86] x86/speculation: Avoid force-disabling IBPB based on STIBP and enhanced IBRS (Waiman Long) [1847378 1847379] {CVE-2020-10767}
+- [x86] x86/speculation: Add support for STIBP always-on preferred mode (Waiman Long) [1847378 1847379] {CVE-2020-10767}
+- [x86] x86/speculation: Change misspelled STIPB to STIBP (Waiman Long) [1847378 1847379] {CVE-2020-10767}
+- [powerpc] powerpc/pseries/ddw: Extend upper limit for huge DMA window for persistent memory (Steve Best) [1842406 1817596]
+
+* Sun Jun 14 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.9.1.el8_2]
+- [wireless] mwifiex: Fix possible buffer overflows in mwifiex_ret_wmm_get_status() (Jarod Wilson) [1844073 1844031] {CVE-2020-12654}
+- [wireless] mwifiex: Fix possible buffer overflows in mwifiex_cmd_append_vsie_tlv() (Jarod Wilson) [1844049 1844039] {CVE-2020-12653}
+- [netdrv] net/mlx5: FPGA, support network cards with standalone FPGA (Alaa Hleihel) [1843544 1789380]
+- [mm] hugetlbfs: don't retry when pool page allocations start to fail (Rafael Aquini) [1835789 1727288]
+- [mm] mm, compaction: raise compaction priority after it withdrawns (Rafael Aquini) [1835789 1727288]
+- [mm] mm, reclaim: cleanup should_continue_reclaim() (Rafael Aquini) [1835789 1727288]
+- [mm] mm, reclaim: make should_continue_reclaim perform dryrun detection (Rafael Aquini) [1835789 1727288]
+- [kernel] exit: panic before exit_mm() on global init exit (Oleg Nesterov) [1821378 1808944]
 - [documentation] x86/speculation: Add Ivy Bridge to affected list (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
 - [documentation] x86/speculation: Add SRBDS vulnerability and mitigation documentation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
 - [x86] x86/speculation: Add Special Register Buffer Data Sampling (SRBDS) mitigation (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
 - [x86] x86/cpu: Add 'table' argument to cpu_matches() (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
 - [x86] x86/cpu: Add a steppings field to struct x86_cpu_id (Josh Poimboeuf) [1827191 1827192] {CVE-2020-0543}
+
+* Mon Jun 08 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.8.1.el8_2]
+- [vfio] vfio-pci: Invalidate mmaps and block MMIO access on disabled memory (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [vfio] vfio-pci: Fault mmaps to enable vma tracking (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [vfio] vfio/type1: Support faulting PFNMAP vmas (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [vfio] vfio/type1: Fix VA->PA translation for PFNMAP VMAs in vaddr_get_pfn() (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [vfio] vfio/pci: call irq_bypass_unregister_producer() before freeing irq (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+- [vfio] vfio_pci: Enable memory accesses before calling pci_map_rom (Alex Williamson) [1837309 1837310] {CVE-2020-12888}
+
+* Mon Jun 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.7.1.el8_2]
+- [sound] ALSA: timer: Fix incorrectly assigned timer instance (Jaroslav Kysela) [1821714 1798468] {CVE-2019-19807}
+- [netdrv] ibmvnic: Do not process device remove during device reset (Steve Best) [1836229 1813223]
+- [net] ipv4: really enforce backoff for redirects (Paolo Abeni) [1836302 1834184]
 
 * Fri May 22 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.6.1.el8_2]
 - [char] tpm: ibmvtpm: retry on H_CLOSED in tpm_ibmvtpm_send() (Steve Best) [1827632 1808048]
