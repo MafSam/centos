@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 51
+%define stable_update 53
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2932,6 +2932,9 @@ fi
 #
 #
 %changelog
+* Sun Jul 26 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.53-200
+- Update to 5.4.53
+
 * Tue Jul 14 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.51-200
 - Update to 5.4.51
 - Backport Wireguard support
