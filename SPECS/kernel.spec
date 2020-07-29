@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 
+%ifarch x86_64 aarch64 s390x ppc64le
 %global signkernel 1
 %else
 %global signkernel 0
@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.13.2.el8_2
+%define pkgrelease 193.14.3.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.13.2%{?dist}
+%define specrelease 193.14.3%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -409,7 +409,7 @@ BuildRequires: asciidoc
 
 Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
-Source11: x509.genkey
+Source9: x509.genkey
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -421,24 +421,44 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source10: redhatsecurebootca5.cer
+Source11: redhatsecurebootca3.cer
+Source12: redhatsecureboot501.cer
+Source13: redhatsecureboot301.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
-%define secureboot_ca %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE11}
+%define secureboot_ca_1 %{SOURCE10}
 %ifarch x86_64 aarch64
-%define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot301
+%define secureboot_key_1 %{SOURCE12}
+%define pesign_name_1 redhatsecureboot501
+%endif
+%ifarch s390x
+%define secureboot_key_0 %{SOURCE14}
+%define pesign_name_0 redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key_0 %{SOURCE15}
+%define pesign_name_0 redhatsecureboot303
 %endif
 
 # released_kernel
 %else
 
-Source12: centos-ca-secureboot.der
-Source13: centossecureboot001.crt
+Source11: redhatsecurebootca4.cer
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot401.cer
+Source14: redhatsecureboot003.cer
 
-%define secureboot_ca %{SOURCE12}
-%define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define secureboot_ca_0 %{SOURCE11}
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot401
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot003
 
 # released_kernel
 %endif
@@ -495,13 +515,6 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
-Patch1000: debrand-single-cpu.patch
-Patch1001: debrand-rh_taint.patch
-#Patch1002: debrand-rh-i686-cpu.patch
-
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -512,7 +525,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for CentOS
+This is the package which provides the Linux %{name} for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -521,7 +534,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -754,11 +767,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The CentOS Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the CentOS
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -768,7 +781,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the CentOS
+The package contains data describing the current ABI of the Red Hat Enterprise
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -841,7 +854,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -1036,17 +1049,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
-
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-ApplyOptionalPatch debrand-single-cpu.patch
-ApplyOptionalPatch debrand-rh_taint.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1181,7 +1188,7 @@ BuildKernel() {
     cp configs/$Config .config
 
     %if %{signkernel}%{signmodules}
-    cp %{SOURCE11} certs/.
+    cp %{SOURCE9} certs/.
     %endif
 
     Arch=`head -1 .config | cut -b 3-`
@@ -1247,11 +1254,13 @@ BuildKernel() {
     fi
 
     %ifarch x86_64 aarch64
-    %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca} -c %{secureboot_key} -n %{pesign_name}
+    %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm vmlinuz.tmp
     %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
-	rpm-sign --key "%{pesign_name}" --lkmsign $SignImage --output vmlinuz.signed
+	rpm-sign --key "%{pesign_name_0}" --lkmsign $SignImage --output vmlinuz.signed
     elif [ $DoModules -eq 1 ]; then
 	chmod +x scripts/sign-file
 	./scripts/sign-file -p sha256 certs/signing_key.pem certs/signing_key.x509 $SignImage vmlinuz.signed
@@ -1645,13 +1654,19 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
-    install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %ifarch x86_64 aarch64
+        install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
+        install -m 0644 %{secureboot_ca_1} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20140212.cer
+        ln -s kernel-signing-ca-20200609.cer $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %else
+        install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %endif
     %ifarch s390x ppc64le
     if [ $DoModules -eq 1 ]; then
 	if [ -x /usr/bin/rpm-sign ]; then
-	    install -m 0644 %{secureboot_key} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
+	    install -m 0644 %{secureboot_key_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
 	else
 	    install -m 0644 certs/signing_key.x509.sign${Flav} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
 	    openssl x509 -in certs/signing_key.pem.sign${Flav} -outform der -out $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
@@ -2406,12 +2421,7 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/weak-updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
-%ifarch s390x ppc64le\
-%if 0%{!?4:1}\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
-%endif\
-%endif\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}\
 %if %{1}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
 /etc/ld.so.conf.d/%{name}-%{KVERREL}%{?3:+%{3}}.conf\
@@ -2465,11 +2475,30 @@ fi
 #
 #
 %changelog
-* Tue Jul 21 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.13.2.el8.centos
-- Apply debranding changes
+* Mon Jul 20 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.3.el8_2]
+- Reverse keys order for dual-signing (Frantisek Hrbata) [1837433 1837434] {CVE-2020-10713}
 
-* Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.2.el8_2]
-- Rebuild to get kernel image properly signed (Bruno Meneguele)
+* Sun Jul 19 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.2.el8_2]
+- [kernel] Move to dual-signing to split signing keys up better (pjones) [1837433 1837434] {CVE-2020-10713}
+- [crypto] pefile: Tolerate other pefile signatures after first (Lenny Szubowicz) [1837433 1837434] {CVE-2020-10713}
+- [acpi] ACPI: configfs: Disallow loading ACPI tables when locked down (Lenny Szubowicz) [1852968 1852969] {CVE-2020-15780}
+- [firmware] efi: Restrict efivar_ssdt_load when the kernel is locked down (Lenny Szubowicz) [1852948 1852949] {CVE-2019-20908}
+
+* Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.1.el8_2]
+- [md] dm mpath: add DM device name to Failing/Reinstating path log messages (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: enhance queue_if_no_path debugging (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: restrict queue_if_no_path state machine (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: simplify __must_push_back (Mike Snitzer) [1852050 1822975]
+- [md] dm: use DMDEBUG macros now that they use pr_debug variants (Mike Snitzer) [1852050 1822975]
+- [include] dm: use dynamic debug instead of compile-time config option (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: switch paths in dm_blk_ioctl() code path (Mike Snitzer) [1852050 1822975]
+- [md] dm multipath: use updated MPATHF_QUEUE_IO on mapping for bio-based mpath (Mike Snitzer) [1852050 1822975]
+- [md] dm: bump version of core and various targets (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: Add timeout mechanism for queue_if_no_path (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: use true_false for bool variable (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: remove harmful bio-based optimization (Mike Snitzer) [1852050 1822975]
+- [scsi] scsi: libiscsi: fall back to sendmsg for slab pages (Maurizio Lombardi) [1852048 1825775]
+- [s390] s390/mm: fix panic in gup_fast on large pud (Philipp Rudo) [1853336 1816980]
 
 * Tue Jul 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.1.el8_2]
 - [x86] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service (Lenny Szubowicz) [1846180 1824005]
