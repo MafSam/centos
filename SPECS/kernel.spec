@@ -2475,6 +2475,9 @@ fi
 #
 #
 %changelog
+* Wed Jul 29 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.14.3.el8.centos
+- Apply debranding changes
+
 * Mon Jul 20 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.3.el8_2]
 - Reverse keys order for dual-signing (Frantisek Hrbata) [1837433 1837434] {CVE-2020-10713}
 
