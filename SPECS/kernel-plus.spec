@@ -43,10 +43,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.13.2.el8_2
+%define pkgrelease 193.14.2.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.13.2%{?dist}
+%define specrelease 193.14.2%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -416,7 +416,7 @@ BuildRequires: asciidoc
 
 Source0: linux-%{rpmversion}-%{pkgrelease}.tar.xz
 
-Source11: x509.genkey
+Source9: x509.genkey
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -428,24 +428,41 @@ Source11: x509.genkey
 
 %if %{?released_kernel}
 
-Source12: centos-ca-secureboot.der 
+#Source10: redhatsecurebootca5.cer
+Source10: centossecurebootca2.der
+#Source11: redhatsecurebootca3.cer
+Source11: centos-ca-secureboot.der
+#Source12: redhatsecureboot501.cer
+Source12: centossecureboot201.crt
+#Source13: redhatsecureboot301.cer
 Source13: centossecureboot001.crt
 
-%define secureboot_ca %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE10}
+%define secureboot_ca_1 %{SOURCE11}
 %ifarch x86_64 aarch64
-%define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define secureboot_key_0 %{SOURCE12}
+%define pesign_name_0 centossecureboot201
+%define secureboot_key_1 %{SOURCE13}
+%define pesign_name_1 centossecureboot001
 %endif
 
 # released_kernel
 %else
 
-Source12: centos-ca-secureboot.der
+#Source11: redhatsecurebootca3.cer
+Source11: centos-ca-secureboot.der
+#Source12: redhatsecureboot501.cer
+Source12: centossecureboot201.crt
+#Source13: redhatsecureboot301.cer
 Source13: centossecureboot001.crt
+Source14: secureboot_s390.cer
 
-%define secureboot_ca %{SOURCE12}
-%define secureboot_key %{SOURCE13}
-%define pesign_name centossecureboot001
+%define secureboot_ca_0 %{SOURCE11}
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot401
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot003
 
 # released_kernel
 %endif
@@ -1115,6 +1132,9 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
+
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
@@ -1272,7 +1292,7 @@ BuildKernel() {
     cp configs/$Config .config
 
     %if %{signkernel}%{signmodules}
-    cp %{SOURCE11} certs/.
+    cp %{SOURCE9} certs/.
     %endif
 
     Arch=`head -1 .config | cut -b 3-`
@@ -1338,11 +1358,13 @@ BuildKernel() {
     fi
 
     %ifarch x86_64 aarch64
-    %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca} -c %{secureboot_key} -n %{pesign_name}
+    %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm vmlinuz.tmp
     %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
-	rpm-sign --key "%{pesign_name}" --lkmsign $SignImage --output vmlinuz.signed
+	rpm-sign --key "%{pesign_name_0}" --lkmsign $SignImage --output vmlinuz.signed
     elif [ $DoModules -eq 1 ]; then
 	chmod +x scripts/sign-file
 	./scripts/sign-file -p sha256 certs/signing_key.pem certs/signing_key.x509 $SignImage vmlinuz.signed
@@ -1738,11 +1760,17 @@ BuildKernel() {
 
     # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
-    install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %ifarch x86_64 aarch64
+        install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
+        install -m 0644 %{secureboot_ca_1} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20140212.cer
+        ln -s kernel-signing-ca-20200609.cer $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %else
+        install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %endif
     %ifarch s390x ppc64le
     if [ $DoModules -eq 1 ]; then
 	if [ -x /usr/bin/rpm-sign ]; then
-	    install -m 0644 %{secureboot_key} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
+	    install -m 0644 %{secureboot_key_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
 	else
 	    install -m 0644 certs/signing_key.x509.sign${Flav} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
 	    openssl x509 -in certs/signing_key.pem.sign${Flav} -outform der -out $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
@@ -2508,12 +2536,7 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/weak-updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
-%ifarch s390x ppc64le\
-%if 0%{!?4:1}\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
-%endif\
-%endif\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}\
 %if %{1}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
 /etc/ld.so.conf.d/%{name}-%{KVERREL}%{?3:+%{3}}.conf\
@@ -2567,7 +2590,7 @@ fi
 #
 #
 %changelog
-* Tue Jul 21 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.13.2.el8_2.centos.plus]
+* Wed Jul 29 2020 Akemi Yagi <toracat@centos.org> [4.18.0-193.14.2.el8_2.centos.plus]
 - Apply debranding changes
 - Modify config file for x86_64 with extra features turned on including some network adapters,
   some SCSI adapters, ReiserFS, TOMOYO
@@ -2578,8 +2601,27 @@ fi
 - Added a triggerin scriptlet to rebuild the initramfs image
   when the system microcode package is updated [bug#17562]
 
-* Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.2.el8_2]
-- Rebuild to get kernel image properly signed (Bruno Meneguele)
+* Sun Jul 19 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.2.el8_2]
+- [kernel] Move to dual-signing to split signing keys up better (pjones) [1837433 1837434] {CVE-2020-10713}
+- [crypto] pefile: Tolerate other pefile signatures after first (Lenny Szubowicz) [1837433 1837434] {CVE-2020-10713}
+- [acpi] ACPI: configfs: Disallow loading ACPI tables when locked down (Lenny Szubowicz) [1852968 1852969] {CVE-2020-15780}
+- [firmware] efi: Restrict efivar_ssdt_load when the kernel is locked down (Lenny Szubowicz) [1852948 1852949] {CVE-2019-20908}
+
+* Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.1.el8_2]
+- [md] dm mpath: add DM device name to Failing/Reinstating path log messages (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: enhance queue_if_no_path debugging (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: restrict queue_if_no_path state machine (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: simplify __must_push_back (Mike Snitzer) [1852050 1822975]
+- [md] dm: use DMDEBUG macros now that they use pr_debug variants (Mike Snitzer) [1852050 1822975]
+- [include] dm: use dynamic debug instead of compile-time config option (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: switch paths in dm_blk_ioctl() code path (Mike Snitzer) [1852050 1822975]
+- [md] dm multipath: use updated MPATHF_QUEUE_IO on mapping for bio-based mpath (Mike Snitzer) [1852050 1822975]
+- [md] dm: bump version of core and various targets (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: Add timeout mechanism for queue_if_no_path (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: use true_false for bool variable (Mike Snitzer) [1852050 1822975]
+- [md] dm mpath: remove harmful bio-based optimization (Mike Snitzer) [1852050 1822975]
+- [scsi] scsi: libiscsi: fall back to sendmsg for slab pages (Maurizio Lombardi) [1852048 1825775]
+- [s390] s390/mm: fix panic in gup_fast on large pud (Philipp Rudo) [1853336 1816980]
 
 * Tue Jul 07 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.13.1.el8_2]
 - [x86] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service (Lenny Szubowicz) [1846180 1824005]
