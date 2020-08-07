@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 53
+%define stable_update 56
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -864,12 +864,6 @@ Patch503: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 # https://lore.kernel.org/patchwork/patch/1132459/
 # https://lkml.org/lkml/2019/8/29/1772
 Patch504: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
-
-# CVE-2019-19054 rhbz 1775063 1775117
-Patch523: media-rc-prevent-memory-leak-in-cx23888_ir_probe.patch
-
-# CVE-2019-18808 rhbz 1777418 1777421
-Patch527: 0001-crypto-ccp-Release-all-allocated-memory-if-sha-type-.patch
 
 # This is already in 5.5 rhbz 1794369
 Patch603: 0001-e1000e-Add-support-for-Comet-Lake.patch
@@ -2932,6 +2926,9 @@ fi
 #
 #
 %changelog
+* Fri Aug  7 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.56-200
+- Update to version v5.4.56
+
 * Sun Jul 26 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.53-200
 - Update to 5.4.53
 
