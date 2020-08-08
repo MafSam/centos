@@ -185,7 +185,7 @@ Summary: The Linux kernel
 
 #
 # gcov support
-%define with_gcov %{?_with_gcov: 1} %{?!_with_gcov: 0}
+%define with_gcov %{?_with_gcov:1}%{?!_with_gcov:0}
 
 #
 # ipa_clone support
@@ -661,29 +661,51 @@ Source10: x509.genkey.rhel
 Source11: x509.genkey.fedora
 %if %{?released_kernel}
 
-Source12: securebootca.cer
-Source13: secureboot.cer
+Source12: redhatsecurebootca5.cer
+Source13: redhatsecurebootca1.cer
+Source14: redhatsecureboot501.cer
+Source15: redhatsecureboot301.cer
+Source16: secureboot_s390.cer
+Source17: secureboot_ppc.cer
 
-%define secureboot_ca %{SOURCE12}
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE13}
 %ifarch x86_64 aarch64
-%define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot301
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot501
+%define secureboot_key_0 %{SOURCE15}
+%define pesign_name_0 redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key_0 %{SOURCE16}
+%define pesign_name_0 redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key_0 %{SOURCE17}
+%define pesign_name_0 redhatsecureboot303
 %endif
 
-%else # released_kernel
+# released_kernel
+%else
 
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot003.cer
+Source12: redhatsecurebootca4.cer
+Source13: redhatsecurebootca2.cer
+Source14: redhatsecureboot401.cer
+Source15: redhatsecureboot003.cer
 
-%define secureboot_ca %{SOURCE12}
-%define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot003
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE13}
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot401
+%define secureboot_key_0 %{SOURCE15}
+%define pesign_name_0 redhatsecureboot003
 
-%endif # released_kernel
+# released_kernel
+%endif
 
-Source15: mod-extra.list.rhel
-Source16: mod-extra.list.fedora
-Source17: mod-extra.sh
+Source22: mod-extra.list.rhel
+Source23: mod-extra.list.fedora
+Source24: mod-extra.sh
 Source18: mod-sign.sh
 Source19: mod-extra-blacklist.sh
 Source79: parallel_xz.sh
@@ -994,8 +1016,8 @@ This package provides debug information for the perf python bindings.
 # the python_sitearch macro should already be defined from above
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python3_sitearch}/perf.*so(\.debug)?|XXX' -o python3-perf-debuginfo.list}
 
-
-%endif # with_perf
+# with_perf
+%endif
 
 %if %{with_tools}
 %package -n kernel-tools
@@ -1050,7 +1072,8 @@ This package provides debug information for package kernel-tools.
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
-%endif # with_tools
+# with_tools
+%endif
 
 %if %{with_bpftool}
 
@@ -1071,9 +1094,11 @@ This package provides debug information for the bpftool package.
 
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_sbindir}/bpftool(\.debug)?|XXX' -o bpftool-debuginfo.list}
 
-%endif # with_bpftool
+# with_bpftool
+%endif
 
 %if %{with_selftests}
+
 %package selftests-internal
 Summary: Kernel samples and selftests
 License: GPLv2
@@ -1081,12 +1106,14 @@ Requires: binutils, bpftool, iproute-tc, nmap-ncat
 Requires: kernel-modules-internal = %{version}-%{release}
 %description selftests-internal
 Kernel sample programs and selftests.
-%{nil}
+
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_libexecdir}/(ksamples|kselftests)/.*|XXX' -o selftests-debuginfo.list}
+
+# with_selftests
 %endif
 
 %if %{with_gcov}
@@ -1284,6 +1311,7 @@ Cortex-A15 devices with LPAE and HW virtualisation support
 %description zfcpdump-core
 The kernel package contains the Linux kernel (vmlinuz) for use by the
 zfcpdump infrastructure.
+# with_zfcpdump
 %endif
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
@@ -1542,8 +1570,7 @@ git am %{patches}
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
-chmod +x tools/objtool/sync-check.sh
-mv COPYING COPYING-%{version}
+mv COPYING COPYING-%{version}-%{release}
 
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
@@ -1791,11 +1818,13 @@ BuildKernel() {
     fi
 
     %ifarch x86_64 aarch64
-    %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca} -c %{secureboot_key} -n %{pesign_name}
+    %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm vmlinuz.tmp
     %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
-	rpm-sign --key "%{pesign_name}" --lkmsign $SignImage --output vmlinuz.signed
+	rpm-sign --key "%{pesign_name_0}" --lkmsign $SignImage --output vmlinuz.signed
     elif [ $DoModules -eq 1 ]; then
 	chmod +x scripts/sign-file
 	./scripts/sign-file -p sha256 certs/signing_key.pem certs/signing_key.x509 $SignImage vmlinuz.signed
@@ -1812,7 +1841,9 @@ BuildKernel() {
     if [ "$KernelExtension" == "gz" ]; then
         gzip -f9 $SignImage
     fi
+    # signkernel
     %endif
+
     $CopyKernel $KernelImage \
                 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
@@ -1827,7 +1858,7 @@ BuildKernel() {
     if [ $DoModules -eq 1 ]; then
 	# Override $(mod-fw) because we don't want it to install any firmware
 	# we'll get it from the linux-firmware package and we don't want conflicts
-	%{make} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT %{?_smp_mflags} modules_install KERNELRELEASE=$KernelVer mod-fw=
+	%{make} %{?_smp_mflags} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT %{?_smp_mflags} modules_install KERNELRELEASE=$KernelVer mod-fw=
     fi
 
 %if %{with_gcov}
@@ -1866,6 +1897,9 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/internal
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
+%if 0%{!?fedora:1}
+    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/weak-updates
+%endif
     # CONFIG_KERNEL_HEADER_TEST generates some extra files in the process of
     # testing so just delete
     find . -name *.h.s -delete
@@ -1886,13 +1920,15 @@ BuildKernel() {
     echo "**** GENERATING kernel ABI metadata ****"
     gzip -c9 < Module.symvers > $RPM_BUILD_ROOT/boot/symvers-$KernelVer.gz
     cp $RPM_BUILD_ROOT/boot/symvers-$KernelVer.gz $RPM_BUILD_ROOT/lib/modules/$KernelVer/symvers.gz
+
 %if %{with_kabichk}
     echo "**** kABI checking is enabled in kernel SPEC file. ****"
     chmod 0755 $RPM_SOURCE_DIR/check-kabi
     if [ -e $RPM_SOURCE_DIR/Module.kabi_%{_target_cpu}$Flavour ]; then
         cp $RPM_SOURCE_DIR/Module.kabi_%{_target_cpu}$Flavour $RPM_BUILD_ROOT/Module.kabi
         $RPM_SOURCE_DIR/check-kabi -k $RPM_BUILD_ROOT/Module.kabi -s Module.symvers || exit 1
-        rm $RPM_BUILD_ROOT/Module.kabi # for now, don't keep it around.
+        # for now, don't keep it around.
+        rm $RPM_BUILD_ROOT/Module.kabi
     else
         echo "**** NOTE: Cannot find reference Module.kabi file. ****"
     fi
@@ -1903,7 +1939,8 @@ BuildKernel() {
     if [ -e $RPM_SOURCE_DIR/Module.kabi_dup_%{_target_cpu}$Flavour ]; then
         cp $RPM_SOURCE_DIR/Module.kabi_dup_%{_target_cpu}$Flavour $RPM_BUILD_ROOT/Module.kabi
         $RPM_SOURCE_DIR/check-kabi -k $RPM_BUILD_ROOT/Module.kabi -s Module.symvers || exit 1
-        rm $RPM_BUILD_ROOT/Module.kabi # for now, don't keep it around.
+        # for now, don't keep it around.
+        rm $RPM_BUILD_ROOT/Module.kabi
     else
         echo "**** NOTE: Cannot find DUP reference Module.kabi file. ****"
     fi
@@ -2077,11 +2114,11 @@ BuildKernel() {
     popd
 
     # Call the modules-extra script to move things around
-    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer $RPM_SOURCE_DIR/mod-extra.list
+    %{SOURCE24} $RPM_BUILD_ROOT/lib/modules/$KernelVer $RPM_SOURCE_DIR/mod-extra.list
     # Blacklist net autoloadable modules in modules-extra
     %{SOURCE19} $RPM_BUILD_ROOT lib/modules/$KernelVer
     # Call the modules-extra script for internal modules
-    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE54} internal
+    %{SOURCE24} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE54} internal
 
     #
     # Generate the kernel-core and kernel-modules files lists
@@ -2094,9 +2131,8 @@ BuildKernel() {
     mkdir restore
     cp -r lib/modules/$KernelVer/* restore/.
 
-    # don't include anything going into k-m-e in the file lists
+    # don't include anything going into k-m-e and k-m-i in the file lists
     rm -rf lib/modules/$KernelVer/{extra,internal}
-
 
     if [ $DoModules -eq 1 ]; then
 	# Find all the module files and filter them out into the core and
@@ -2179,11 +2215,17 @@ BuildKernel() {
 
     # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
-    install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %ifarch x86_64 aarch64
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
+       install -m 0644 %{secureboot_ca_1} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20140212.cer
+       ln -s kernel-signing-ca-20200609.cer $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %else
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %endif
     %ifarch s390x ppc64le
     if [ $DoModules -eq 1 ]; then
 	if [ -x /usr/bin/rpm-sign ]; then
-	    install -m 0644 %{secureboot_key} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
+	    install -m 0644 %{secureboot_key_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
 	else
 	    install -m 0644 certs/signing_key.x509.sign${Flav} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
 	    openssl x509 -in certs/signing_key.pem.sign${Flav} -outform der -out $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
@@ -2242,28 +2284,34 @@ chmod +x tools/perf/check-headers.sh
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
 %endif
 
+%global tools_make \
+  %{make} CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" V=1
+
 %if %{with_tools}
 %ifarch %{cpupowerarchs}
 # cpupower
 # make sure version-gen.sh is executable.
 chmod +x tools/power/cpupower/utils/version-gen.sh
-%{make} %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
+%{tools_make} %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
 %ifarch x86_64
     pushd tools/power/cpupower/debug/x86_64
-    %{make} %{?_smp_mflags} centrino-decode powernow-k8-decode
+    %{tools_make} %{?_smp_mflags} centrino-decode powernow-k8-decode
     popd
 %endif
 %ifarch x86_64
    pushd tools/power/x86/x86_energy_perf_policy/
-   %{make}
+   %{tools_make}
    popd
    pushd tools/power/x86/turbostat
+   %{tools_make}
+   popd
+   pushd tools/power/x86/intel-speed-select
    %{make}
    popd
-%endif #turbostat/x86_energy_perf_policy
+%endif
 %endif
 pushd tools/thermal/tmon/
-%{make}
+%{tools_make}
 popd
 pushd tools/iio/
 %{make}
@@ -2292,7 +2340,7 @@ popd
 
 %if %{with_doc}
 # Make the HTML pages.
-make htmldocs || %{doc_build_fail}
+make PYTHON=/usr/bin/python3 htmldocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2388,6 +2436,7 @@ docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
 mkdir -p $docdir
 tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
+# with_doc
 %endif
 
 # We have to do the headers install before the tools install because the
@@ -2405,7 +2454,11 @@ find $RPM_BUILD_ROOT/usr/include \
 %endif
 
 %if %{with_cross_headers}
+%if 0%{?fedora}%{?centos}
 HDR_ARCH_LIST='arm arm64 powerpc s390 x86'
+%else
+HDR_ARCH_LIST='arm64 powerpc s390 x86'
+%endif
 mkdir -p $RPM_BUILD_ROOT/usr/tmp-headers
 
 for arch in $HDR_ARCH_LIST; do
@@ -2430,8 +2483,10 @@ rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
 # kabi directory
 INSTALL_KABI_PATH=$RPM_BUILD_ROOT/lib/modules/
 mkdir -p $INSTALL_KABI_PATH
+
 # install kabi releases directories
 tar xjvf %{SOURCE300} -C $INSTALL_KABI_PATH
+# with_kernel_abi_whitelists
 %endif
 
 %if %{with_perf}
@@ -2481,14 +2536,17 @@ install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
 %ifarch x86_64
    mkdir -p %{buildroot}%{_mandir}/man8
    pushd tools/power/x86/x86_energy_perf_policy
-   make DESTDIR=%{buildroot} install
+   %{tools_make} DESTDIR=%{buildroot} install
    popd
    pushd tools/power/x86/turbostat
-   make DESTDIR=%{buildroot} install
+   %{tools_make} DESTDIR=%{buildroot} install
    popd
-%endif #turbostat/x86_energy_perf_policy
+   pushd tools/power/x86/intel-speed-select
+   %{tools_make} CFLAGS+="-D_GNU_SOURCE -Iinclude" DESTDIR=%{buildroot} install
+   popd
+%endif
 pushd tools/thermal/tmon
-make INSTALL_ROOT=%{buildroot} install
+%{tools_make} INSTALL_ROOT=%{buildroot} install
 popd
 pushd tools/iio
 make DESTDIR=%{buildroot} install
@@ -2552,6 +2610,18 @@ find -type d -exec install -d %{buildroot}%{_libexecdir}/kselftests/livepatch/{}
 find -type f -executable -exec install -D -m755 {} %{buildroot}%{_libexecdir}/kselftests/livepatch/{} \;
 find -type f ! -executable -exec install -D -m644 {} %{buildroot}%{_libexecdir}/kselftests/livepatch/{} \;
 popd
+%endif
+
+# We have to do the headers checksum calculation after the tools install because
+# these might end up installing their own set of headers on top of kernel's
+%if %{with_headers}
+# compute a content hash to export as Provides: kernel-headers-checksum
+HEADERS_CHKSUM=$(export LC_ALL=C; find $RPM_BUILD_ROOT/usr/include -type f -name "*.h" \
+			! -path $RPM_BUILD_ROOT/usr/include/linux/version.h | \
+		 sort | xargs cat | sha1sum - | cut -f 1 -d ' ');
+# export the checksum via usr/include/linux/version.h, so the dynamic
+# find-provides can grab the hash to update it accordingly
+echo "#define KERNEL_HEADERS_CHECKSUM \"$HEADERS_CHKSUM\"" >> $RPM_BUILD_ROOT/usr/include/linux/version.h
 %endif
 
 ###
@@ -2637,6 +2707,12 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
+%if 0%{!?fedora:1}\
+if [ -x %{_sbindir}/weak-modules ]\
+then\
+    %{_sbindir}/weak-modules --add-kernel %{KVERREL}%{?1:+%{1}} || exit $?\
+fi\
+%endif\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
 
@@ -2666,6 +2742,12 @@ fi}\
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1:%{1}-}core}\
 /bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
+%if 0%{!?fedora:1}\
+if [ -x %{_sbindir}/weak-modules ]\
+then\
+    %{_sbindir}/weak-modules --remove-kernel %{KVERREL}%{?1:+%{1}} || exit $?\
+fi\
+%endif\
 %{nil}
 
 %kernel_variant_preun
@@ -2747,7 +2829,8 @@ fi
 
 %files -f python3-perf-debuginfo.list -n python3-perf-debuginfo
 %endif
-%endif # with_perf
+# with_perf
+%endif
 
 %if %{with_tools}
 %ifnarch %{cpupowerarchs}
@@ -2768,8 +2851,10 @@ fi
 %{_mandir}/man8/x86_energy_perf_policy*
 %{_bindir}/turbostat
 %{_mandir}/man8/turbostat*
+%{_bindir}/intel-speed-select
 %endif
-%endif # cpupowerarchs
+# cpupowerarchs
+%endif
 %{_bindir}/tmon
 %{_bindir}/iio_event_monitor
 %{_bindir}/iio_generic_buffer
@@ -2793,7 +2878,8 @@ fi
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
-%endif # with_tools
+# with_tools
+%endif
 
 %if %{with_bpftool}
 %files -n bpftool
@@ -2846,7 +2932,7 @@ fi
 %if %{2}\
 %{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?1:-f kernel-%{?3:%{3}-}ldsoconf.list} %{?3:%{3}-}core}\
 %{!?_licensedir:%global license %%doc}\
-%license linux-%{KVERREL}/COPYING-%{version}\
+%license linux-%{KVERREL}/COPYING-%{version}-%{release}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
@@ -2873,7 +2959,10 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/source\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
+%if 0%{!?fedora:1}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/weak-updates\
+%endif\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca*.cer\
 %ifarch s390x ppc64le\
 %if 0%{!?4:1}\
 %{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
