@@ -2475,6 +2475,9 @@ fi
 #
 #
 %changelog
+* Tue Sep 08 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.19.1.el8.centos
+- Apply debranding changes
+
 * Wed Aug 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.19.1.el8_2]
 - [net] tcp: add sanity tests in tcp_add_backlog() (Guillaume Nault) [1861378 1790843]
 - [net] tcp: implement coalescing on backlog queue (Guillaume Nault) [1861378 1790843]
