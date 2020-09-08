@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.14.3.el8_2
+%define pkgrelease 193.19.1.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.14.3%{?dist}
+%define specrelease 193.19.1%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -2475,17 +2475,40 @@ fi
 #
 #
 %changelog
-* Wed Jul 29 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.14.3.el8.centos
-- Apply debranding changes
+* Wed Aug 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.19.1.el8_2]
+- [net] tcp: add sanity tests in tcp_add_backlog() (Guillaume Nault) [1861378 1790843]
+- [net] tcp: implement coalescing on backlog queue (Guillaume Nault) [1861378 1790843]
+- [include] tcp: make tcp_space() aware of socket backlog (Guillaume Nault) [1861378 1790843]
+- [net] tcp: take care of compressed acks in tcp_add_reno_sack() (Guillaume Nault) [1861378 1790843]
+- [include] tcp: hint compiler about sack flows (Guillaume Nault) [1861378 1790843]
+- [net] tcp: drop dst in tcp_add_backlog() (Guillaume Nault) [1861378 1790843]
 
-* Mon Jul 20 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.3.el8_2]
-- Reverse keys order for dual-signing (Frantisek Hrbata) [1837433 1837434] {CVE-2020-10713}
+* Wed Aug 19 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.18.1.el8_2]
+- [security] selinux: allow reading labels before policy is loaded (Ondrej Mosnacek) [1861721 1839819]
+- [security] selinux: allow labeling before policy is loaded (Ondrej Mosnacek) [1861722 1777525]
+- [mm] mm/memory_hotplug.c: only respect mem= parameter during boot stage (Baoquan He) [1854207 1838809]
 
-* Sun Jul 19 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.2.el8_2]
+* Wed Aug 12 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.17.1.el8_2]
+- [net] netfilter: nf_tables: reintroduce the NFT_SET_CONCAT flag (Phil Sutter) [1854531 1847553]
+- [net] netfilter: nf_tables: report EOPNOTSUPP on unsupported flags/object type (Phil Sutter) [1854531 1847553]
+- [s390] s390: prevent leaking kernel address in BEAR (Claudio Imbrenda) [1854986 1850907]
+- [s390] scsi: zfcp: Fix panic on ERP timeout for previously dismissed ERP action (Philipp Rudo) [1861355 1857312]
+
+* Wed Aug 05 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.16.1.el8_2]
+- [infiniband] IB/rdmavt: Free kernel completion queue when done (Gopal Tiwari) [1857757 1805036]
 - [kernel] Move to dual-signing to split signing keys up better (pjones) [1837433 1837434] {CVE-2020-10713}
 - [crypto] pefile: Tolerate other pefile signatures after first (Lenny Szubowicz) [1837433 1837434] {CVE-2020-10713}
 - [acpi] ACPI: configfs: Disallow loading ACPI tables when locked down (Lenny Szubowicz) [1852968 1852969] {CVE-2020-15780}
 - [firmware] efi: Restrict efivar_ssdt_load when the kernel is locked down (Lenny Szubowicz) [1852948 1852949] {CVE-2019-20908}
+
+* Wed Jul 29 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.15.1.el8_2]
+- [wireless] iwlwifi: pcie: handle QuZ configs with killer NICs as well (Jarod Wilson) [1857773 1844129]
+- [wireless] iwlwifi: pcie: move power gating workaround earlier in the flow (Jarod Wilson) [1857773 1844129]
+- [nvme] nvme: fix possible deadlock when nvme_update_formats fails (Gopal Tiwari) [1857115 1781927]
+- [iommu] iommu: move flags field before ids in iommu_fwspec (Jerry Snitselaar) [1856966 1833512]
+- [x86] kvm: x86: only do L1TF workaround on affected processors (Vitaly Kuznetsov) [1857796 1800673]
+- [x86] kvm: x86: create mmu/ subdirectory (Vitaly Kuznetsov) [1857796 1800673]
+- [kvm] KVM: SVM: Override default MMIO mask if memory encryption is enabled (Wei Huang) [1857796 1800673]
 
 * Mon Jul 13 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.14.1.el8_2]
 - [md] dm mpath: add DM device name to Failing/Reinstating path log messages (Mike Snitzer) [1852050 1822975]
