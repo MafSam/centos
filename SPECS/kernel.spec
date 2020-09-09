@@ -29,7 +29,7 @@ Summary: The Linux kernel
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
 %else
-%define secure_boot_arch x86_64 aarch64 s390x ppc64le
+%define secure_boot_arch x86_64 aarch64
 %endif
 
 # Signing for secure boot authentication
@@ -664,10 +664,10 @@ Source10: x509.genkey.rhel
 Source11: x509.genkey.fedora
 %if %{?released_kernel}
 
-Source12: redhatsecurebootca5.cer
-Source13: redhatsecurebootca1.cer
-Source14: redhatsecureboot501.cer
-Source15: redhatsecureboot301.cer
+Source12: centossecurebootca2.der
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot201.der
+Source15: centossecureboot001.der
 Source16: secureboot_s390.cer
 Source17: secureboot_ppc.cer
 
@@ -675,33 +675,25 @@ Source17: secureboot_ppc.cer
 %define secureboot_ca_0 %{SOURCE13}
 %ifarch x86_64 aarch64
 %define secureboot_key_1 %{SOURCE14}
-%define pesign_name_1 redhatsecureboot501
+%define pesign_name_1 centossecureboot201
 %define secureboot_key_0 %{SOURCE15}
-%define pesign_name_0 redhatsecureboot301
-%endif
-%ifarch s390x
-%define secureboot_key_0 %{SOURCE16}
-%define pesign_name_0 redhatsecureboot302
-%endif
-%ifarch ppc64le
-%define secureboot_key_0 %{SOURCE17}
-%define pesign_name_0 redhatsecureboot303
+%define pesign_name_0 centossecureboot001
 %endif
 
 # released_kernel
 %else
 
-Source12: redhatsecurebootca4.cer
-Source13: redhatsecurebootca2.cer
-Source14: redhatsecureboot401.cer
-Source15: redhatsecureboot003.cer
+Source12: centossecurebootca2.der
+Source13: centos-ca-secureboot.der
+Source14: centossecureboot201.der
+Source15: centossecureboot001.der
 
 %define secureboot_ca_1 %{SOURCE12}
 %define secureboot_ca_0 %{SOURCE13}
 %define secureboot_key_1 %{SOURCE14}
-%define pesign_name_1 redhatsecureboot401
+%define pesign_name_1 centossecureboot201
 %define secureboot_key_0 %{SOURCE15}
-%define pesign_name_0 redhatsecureboot003
+%define pesign_name_0 centossecureboot001
 
 # released_kernel
 %endif
@@ -784,6 +776,8 @@ Source213: Module.kabi_dup_x86_64
 # Sources for kernel-tools
 Source2000: cpupower.service
 Source2001: cpupower.config
+
+Source9000: centos.pem
 
 ## Patches needed for building this package
 
@@ -1544,6 +1538,7 @@ fi
 
 # Now build the fedora kernel tree.
 cp -al vanilla-%{vanillaversion} linux-%{KVERREL}
+cp -v %{SOURCE9000} linux-%{KVERREL}/certs/rhel.pem
 
 cd linux-%{KVERREL}
 if [ ! -d .git ]; then
