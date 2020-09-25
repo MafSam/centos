@@ -19,7 +19,7 @@
 %global distro_build 193
 
 # Sign the x86_64 kernel for secure boot authentication
-%ifarch x86_64 aarch64 s390x ppc64le
+%ifarch x86_64 aarch64
 %global signkernel 1
 %else
 %global signkernel 0
@@ -421,44 +421,34 @@ Source9: x509.genkey
 
 %if %{?released_kernel}
 
-Source10: redhatsecurebootca5.cer
-Source11: redhatsecurebootca3.cer
-Source12: redhatsecureboot501.cer
-Source13: redhatsecureboot301.cer
-Source14: secureboot_s390.cer
-Source15: secureboot_ppc.cer
+Source10: centossecurebootca2.der
+Source11: centos-ca-secureboot.der
+Source12: centossecureboot201.der
+Source13: centossecureboot001.der
 
 %define secureboot_ca_0 %{SOURCE11}
 %define secureboot_ca_1 %{SOURCE10}
 %ifarch x86_64 aarch64
 %define secureboot_key_0 %{SOURCE13}
-%define pesign_name_0 redhatsecureboot301
+%define pesign_name_0 centossecureboot001
 %define secureboot_key_1 %{SOURCE12}
-%define pesign_name_1 redhatsecureboot501
-%endif
-%ifarch s390x
-%define secureboot_key_0 %{SOURCE14}
-%define pesign_name_0 redhatsecureboot302
-%endif
-%ifarch ppc64le
-%define secureboot_key_0 %{SOURCE15}
-%define pesign_name_0 redhatsecureboot303
+%define pesign_name_1 centossecureboot201
 %endif
 
 # released_kernel
 %else
 
-Source11: redhatsecurebootca4.cer
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot401.cer
-Source14: redhatsecureboot003.cer
+Source11: centos-ca-secureboot.der
+Source12: centossecurebootca2.der
+Source13: centossecureboot001.der
+Source14: centossecureboot201.der
 
 %define secureboot_ca_0 %{SOURCE11}
 %define secureboot_ca_1 %{SOURCE12}
 %define secureboot_key_0 %{SOURCE13}
-%define pesign_name_0 redhatsecureboot401
+%define pesign_name_0 centossecureboot201
 %define secureboot_key_1 %{SOURCE14}
-%define pesign_name_1 redhatsecureboot003
+%define pesign_name_1 centossecureboot001
 
 # released_kernel
 %endif
@@ -515,6 +505,8 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+Source9000: centos.pem
+
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -525,8 +517,8 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for Red Hat Enterprise
-Linux. It is based on upstream Linux at version %{version} and maintains kABI
+This is the package which provides the Linux %{name} for CentOS.
+It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
 this is not a %{version} kernel anymore: it includes several components which come
@@ -534,7 +526,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in Red Hat Enterprise Linux, enhancements for
+updates for supported hardware in CentOS, enhancements for
 enterprise customers, etc.
 
 #
@@ -767,12 +759,12 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
+Summary: The CentOS kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the Red Hat Enterprise
-Linux kernel ABI, including lists of kernel symbols that are needed by
+The kABI package contains information pertaining to the CentOS
+kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
 %if %{with_kabidw_base}
@@ -781,8 +773,8 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the Red Hat Enterprise
-Linux kernel, suitable for the kabi-dw tool.
+The package contains data describing the current ABI of the CentOS
+kernel, suitable for the kabi-dw tool.
 %endif
 
 #
@@ -854,7 +846,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
 %{nil}
 
 #
@@ -1049,6 +1041,7 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
@@ -2475,9 +2468,6 @@ fi
 #
 #
 %changelog
-* Tue Oct 20 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.28.1.el8.centos
-- Apply debranding changes
-
 * Fri Oct 16 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.28.1.el8_2]
 - [net] Bluetooth: L2CAP: Fix calling sk_filter on non-socket based channel (Gopal Tiwari) [1888256 1888258] {CVE-2020-12351}
 - [net] Bluetooth: A2MP: Fix not initializing all members (Gopal Tiwari) [1888906 1888807] {CVE-2020-12352}
