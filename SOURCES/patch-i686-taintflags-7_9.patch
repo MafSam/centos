@@ -1,0 +1,17 @@
+patch-i686-taintflags-7_9.patch
+  Submitted by Pablo Greco <pablo@fliagreco.com.ar>
+
+--- a/include/linux/kernel.h	2020-08-18 15:24:23.000000000 -0300
++++ b/include/linux/kernel.h	2020-10-01 15:34:52.981717751 -0300
+@@ -540,7 +540,11 @@ extern enum system_states {
+ #define TAINT_RESERVED30		30
+ #define TAINT_RESERVED31		31
+ #define TAINT_FLAGS_COUNT		32
++#ifdef CONFIG_X86_32
++#define TAINT_FLAGS_MAX			((unsigned long)((1ULL << TAINT_FLAGS_COUNT) - 1))
++#else
+ #define TAINT_FLAGS_MAX			((1UL << TAINT_FLAGS_COUNT) - 1)
++#endif
+ 
+ struct taint_flag {
+ 	char c_true;	/* character printed when tainted */
