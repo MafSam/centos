@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 65
+%define stable_update 72
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -867,7 +867,6 @@ Patch325: arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
-Patch500: PATCH-v2-selinux-allow-labeling-before-policy-is-loaded.patch
 
 # rhbz 1431375
 Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
@@ -883,9 +882,6 @@ Patch503: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 # https://lore.kernel.org/patchwork/patch/1132459/
 # https://lkml.org/lkml/2019/8/29/1772
 Patch504: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
-
-# This is already in 5.5 rhbz 1794369
-Patch603: 0001-e1000e-Add-support-for-Comet-Lake.patch
 
 #KVM fix
 Patch700: 0001-arm64-kvm-Fix-IDMAP-overlap-with-HYP-VA.patch
@@ -3013,6 +3009,11 @@ fi
 #
 #
 %changelog
+* Sun Oct 18 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.72-200
+- Update to version v5.4.72
+- Add initial bits for secure boot
+- Remove upstreamed patches
+
 * Sat Sep 12 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.65-200
 - Update to version v5.4.65
 
