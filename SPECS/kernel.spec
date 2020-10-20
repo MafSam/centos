@@ -2475,6 +2475,9 @@ fi
 #
 #
 %changelog
+* Tue Oct 20 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.28.1.el8.centos
+- Apply debranding changes
+
 * Fri Oct 16 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.28.1.el8_2]
 - [net] Bluetooth: L2CAP: Fix calling sk_filter on non-socket based channel (Gopal Tiwari) [1888256 1888258] {CVE-2020-12351}
 - [net] Bluetooth: A2MP: Fix not initializing all members (Gopal Tiwari) [1888906 1888807] {CVE-2020-12352}
