@@ -42,10 +42,10 @@
 # define buildid .local
 
 %define rpmversion 4.18.0
-%define pkgrelease 193.19.1.el8_2
+%define pkgrelease 193.28.1.el8_2
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 193.19.1%{?dist}
+%define specrelease 193.28.1%{?dist}
 
 %define pkg_release %{specrelease}%{?buildid}
 
@@ -421,24 +421,20 @@ Source9: x509.genkey
 
 %if %{?released_kernel}
 
-#Source10: redhatsecurebootca5.cer
-Source10: centossecurebootca2.der
-#Source11: redhatsecurebootca3.cer
-Source11: centos-ca-secureboot.der
-#Source12: redhatsecureboot501.cer
-Source12: centossecureboot201.crt
-#Source13: redhatsecureboot301.cer
-Source13: centossecureboot001.crt
+Source10: redhatsecurebootca5.cer
+Source11: redhatsecurebootca3.cer
+Source12: redhatsecureboot501.cer
+Source13: redhatsecureboot301.cer
 Source14: secureboot_s390.cer
 Source15: secureboot_ppc.cer
 
-%define secureboot_ca_0 %{SOURCE10}
-%define secureboot_ca_1 %{SOURCE11}
+%define secureboot_ca_0 %{SOURCE11}
+%define secureboot_ca_1 %{SOURCE10}
 %ifarch x86_64 aarch64
-%define secureboot_key_0 %{SOURCE12}
-%define pesign_name_0 centossecureboot201
-%define secureboot_key_1 %{SOURCE13}
-%define pesign_name_1 centossecureboot001
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot301
+%define secureboot_key_1 %{SOURCE12}
+%define pesign_name_1 redhatsecureboot501
 %endif
 %ifarch s390x
 %define secureboot_key_0 %{SOURCE14}
@@ -446,19 +442,16 @@ Source15: secureboot_ppc.cer
 %endif
 %ifarch ppc64le
 %define secureboot_key_0 %{SOURCE15}
-%define pesign_name_0 centossecureboot201 
+%define pesign_name_0 redhatsecureboot303
 %endif
 
 # released_kernel
 %else
 
-#Source11: redhatsecurebootca3.cer
-Source11: centos-ca-secureboot.der
-#Source12: redhatsecureboot501.cer
-Source12: centossecureboot201.crt
-#Source13: redhatsecureboot301.cer
-Source13: centossecureboot001.crt
-Source14: secureboot_s390.cer
+Source11: redhatsecurebootca4.cer
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot401.cer
+Source14: redhatsecureboot003.cer
 
 %define secureboot_ca_0 %{SOURCE11}
 %define secureboot_ca_1 %{SOURCE12}
@@ -522,9 +515,6 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# Sources for CentOS debranding
-Source9000: centos.pem
-
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -535,7 +525,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for CentOS
+This is the package which provides the Linux %{name} for Red Hat Enterprise
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -544,7 +534,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in CentOS Linux, enhancements for
+updates for supported hardware in Red Hat Enterprise Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -777,11 +767,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The CentOS Linux kernel ABI symbol whitelists
+Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the CentOS
+The kABI package contains information pertaining to the Red Hat Enterprise
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -791,7 +781,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the CentOS
+The package contains data describing the current ABI of the Red Hat Enterprise
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -864,7 +854,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
 %{nil}
 
 #
@@ -1059,15 +1049,11 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
-
-cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
-
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
-#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1668,7 +1654,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     %ifarch x86_64 aarch64
         install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
@@ -2489,8 +2475,93 @@ fi
 #
 #
 %changelog
-* Tue Sep 08 2020 CentOS Sources <bugs@centos.org> - 4.18.0-193.19.1.el8.centos
-- Apply debranding changes
+* Fri Oct 16 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.28.1.el8_2]
+- [net] Bluetooth: L2CAP: Fix calling sk_filter on non-socket based channel (Gopal Tiwari) [1888256 1888258] {CVE-2020-12351}
+- [net] Bluetooth: A2MP: Fix not initializing all members (Gopal Tiwari) [1888906 1888807] {CVE-2020-12352}
+
+* Thu Oct 15 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.27.1.el8_2]
+- [powerpc] powerpc/pseries: Do not initiate shutdown when system is running on UPS (Diego Domingos) [1882243 1870477]
+- [video] vgacon: Fix for missing check in scrollback handling (Lyude Paul) [1859471 1859472] {CVE-2020-14331}
+
+* Thu Oct 08 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.26.1.el8_2]
+- [firmware] efi: don't reserve MOK config table memory region (Kairui Song) [1879988 1878584]
+- [security] integrity: Load certs from the EFI MOK config table (Lenny Szubowicz) [1877528 1868306]
+- [security] integrity: Move import of MokListRT certs to a separate routine (Lenny Szubowicz) [1877528 1868306]
+- [firmware] efi: Support for MOK variable config table (Lenny Szubowicz) [1877528 1868306]
+- [security] efi: Only print errors about failing to get certs if EFI vars are found (Lenny Szubowicz) [1877528 1804969]
+- [fs] ceph: fix inode number handling on arches with 32-bit ino_t (Jeff Layton) [1875787 1866018]
+- [fs] ceph: handle zero-length feature mask in session messages (Jeff Layton) [1875787 1866018]
+- [fs] ceph: fix endianness bug when handling MDS session feature bits (Jeff Layton) [1875787 1866018]
+- [netdrv] net/mlx5e: Fix missing cleanup of ethtool steering during rep rx cleanup (Alaa Hleihel) [1857777 1856660]
+
+* Thu Oct 01 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.25.1.el8_2]
+- [net] netfilter: conntrack: proc: rename stat column (Florian Westphal) [1882095 1875681]
+- [net] netfilter: conntrack: add clash resolution stat counter (Florian Westphal) [1882095 1875681]
+- [net] netfilter: conntrack: remove ignore stats (Florian Westphal) [1882095 1875681]
+- [net] netfilter: conntrack: do not increment two error counters at same time (Florian Westphal) [1882095 1875681]
+- [net] netfilter: conntrack: do not auto-delete clash entries on reply (Florian Westphal) [1882095 1875681]
+- [fs] xfs: fix boundary test in xfs_attr_shortform_verify (Eric Sandeen) [1881085 1875316] {CVE-2020-14385}
+- [kernel] time/tick-broadcast: Fix tick_broadcast_offline() lockdep complaint (Alexey Klimov) [1880081 1877380]
+- [net] atomics/treewide: Rename __atomic_add_unless() => atomic_fetch_add_unless() (Yauheni Kaliuta) [1880081 1813370]
+- [kernel] timers: Lower base clock forwarding threshold (Phil Auld) [1877417 1833096]
+
+* Wed Sep 23 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.24.1.el8_2]
+- [kernel] timers: Remove must_forward_clk (Phil Auld) [1877417 1833096]
+- [kernel] timers: Spare timer softirq until next expiry (Phil Auld) [1877417 1833096]
+- [kernel] timers: Expand clk forward logic beyond nohz (Phil Auld) [1877417 1833096]
+- [kernel] timers: Reuse next expiry cache after nohz exit (Phil Auld) [1877417 1833096]
+- [kernel] timers: Always keep track of next expiry (Phil Auld) [1877417 1833096]
+- [kernel] timers: Optimize _next_timer_interrupt() level iteration (Phil Auld) [1877417 1833096]
+- [kernel] timers: Add comments about calc_index() ceiling work (Phil Auld) [1877417 1833096]
+- [kernel] timers: Move trigger_dyntick_cpu() to enqueue_timer() (Phil Auld) [1877417 1833096]
+- [kernel] timers: Use only bucket expiry for base->next_expiry value (Phil Auld) [1877417 1833096]
+- [kernel] timers: Preserve higher bits of expiration on index calculation (Phil Auld) [1877417 1833096]
+- [kernel] timer: Fix wheel index calculation on last level (Phil Auld) [1877417 1833096]
+- [kernel] timer: Prevent base->clk from moving backward (Phil Auld) [1877417 1833096]
+- [kernel] timer: Read jiffies once when forwarding base clk (Phil Auld) [1877417 1833096]
+- [infiniband] RDMA/umem: Fix ib_umem_find_best_pgsz() (Kamal Heib) [1872424 1856158]
+- [net] net: accept an empty mask in /sys/class/net/*/queues/rx-*/rps_cpus (Nitesh Narayan Lal) [1870181 1868433]
+- [net] net: Restrict receive packets queuing to housekeeping CPUs (Nitesh Narayan Lal) [1867174 1844520]
+- [pci] PCI: Restrict probe functions to housekeeping CPUs (Nitesh Narayan Lal) [1867174 1844520]
+- [lib] lib: Restrict cpumask_local_spread to houskeeping CPUs (Nitesh Narayan Lal) [1867174 1844520]
+- [s390] s390/pci: Fix unexpected write combine on resource (Philipp Rudo) [1869276 1827311]
+
+* Thu Sep 17 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.23.1.el8_2]
+- [net] packet: fix overflow in tpacket_rcv (Hangbin Liu) [1876223 1876224] {CVE-2020-14386}
+- [net] packet: make tp_drops atomic (Hangbin Liu) [1876223 1876224] {CVE-2020-14386}
+
+* Wed Sep 16 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.22.1.el8_2]
+- [crypto] pefile: Support multiple signatures in verify_pefile_signature (Lenny Szubowicz) [1877530 1862072]
+- [crypto] Revert "pefile: Tolerate other pefile signatures after first" (Bruno Meneguele)
+- [infiniband] IB/hfi1: Fix another case where pq is left on waitlist (Kamal Heib) [1872766 1859209]
+- [infiniband] IB/hfi1: Ensure pq is not left on waitlist (Kamal Heib) [1872766 1859209]
+
+* Thu Sep 10 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.21.1.el8_2]
+- [scsi] scsi: ibmvfc: Fix NULL return compiler warning (Steve Best) [1866371 1810653]
+- [scsi] scsi: ibmvfc: Avoid loss of all paths during SVC node reboot (Steve Best) [1866371 1810653]
+
+* Thu Sep 03 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.20.1.el8_2]
+- [infiniband] IB/rdmavt: Fix RQ counting issues causing use of an invalid RWQE (Kamal Heib) [1872771 1850314]
+- [block] blk-mq: Rerun dispatching in the case of budget contention (Ming Lei) [1869779 1824037]
+- [block] blk-mq: Add blk_mq_delay_run_hw_queues() API call (Ming Lei) [1869779 1824037]
+- [block] blk-mq: In blk_mq_dispatch_rq_list() "no budget" is a reason to kick (Ming Lei) [1869779 1824037]
+- [block] blk-mq: Put driver tag in blk_mq_dispatch_rq_list() when no budget (Ming Lei) [1869779 1824037]
+- [md] dm mpath: use double checked locking in fast path (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: rename current_pgpath to pgpath in multipath_prepare_ioctl (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: rework __map_bio() (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: factor out multipath_queue_bio (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: push locking down to must_push_back_rq() (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: take m->lock spinlock when testing QUEUE_IF_NO_PATH (Mike Snitzer) [1869386 1848651]
+- [md] dm mpath: changes from initial m->flags locking audit (Mike Snitzer) [1869386 1848651]
+- [md] dm rq: don't call blk_mq_queue_stopped() in dm_stop_queue() (Mike Snitzer) [1869386 1848651]
+- [md] dm: do not use waitqueue for request-based DM (Mike Snitzer) [1869386 1848651]
+- [block] blk-mq: consider non-idle request as "inflight" in blk_mq_rq_inflight() (Mike Snitzer) [1869386 1848651]
+- [kernel] sched/deadline: Initialize ->dl_boosted (Phil Auld) [1867612 1854179]
+- [kernel] sched/core: Fix PI boosting between RT and DEADLINE tasks (Phil Auld) [1867612 1854179]
+- [net] net/smc: tolerate future SMCD versions (Philipp Rudo) [1866390 1854992]
+- [net] openvswitch: fixes potential deadlock in dp cleanup code (Eelco Chaudron) [1859216 1845662]
+- [net] openvswitch: reorder masks array based on usage (Eelco Chaudron) [1859216 1845662]
+- [net] openvswitch: take into account de-fragmentation/gso_size in execute_check_pkt_len (Lorenzo Bianconi) [1860169 1851888]
 
 * Wed Aug 26 2020 Bruno Meneguele <bmeneg@redhat.com> [4.18.0-193.19.1.el8_2]
 - [net] tcp: add sanity tests in tcp_add_backlog() (Guillaume Nault) [1861378 1790843]
