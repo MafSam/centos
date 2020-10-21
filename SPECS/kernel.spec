@@ -544,9 +544,10 @@ Source211: Module.kabi_dup_ppc64le
 Source212: Module.kabi_dup_s390x
 Source213: Module.kabi_dup_x86_64
 
-Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
 Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 %endif
+
+Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
 
 %if %{with_realtime}
 Source400: mod-kvm.list
