@@ -421,20 +421,24 @@ Source9: x509.genkey
 
 %if %{?released_kernel}
 
-Source10: redhatsecurebootca5.cer
-Source11: redhatsecurebootca3.cer
-Source12: redhatsecureboot501.cer
-Source13: redhatsecureboot301.cer
+#Source10: redhatsecurebootca5.cer
+Source10: centossecurebootca2.der
+#Source11: redhatsecurebootca3.cer
+Source11: centos-ca-secureboot.der
+#Source12: redhatsecureboot501.cer
+Source12: centossecureboot201.crt
+#Source13: redhatsecureboot301.cer
+Source13: centossecureboot001.crt
 Source14: secureboot_s390.cer
 Source15: secureboot_ppc.cer
 
-%define secureboot_ca_0 %{SOURCE11}
-%define secureboot_ca_1 %{SOURCE10}
+%define secureboot_ca_0 %{SOURCE10}
+%define secureboot_ca_1 %{SOURCE11}
 %ifarch x86_64 aarch64
-%define secureboot_key_0 %{SOURCE13}
-%define pesign_name_0 redhatsecureboot301
-%define secureboot_key_1 %{SOURCE12}
-%define pesign_name_1 redhatsecureboot501
+%define secureboot_key_0 %{SOURCE12}
+%define pesign_name_0 centossecureboot201
+%define secureboot_key_1 %{SOURCE13}
+%define pesign_name_1 centossecureboot001
 %endif
 %ifarch s390x
 %define secureboot_key_0 %{SOURCE14}
@@ -442,16 +446,19 @@ Source15: secureboot_ppc.cer
 %endif
 %ifarch ppc64le
 %define secureboot_key_0 %{SOURCE15}
-%define pesign_name_0 redhatsecureboot303
+%define pesign_name_0 centossecureboot201 
 %endif
 
 # released_kernel
 %else
 
-Source11: redhatsecurebootca4.cer
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot401.cer
-Source14: redhatsecureboot003.cer
+#Source11: redhatsecurebootca3.cer
+Source11: centos-ca-secureboot.der
+#Source12: redhatsecureboot501.cer
+Source12: centossecureboot201.crt
+#Source13: redhatsecureboot301.cer
+Source13: centossecureboot001.crt
+Source14: secureboot_s390.cer
 
 %define secureboot_ca_0 %{SOURCE11}
 %define secureboot_ca_1 %{SOURCE12}
@@ -515,6 +522,9 @@ Source400: mod-kvm.list
 Source2000: cpupower.service
 Source2001: cpupower.config
 
+# Sources for CentOS debranding
+Source9000: centos.pem
+
 ## Patches needed for building this package
 
 # empty final patch to facilitate testing of kernel patches
@@ -525,7 +535,7 @@ Patch999999: linux-kernel-test.patch
 BuildRoot: %{_tmppath}/%{name}-%{KVERREL}-root
 
 %description
-This is the package which provides the Linux %{name} for Red Hat Enterprise
+This is the package which provides the Linux %{name} for CentOS
 Linux. It is based on upstream Linux at version %{version} and maintains kABI
 compatibility of a set of approved symbols, however it is heavily modified with
 backports and fixes pulled from newer upstream Linux %{name} releases. This means
@@ -534,7 +544,7 @@ from newer upstream linux versions, while maintaining a well tested and stable
 core. Some of the components/backports that may be pulled in are: changes like
 updates to the core kernel (eg.: scheduler, cgroups, memory management, security
 fixes and features), updates to block layer, supported filesystems, major driver
-updates for supported hardware in Red Hat Enterprise Linux, enhancements for
+updates for supported hardware in CentOS Linux, enhancements for
 enterprise customers, etc.
 
 #
@@ -767,11 +777,11 @@ kernel-gcov includes the gcov graph and source files for gcov coverage collectio
 %endif
 
 %package -n %{name}-abi-whitelists
-Summary: The Red Hat Enterprise Linux kernel ABI symbol whitelists
+Summary: The CentOS Linux kernel ABI symbol whitelists
 Group: System Environment/Kernel
 AutoReqProv: no
 %description -n %{name}-abi-whitelists
-The kABI package contains information pertaining to the Red Hat Enterprise
+The kABI package contains information pertaining to the CentOS
 Linux kernel ABI, including lists of kernel symbols that are needed by
 external Linux kernel modules, and a yum plugin to aid enforcement.
 
@@ -781,7 +791,7 @@ Summary: The baseline dataset for kABI verification using DWARF data
 Group: System Environment/Kernel
 AutoReqProv: no
 %description kernel-kabidw-base-internal
-The package contains data describing the current ABI of the Red Hat Enterprise
+The package contains data describing the current ABI of the CentOS
 Linux kernel, suitable for the kabi-dw tool.
 %endif
 
@@ -854,7 +864,7 @@ Requires: %{name}%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules-internal\
-This package provides kernel modules for the %{?2:%{2} }kernel package for Red Hat internal usage.\
+This package provides kernel modules for the %{?2:%{2} }kernel package for CentOS internal usage.\
 %{nil}
 
 #
@@ -1049,11 +1059,15 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n %{name}-%{rpmversion}-%{pkgrelease} -c
+
+cp -v %{SOURCE9000} linux-%{rpmversion}-%{pkgrelease}/certs/rhel.pem
+
 mv linux-%{rpmversion}-%{pkgrelease} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
 ApplyOptionalPatch linux-kernel-test.patch
+#ApplyOptionalPatch debrand-rh-i686-cpu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1654,7 +1668,7 @@ BuildKernel() {
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-    # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
+    # CentOS UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     %ifarch x86_64 aarch64
         install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
