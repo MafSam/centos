@@ -1,0 +1,30 @@
+centos-3.10-i686-fix-pcid-bug17925.patch 
+
+https://bugs.centos.org/view.php?id=17925
+
+When booting a recent 32-bit i686 kernel on a multi-cpu system with 'pcid' cpu feature, only the boot cpu is correctly initialized. The other cpu's fail to initialize, resulting in a badly running or crashing kernel.
+
+The reason is two missing patches present in vanilla upstream kernels:
+x86/mm: Disable PCID on 32-bit kernels
+x86/mm/32: Move setup_clear_cpu_cap(X86_FEATURE_PCID) earlier
+
+Submitted-by: Jerome Borsboom
+Applied-by: Akemi Yagi <toracat@centos.org>
+
+--- a/arch/x86/kernel/cpu/common.c	2020-10-21 10:17:08.000000000 -0700
++++ b/arch/x86/kernel/cpu/common.c	2020-12-09 22:10:47.945329193 -0800
+@@ -1131,6 +1131,14 @@ static void __init early_identify_cpu(st
+ 		this_cpu->c_bsp_init(c);
+ 
+ 	cpu_set_bug_bits(c);
++
++#ifdef CONFIG_X86_32
++	/*
++	* Regardless of whether PCID is enumerated, the SDM says
++	* that it can't be enabled in 32-bit mode.
++	*/
++	setup_clear_cpu_cap(X86_FEATURE_PCID);
++#endif
+ }
+ 
+ void __init early_cpu_init(void)
