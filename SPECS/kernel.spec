@@ -3014,65 +3014,65 @@ fi
 * Mon Feb 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.12-200
 - Linux v5.10.12
 
-* Wed Jan 27 08:07:48 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.11-200
+* Wed Jan 27 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.11-200
 - Linux v5.10.11
 - Fix URB buffer allocation of pwc driver (rhbz 1918778)
 - Fix wacom touchscreens (rhbz 1918486)
 
-* Sun Jan 24 11:28:41 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.10-200
+* Sun Jan 24 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.10-200
 - Linux v5.10.10
 - Fixes CVE-2021-3178 (rhbz 1918179 1918181)
 
 * Wed Jan 20 2021 Peter Robinson <pbrobinson@fedoraproject.org> - 5.10.9-201
 - Fix for ARMv7 builder pause issue
 
-* Tue Jan 19 15:00:17 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.9-200
+* Tue Jan 19 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.9-200
 - Linux v5.10.9
 
-* Sun Jan 17 13:09:31 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.8-200
+* Sun Jan 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.8-200
 - Linux v5.10.8
 
-* Tue Jan 12 13:41:35 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.7-200
+* Tue Jan 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.7-200
 - Linux v5.10.7
 
-* Mon Jan 11 06:51:13 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.6-200
+* Mon Jan 11 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.6-200
 - Linux v5.10.6 rebase
 - Fix bluetooth controller initialization (rhbz 1898495)
 - Fix CVE-2020-36158 (rhbz 1913348 1913349)
 
-* Mon Dec 21 07:41:08 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.16-200
+* Mon Dec 21 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.16-200
 - Linux v5.9.16
 
-* Wed Dec 16 08:06:21 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.15-200
+* Wed Dec 16 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.15-200
 - Linux v5.9.15
 
-* Fri Dec 11 07:14:10 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.14-200
+* Fri Dec 11 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.14-200
 - Linux v5.9.14
 - Fixes CVE-2020-29660 (rhbz 1906522 1906523)
 - Fixes CVE-2020-29661 (rhbz 1906525 1906526)
 
-* Tue Dec  8 08:04:29 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.13-200
+* Tue Dec  8 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.13-200
 - Linux v5.9.13
 
-* Wed Dec  2 07:55:34 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.12-200
+* Wed Dec  2 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.12-200
 - Linux v5.9.12
 
-* Tue Nov 24 11:22:38 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.11-200
+* Tue Nov 24 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.11-200
 - Linux v5.9.11
 
-* Mon Nov 23 09:58:15 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.10-200
+* Mon Nov 23 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.10-200
 - Linux v5.9.10
 - Fix CVE-2020-28941 (rhbz 1899985 1899986)
 - Fix CVE-2020-4788 (rhbz 1888433 1900437)
 
-* Thu Nov 19 07:09:26 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.9-200
+* Thu Nov 19 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.9-200
 - Linux v5.9.9
 - Enable NANDSIM (rhbz 1898638)
 
 * Thu Nov 12 2020 Justin M. Forbes <jforbes@fedoraproject.org>
 - Fix bluetooth device disconnect issues. (rhbz 1897038)
 
-* Tue Nov 10 15:34:25 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.8-200
+* Tue Nov 10 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.8-200
 - Linux v5.9.8
 - Fixes CVE-2020-8694 (rhbz 1828580 1896525)
 
@@ -3082,17 +3082,17 @@ fi
 - Fixes CVE-2020-27673 (rhbz 1891110 1891112)
 - Fixes CVE-2020-25704 (rhbz 1895951 1895963)
 
-* Mon Nov  2 10:50:39 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.18-300
+* Mon Nov  2 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.18-300
 - Linux v5.8.18
 
-* Thu Oct 29 07:55:15 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.17-300
+* Thu Oct 29 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.17-300
 - Linux v5.8.17
 - Fix CVE-2020-27675 (rhbz 1891114 1891115)
 
 * Wed Oct 28 2020 Peter Robinson <pbrobinson@fedoraproject.org>
 - Fixes for AllWinner wired network issues due to Realtek PHY driver change (rhbz 1889090)
 
-* Mon Oct 19 07:15:01 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.16-300
+* Mon Oct 19 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.16-300
 - Linux v5.8.16
 
 * Fri Oct 16 2020 Hans de Goede <hdegoede@redhat.com>
@@ -3101,35 +3101,35 @@ fi
 * Thu Oct 15 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.15-301
 - Fix BleedingTooth CVE-2020-12351 CVE-2020-12352 (rhbz 1886521 1888439 1886529 1888440)
 
-* Wed Oct 14 11:29:34 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.15-300
+* Wed Oct 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.15-300
 - Linux v5.8.15
 - Fix CVE-2020-16119 (rhbz 1886374 1888083)
 
-* Wed Oct  7 07:21:34 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.14-300
+* Wed Oct  7 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.14-300
 - Linux v5.8.14
 
 * Wed Oct  7 2020 Peter Robinson <pbrobinson@fedoraproject.org>
 - Fix aarch64 boot crash on BTI capable systems
 - Fix boot crash on aarch64 Ampere eMAG systems (rhbz #1874117)
 
-* Thu Oct  1 12:09:16 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.13-300
+* Thu Oct  1 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.13-300
 - Linux v5.8.13
 
-* Mon Sep 28 06:48:48 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.12-300
+* Mon Sep 28 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.12-300
 - Linux v5.8.12
 
-* Wed Sep 23 06:58:55 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.11-300
+* Wed Sep 23 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.11-300
 - Linux v5.8.11
 - Fix (rhbz 1821946)
 
-* Thu Sep 17 08:47:40 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.10-300
+* Thu Sep 17 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.10-300
 - Linux v5.8.10
 - Fix (rhbz 1873720 1876997)
 
 * Mon Sep 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.9-301
 - Fix error code in bdev_del_part (rhbz 1878858)
 
-* Mon Sep 14 08:51:55 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.9-300
+* Mon Sep 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.9-300
 - Linux v5.8.9
 
 * Sat Sep 12 2020 Peter Robinson <pbrobinson@fedoraproject.org>
@@ -3140,7 +3140,7 @@ fi
 * Thu Sep 10 2020 Justin M. Forbes <jforbes@fedoraproject.org>
 - Fix CVE-2020-25211 (rhbz 1877571 1877572)
 
-* Wed Sep  9 13:39:47 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.8-300
+* Wed Sep  9 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.8-300
 - Linux v5.8.8
 
 * Mon Sep 07 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.7-300
