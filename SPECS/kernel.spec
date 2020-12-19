@@ -877,6 +877,7 @@ Patch105: arm-dts-rpi-4-disable-wifi-frequencies.patch
 
 # END OF PATCH DEFINITIONS
 
+Patch10000: linux-5.10-lx2160a-network.patch
 %endif
 
 
