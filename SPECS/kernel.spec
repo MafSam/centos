@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 72
+%define stable_update 84
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3009,6 +3009,9 @@ fi
 #
 #
 %changelog
+* Sun Dec 20 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.84-200
+- Update to version v5.4.84
+
 * Sun Oct 18 2020 Pablo Greco <pgreco@centosproject.org> - 5.4.72-200
 - Update to version v5.4.72
 - Add initial bits for secure boot
