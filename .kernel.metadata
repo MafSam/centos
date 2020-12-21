@@ -1,3 +1,3 @@
-3bfcc5f6c56bdc7f2a94b139789f355a21c7b4a6 SOURCES/kernel-abi-whitelists-4.18.0-257.tar.bz2
-fd888940a25011abc9a961551fd80cec25205dc2 SOURCES/kernel-kabi-dw-4.18.0-257.tar.bz2
-39068d9a1110c73e1fe7fe949d0a9c0371389ce6 SOURCES/linux-4.18.0-257.el8.tar.xz
+cd7d912df844eddcf83700a85938ac1e62ef3667 SOURCES/kernel-abi-whitelists-4.18.0-259.tar.bz2
+4578cb63d31fe812a977280e4fcae52b1207eb2a SOURCES/kernel-kabi-dw-4.18.0-259.tar.bz2
+96b6883ac97b360ff0e2fb7cf1643187e23b17c2 SOURCES/linux-4.18.0-259.el8.tar.xz
