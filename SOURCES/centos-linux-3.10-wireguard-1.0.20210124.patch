@@ -1,4 +1,4 @@
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/allowedips.c	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,382 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -383,7 +383,7 @@
 +}
 +
 +#include "selftest/allowedips.c"
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/dst_cache/dst_cache.c	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,175 @@
 +/*
@@ -561,7 +561,7 @@
 +
 +	free_percpu(dst_cache->cache);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/memneq/memneq.c	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,170 @@
 +/*
@@ -734,7 +734,7 @@
 +}
 +
 +#endif /* __HAVE_ARCH_CRYPTO_MEMNEQ */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/siphash/siphash.c	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,539 @@
 +/* Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -1276,7 +1276,7 @@
 +	HPOSTAMBLE
 +}
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/udp_tunnel/udp_tunnel.c	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,394 @@
 +#include <linux/module.h>
@@ -1673,7 +1673,7 @@
 +	return 0;
 +}
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/cookie.c	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,236 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -1912,7 +1912,7 @@
 +out:
 +	wg_peer_put(peer);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/blake2s/blake2s.c	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,271 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2186,7 +2186,7 @@
 +MODULE_DESCRIPTION("BLAKE2s hash function");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/blake2s/blake2s-x86_64-glue.c	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,72 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2261,7 +2261,7 @@
 +	simd_put(&simd_context);
 +	return used_arch;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-arm-glue.c	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,98 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2362,7 +2362,7 @@
 +	}
 +	return false;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20.c	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,191 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2556,7 +2556,7 @@
 +MODULE_DESCRIPTION("ChaCha20 stream cipher");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-mips-glue.c	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,27 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2586,7 +2586,7 @@
 +{
 +	return false;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-x86_64-glue.c	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,105 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2694,7 +2694,7 @@
 +	}
 +	return false;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20poly1305.c	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,398 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -3095,7 +3095,7 @@
 +MODULE_DESCRIPTION("ChaCha20Poly1305 AEAD construction");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-arm-glue.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,43 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -3141,7 +3141,7 @@
 +{
 +	return false;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,110 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -3254,7 +3254,7 @@
 +MODULE_DESCRIPTION("Curve25519 scalar multiplication");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-fiat32.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,860 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -4117,7 +4117,7 @@
 +	memzero_explicit(&x3l, sizeof(x3l));
 +	memzero_explicit(&e, sizeof(e));
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-hacl64.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,779 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -4899,7 +4899,7 @@
 +	}
 +	memzero_explicit(buf0, sizeof(buf0));
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-x86_64.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,1369 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -6271,7 +6271,7 @@
 +
 +	memzero_explicit(tmp, sizeof(tmp));
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-x86_64-glue.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,44 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -6318,7 +6318,7 @@
 +	}
 +	return false;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-arm-glue.c	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,140 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -6461,7 +6461,7 @@
 +		poly1305_emit_neon(ctx, mac, nonce);
 +	return true;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305.c	2020-08-02 10:36:29.966302035 -0700
 @@ -0,0 +1,165 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -6629,7 +6629,7 @@
 +MODULE_DESCRIPTION("Poly1305 one-time authenticator");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-donna32.c	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,205 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -6837,7 +6837,7 @@
 +	put_unaligned_le32(h2, &mac[8]);
 +	put_unaligned_le32(h3, &mac[12]);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-donna64.c	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,182 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -7022,7 +7022,7 @@
 +	put_unaligned_le64(h0, &mac[0]);
 +	put_unaligned_le64(h1, &mac[8]);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-mips-glue.c	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,37 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -7062,7 +7062,7 @@
 +	poly1305_emit_mips(ctx, mac, nonce);
 +	return true;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-x86_64-glue.c	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,156 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -7221,7 +7221,7 @@
 +		poly1305_emit_avx(ctx, mac, nonce);
 +	return true;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/blake2s.c	2020-08-02 10:36:29.966302035 -0700
 @@ -0,0 +1,2090 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -9314,7 +9314,7 @@
 +	}
 +	return success;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/chacha20.c	2020-08-02 10:36:29.967302019 -0700
 @@ -0,0 +1,2698 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -12015,7 +12015,7 @@
 +	vfree(massive_input);
 +	return success;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/chacha20poly1305.c	2020-08-02 10:36:29.968302003 -0700
 @@ -0,0 +1,9076 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -21094,7 +21094,7 @@
 +	kfree(input);
 +	return success;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/curve25519.c	2020-08-02 10:36:29.968302003 -0700
 @@ -0,0 +1,1315 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -22412,7 +22412,7 @@
 +
 +	return success;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/poly1305.c	2020-08-02 10:36:29.968302003 -0700
 @@ -0,0 +1,1107 @@
 +// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -23522,8 +23522,8 @@
 +
 +	return success;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/device.c	2020-08-02 10:36:29.969301986 -0700
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/device.c	2021-01-02 14:15:57.921553943 -0800
 @@ -0,0 +1,470 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
@@ -23692,7 +23692,7 @@
 +	} else {
 +		struct sk_buff *segs = skb_gso_segment(skb, 0);
 +
-+		if (unlikely(IS_ERR(segs))) {
++		if (IS_ERR(segs)) {
 +			ret = PTR_ERR(segs);
 +			goto err_peer;
 +		}
@@ -23995,7 +23995,7 @@
 +#endif
 +	rcu_barrier();
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/main.c	2020-08-02 10:36:29.969301986 -0700
 @@ -0,0 +1,69 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -24067,7 +24067,7 @@
 +MODULE_ALIAS_RTNL_LINK(KBUILD_MODNAME);
 +MODULE_ALIAS_GENL_FAMILY(WG_GENL_NAME);
 +MODULE_INFO(intree, "Y");
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/netlink.c	2020-09-03 15:55:14.516000561 -0700
 @@ -0,0 +1,658 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -24728,7 +24728,7 @@
 +{
 +	genl_unregister_family(&genl_family);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/noise.c	2020-11-13 17:49:02.927476471 -0800
 @@ -0,0 +1,830 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -25561,7 +25561,7 @@
 +	up_write(&handshake->lock);
 +	return ret;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/peer.c	2020-09-03 15:55:14.516000561 -0700
 @@ -0,0 +1,237 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -25801,7 +25801,7 @@
 +		return;
 +	kref_put(&peer->refcount, kref_release);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/peerlookup.c	2020-09-08 09:01:36.189115941 -0700
 @@ -0,0 +1,226 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -26030,7 +26030,7 @@
 +	rcu_read_unlock_bh();
 +	return entry;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/queueing.c	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,55 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -26088,7 +26088,7 @@
 +	WARN_ON(!__ptr_ring_empty(&queue->ring));
 +	ptr_ring_cleanup(&queue->ring, NULL);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/ratelimiter.c	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,235 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -26326,7 +26326,7 @@
 +}
 +
 +#include "selftest/ratelimiter.c"
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/receive.c	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,599 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -26928,7 +26928,7 @@
 +err:
 +	dev_kfree_skb(skb);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/selftest/allowedips.c	2020-08-02 10:36:30.025301087 -0700
 @@ -0,0 +1,683 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -27614,7 +27614,7 @@
 +#undef init_peer
 +
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/selftest/counter.c	2020-08-02 10:36:30.025301087 -0700
 @@ -0,0 +1,111 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -27728,7 +27728,7 @@
 +	return success;
 +}
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/selftest/ratelimiter.c	2020-08-02 10:36:30.025301087 -0700
 @@ -0,0 +1,226 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -27957,7 +27957,7 @@
 +	return success;
 +}
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/send.c	2020-08-02 10:36:30.025301087 -0700
 @@ -0,0 +1,429 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -28389,8 +28389,8 @@
 +	 */
 +	wg_packet_send_queued_handshake_initiation(peer, false);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/socket.c	2020-08-02 10:36:30.025301087 -0700
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/socket.c	2021-01-02 14:15:57.922553926 -0800
 @@ -0,0 +1,436 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
@@ -28447,7 +28447,7 @@
 +		if (unlikely(!inet_confirm_addr(sock_net(sock), NULL, 0,
 +						fl.saddr, RT_SCOPE_HOST))) {
 +			endpoint->src4.s_addr = 0;
-+			*(__force __be32 *)&endpoint->src_if4 = 0;
++			endpoint->src_if4 = 0;
 +			fl.saddr = 0;
 +			if (cache)
 +				dst_cache_reset(cache);
@@ -28457,7 +28457,7 @@
 +			     PTR_ERR(rt) == -EINVAL) || (!IS_ERR(rt) &&
 +			     rt->dst.dev->ifindex != endpoint->src_if4)))) {
 +			endpoint->src4.s_addr = 0;
-+			*(__force __be32 *)&endpoint->src_if4 = 0;
++			endpoint->src_if4 = 0;
 +			fl.saddr = 0;
 +			if (cache)
 +				dst_cache_reset(cache);
@@ -28465,7 +28465,7 @@
 +				ip_rt_put(rt);
 +			rt = ip_route_output_flow(sock_net(sock), &fl, sock);
 +		}
-+		if (unlikely(IS_ERR(rt))) {
++		if (IS_ERR(rt)) {
 +			ret = PTR_ERR(rt);
 +			net_dbg_ratelimited("%s: No route to %pISpfsc, error %d\n",
 +					    wg->dev->name, &endpoint->addr, ret);
@@ -28532,7 +28532,7 @@
 +		}
 +		dst = ipv6_stub->ipv6_dst_lookup_flow(sock_net(sock), sock, &fl,
 +						      NULL);
-+		if (unlikely(IS_ERR(dst))) {
++		if (IS_ERR(dst)) {
 +			ret = PTR_ERR(dst);
 +			net_dbg_ratelimited("%s: No route to %pISpfsc, error %d\n",
 +					    wg->dev->name, &endpoint->addr, ret);
@@ -28828,7 +28828,7 @@
 +	sock_free(old4);
 +	sock_free(old6);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/timers.c	2020-08-02 10:36:30.026301071 -0700
 @@ -0,0 +1,243 @@
 +// SPDX-License-Identifier: GPL-2.0
@@ -29074,7 +29074,7 @@
 +	del_timer_sync(&peer->timer_persistent_keepalive);
 +	flush_work(&peer->clear_peer_work);
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/allowedips.h	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,59 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -29136,7 +29136,7 @@
 +#endif
 +
 +#endif /* _WG_ALLOWEDIPS_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/checksum/checksum_partial_compat.h	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,208 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -29347,9 +29347,9 @@
 +	}
 +	return err;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/compat/compat-asm.h	2020-11-13 17:49:02.927476471 -0800
-@@ -0,0 +1,78 @@
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/compat/compat-asm.h	2021-02-02 09:31:12.877629726 -0800
+@@ -0,0 +1,89 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -29361,6 +29361,17 @@
 +#include <linux/linkage.h>
 +#include <linux/kconfig.h>
 +#include <linux/version.h>
++
++#ifdef RHEL_MAJOR
++#if RHEL_MAJOR == 7
++#define ISRHEL7
++#elif RHEL_MAJOR == 8
++#define ISRHEL8
++#if RHEL_MINOR == 4
++#define ISCENTOS8S
++#endif
++#endif
++#endif
 +
 +/* PaX compatibility */
 +#if defined(RAP_PLUGIN)
@@ -29392,7 +29403,7 @@
 +#undef pull
 +#endif
 +
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 76)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 76) && !defined(ISCENTOS8S)
 +#define SYM_FUNC_START ENTRY
 +#define SYM_FUNC_END ENDPROC
 +#endif
@@ -29428,9 +29439,9 @@
 +#endif
 +
 +#endif /* _WG_COMPATASM_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/compat/compat.h	2020-09-03 15:55:14.483001058 -0700
-@@ -0,0 +1,1118 @@
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/compat/compat.h	2021-02-02 09:31:12.877629726 -0800
+@@ -0,0 +1,1115 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + * Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -29447,13 +29458,10 @@
 +#ifdef RHEL_MAJOR
 +#if RHEL_MAJOR == 7
 +#define ISRHEL7
-+#if RHEL_MINOR == 8
-+#define ISCENTOS7
-+#endif
 +#elif RHEL_MAJOR == 8
 +#define ISRHEL8
-+#if RHEL_MINOR == 2
-+#define ISCENTOS8
++#if RHEL_MINOR == 4
++#define ISCENTOS8S
 +#endif
 +#endif
 +#endif
@@ -29527,7 +29535,7 @@
 +
 +#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 17, 0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 83)
 +#define ipv6_dst_lookup_flow(a, b, c, d) ipv6_dst_lookup_flow(b, c, d)
-+#elif (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 5) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(5, 3, 18) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0) && !defined(ISUBUNTU1904)) || (!defined(ISRHEL8) && !defined(ISDEBIAN) && !defined(ISUBUNTU1804) && LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 119) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 181) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 224) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 224) && !defined(ISUBUNTU1604) && (!defined(ISRHEL7) || defined(ISCENTOS7)))
++#elif (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 5) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(5, 3, 18) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0) && !defined(ISUBUNTU1904)) || (!defined(ISRHEL8) && !defined(ISDEBIAN) && !defined(ISUBUNTU1804) && LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 119) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 181) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 224) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 224) && !defined(ISUBUNTU1604) && !defined(ISRHEL7))
 +#define ipv6_dst_lookup_flow(a, b, c, d) ipv6_dst_lookup(a, b, &dst, c) + (void *)0 ?: dst
 +#endif
 +
@@ -30193,7 +30201,7 @@
 +#define hlist_add_behind(a, b) hlist_add_after(b, a)
 +#endif
 +
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0) && !defined(ISCENTOS8S)
 +#define totalram_pages() totalram_pages
 +#endif
 +
@@ -30259,7 +30267,7 @@
 +#define COMPAT_CANNOT_DEPRECIATE_BH_RCU
 +#endif
 +
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 10) && !defined(ISRHEL8)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 10) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0) && !defined(ISRHEL8)) || LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 217)
 +static inline void skb_mark_not_on_list(struct sk_buff *skb)
 +{
 +	skb->next = NULL;
@@ -30448,7 +30456,7 @@
 +#define COMPAT_CANNOT_USE_MAX_MTU
 +#endif
 +
-+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 5, 14) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 5, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 29) && !defined(ISUBUNTU1910) && !defined(ISUBUNTU1904) && (!defined(ISRHEL8) || defined(ISCENTOS8)))
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 5, 14) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 5, 0)) || (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 29) && !defined(ISUBUNTU1910) && !defined(ISUBUNTU1904) && !defined(ISRHEL8))
 +#include <linux/skbuff.h>
 +#include <net/sch_generic.h>
 +static inline void skb_reset_redirect(struct sk_buff *skb)
@@ -30549,7 +30557,7 @@
 +#endif
 +
 +#endif /* _WG_COMPAT_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/dst_cache/include/net/dst_cache.h	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,97 @@
 +#ifndef _WG_NET_DST_CACHE_H
@@ -30649,11 +30657,11 @@
 +void dst_cache_destroy(struct dst_cache *dst_cache);
 +
 +#endif /* _WG_NET_DST_CACHE_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/fpu-x86/include/asm/fpu/api.h	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1 @@
 +#include <asm/i387.h>
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/intel-family-x86/include/asm/intel-family.h	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,73 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -30729,7 +30737,7 @@
 +#define INTEL_FAM6_XEON_PHI_KNM		0x85 /* Knights Mill */
 +
 +#endif /* _ASM_X86_INTEL_FAMILY_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/memneq/include.h	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,5 @@
 +extern noinline unsigned long __crypto_memneq(const void *a, const void *b, size_t size);
@@ -30737,7 +30745,7 @@
 +{
 +	return __crypto_memneq(a, b, size) != 0UL ? 1 : 0;
 +}
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/neon-arm/include/asm/neon.h	2020-08-02 10:36:29.936302517 -0700
 @@ -0,0 +1,7 @@
 +#ifndef _ARCH_ARM_ASM_NEON
@@ -30747,7 +30755,7 @@
 +#define kernel_neon_end() \
 +	BUILD_BUG_ON_MSG(1, "This kernel does not support ARM NEON")
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/ptr_ring/include/linux/ptr_ring.h	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,674 @@
 +/* SPDX-License-Identifier: GPL-2.0-or-later */
@@ -31424,7 +31432,7 @@
 +}
 +
 +#endif /* _LINUX_PTR_RING_H  */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/simd-asm/include/asm/simd.h	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,21 @@
 +#ifndef _COMPAT_ASM_SIMD_H
@@ -31448,8 +31456,8 @@
 +}
 +
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/compat/simd/include/linux/simd.h	2020-08-02 10:36:29.937302501 -0700
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/compat/simd/include/linux/simd.h	2021-01-02 14:15:57.921553943 -0800
 @@ -0,0 +1,70 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
@@ -31478,7 +31486,7 @@
 +
 +static inline void simd_get(simd_context_t *ctx)
 +{
-+	*ctx = !IS_ENABLED(CONFIG_PREEMPT_RT_BASE) && may_use_simd() ? HAVE_FULL_SIMD : HAVE_NO_SIMD;
++	*ctx = !IS_ENABLED(CONFIG_PREEMPT_RT) && !IS_ENABLED(CONFIG_PREEMPT_RT_BASE) && may_use_simd() ? HAVE_FULL_SIMD : HAVE_NO_SIMD;
 +}
 +
 +static inline void simd_put(simd_context_t *ctx)
@@ -31521,7 +31529,7 @@
 +}
 +
 +#endif /* _WG_SIMD_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/siphash/include/linux/siphash.h	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,140 @@
 +/* Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
@@ -31664,7 +31672,7 @@
 +}
 +
 +#endif /* _WG_LINUX_SIPHASH_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/udp_tunnel/include/net/udp_tunnel.h	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,94 @@
 +#ifndef _WG_NET_UDP_TUNNEL_H
@@ -31761,7 +31769,7 @@
 +void udp_tunnel_sock_release(struct socket *sock);
 +
 +#endif /* _WG_NET_UDP_TUNNEL_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/udp_tunnel/udp_tunnel_partial_compat.h	2020-08-02 10:36:29.937302501 -0700
 @@ -0,0 +1,226 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -31990,7 +31998,7 @@
 +#define udp_port_cfg __compat_udp_port_cfg
 +#define udp_sock_create(a, b, c) __compat_udp_sock_create(a, b, c)
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/cookie.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,59 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32052,7 +32060,7 @@
 +			       struct wg_device *wg);
 +
 +#endif /* _WG_COOKIE_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/include/zinc/blake2s.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,56 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32111,7 +32119,7 @@
 +		  const size_t inlen, const size_t keylen);
 +
 +#endif /* _ZINC_BLAKE2S_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/include/zinc/chacha20.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,70 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32184,7 +32192,7 @@
 +	       const u8 key[HCHACHA20_KEY_SIZE], simd_context_t *simd_context);
 +
 +#endif /* _ZINC_CHACHA20_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/include/zinc/chacha20poly1305.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,50 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32237,7 +32245,7 @@
 +	const u8 key[CHACHA20POLY1305_KEY_SIZE]);
 +
 +#endif /* _ZINC_CHACHA20POLY1305_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/include/zinc/curve25519.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,28 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32268,7 +32276,7 @@
 +}
 +
 +#endif /* _ZINC_CURVE25519_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/include/zinc/poly1305.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,31 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32302,7 +32310,7 @@
 +		    simd_context_t *simd_context);
 +
 +#endif /* _ZINC_POLY1305_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc.h	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,15 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32320,7 +32328,7 @@
 +int curve25519_mod_init(void);
 +
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/selftest/run.h	2020-08-02 10:36:29.968302003 -0700
 @@ -0,0 +1,48 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -32371,7 +32379,7 @@
 +}
 +
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/device.h	2020-08-02 10:36:29.969301986 -0700
 @@ -0,0 +1,64 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32438,7 +32446,7 @@
 +void wg_device_uninit(void);
 +
 +#endif /* _WG_DEVICE_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/messages.h	2020-08-02 10:36:29.969301986 -0700
 @@ -0,0 +1,128 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32569,7 +32577,7 @@
 +enum { HANDSHAKE_DSCP = 0x88 /* AF41, plus 00 ECN */ };
 +
 +#endif /* _WG_MESSAGES_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/netlink.h	2020-08-02 10:36:29.969301986 -0700
 @@ -0,0 +1,12 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32584,7 +32592,7 @@
 +void wg_genetlink_uninit(void);
 +
 +#endif /* _WG_NETLINK_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/noise.h	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,135 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32722,7 +32730,7 @@
 +				      struct noise_keypairs *keypairs);
 +
 +#endif /* _WG_NOISE_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/peer.h	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,83 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32808,7 +32816,7 @@
 +void wg_peer_remove_all(struct wg_device *wg);
 +
 +#endif /* _WG_PEER_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/peerlookup.h	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,64 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -32875,7 +32883,7 @@
 +			  const __le32 index, struct wg_peer **peer);
 +
 +#endif /* _WG_PEERLOOKUP_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/queueing.h	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,196 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -33074,7 +33082,7 @@
 +#endif
 +
 +#endif /* _WG_QUEUEING_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/ratelimiter.h	2020-08-02 10:36:30.024301103 -0700
 @@ -0,0 +1,19 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -33096,7 +33104,7 @@
 +#endif
 +
 +#endif /* _WG_RATELIMITER_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/socket.h	2020-08-02 10:36:30.025301087 -0700
 @@ -0,0 +1,44 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -33143,7 +33151,7 @@
 +#endif
 +
 +#endif /* _WG_SOCKET_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/timers.h	2020-08-02 10:36:30.026301071 -0700
 @@ -0,0 +1,31 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -33177,7 +33185,7 @@
 +}
 +
 +#endif /* _WG_TIMERS_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/uapi/wireguard.h	2020-08-02 10:36:30.026301071 -0700
 @@ -0,0 +1,196 @@
 +/* SPDX-License-Identifier: (GPL-2.0 WITH Linux-syscall-note) OR MIT */
@@ -33376,13 +33384,13 @@
 +#define WGALLOWEDIP_A_MAX (__WGALLOWEDIP_A_LAST - 1)
 +
 +#endif /* _WG_UAPI_WIREGUARD_H */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
-+++ b/net/wireguard/version.h	2020-11-13 17:49:02.947476135 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
++++ b/net/wireguard/version.h	2021-02-02 09:31:12.878629709 -0800
 @@ -0,0 +1,3 @@
 +#ifndef WIREGUARD_VERSION
-+#define WIREGUARD_VERSION "1.0.20201112"
++#define WIREGUARD_VERSION "1.0.20210124"
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/blake2s/blake2s-x86_64.S	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,258 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -33643,7 +33651,7 @@
 +	retq
 +SYM_FUNC_END(blake2s_compress_avx512)
 +#endif /* CONFIG_AS_AVX512 */
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-mips.S	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,424 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -34070,7 +34078,7 @@
 +	FOR_EACH_WORD(JMPTBL_UNALIGNED)
 +.end chacha20_mips
 +.set at
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-unrolled-arm.S	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,461 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
@@ -34534,7 +34542,7 @@
 +
 +	pop		{r4-r11,pc}
 +SYM_FUNC_END(hchacha20_arm)
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/curve25519/curve25519-arm.S	2020-08-02 10:36:29.940302452 -0700
 @@ -0,0 +1,2064 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -36601,7 +36609,7 @@
 +	pop		{r4-r11, pc}
 +SYM_FUNC_END(curve25519_neon)
 +#endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-mips.S	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,407 @@
 +/* SPDX-License-Identifier: GPL-2.0 OR MIT */
@@ -37011,7 +37019,7 @@
 +	/* Jump Back  */
 +	jr	$ra
 +.end poly1305_init_mips
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-arm64.pl	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,1163 @@
 +#!/usr/bin/env perl
@@ -38177,7 +38185,7 @@
 +	print $_,"\n";
 +}
 +close STDOUT;	# flush
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-arm.pl	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,1227 @@
 +#!/usr/bin/env perl
@@ -39407,7 +39415,7 @@
 +	print $_,"\n";
 +}
 +close STDOUT;
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/chacha20/chacha20-x86_64.pl	2020-08-02 10:36:29.939302468 -0700
 @@ -0,0 +1,4106 @@
 +#!/usr/bin/env perl
@@ -43516,7 +43524,7 @@
 +}
 +
 +close STDOUT;
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-arm64.pl	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,974 @@
 +#!/usr/bin/env perl
@@ -44493,7 +44501,7 @@
 +	print $_,"\n";
 +}
 +close STDOUT;
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-arm.pl	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,1276 @@
 +#!/usr/bin/env perl
@@ -45772,7 +45780,7 @@
 +	print $_,"\n";
 +}
 +close STDOUT; # enforce flush
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-mips64.pl	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,467 @@
 +#!/usr/bin/env perl
@@ -46242,7 +46250,7 @@
 +print $code;
 +close STDOUT;
 +
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/zinc/poly1305/poly1305-x86_64.pl	2020-08-02 10:36:29.941302436 -0700
 @@ -0,0 +1,4266 @@
 +#!/usr/bin/env perl
@@ -50511,7 +50519,7 @@
 +	print $_,"\n";
 +}
 +close STDOUT;
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/compat/Makefile.include	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,102 @@
 +# SPDX-License-Identifier: GPL-2.0
@@ -50616,7 +50624,7 @@
 +ifneq ($(shell grep -s -F "\#define LINUX_PACKAGE_ID \" Debian " "$(CURDIR)/include/generated/package.h"),)
 +ccflags-y += -DISDEBIAN
 +endif
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/crypto/Makefile.include	2020-08-02 10:36:29.938302484 -0700
 @@ -0,0 +1,57 @@
 +ifeq ($(CONFIG_X86_64)$(if $(CONFIG_UML),y,n),yn)
@@ -50676,7 +50684,7 @@
 +ccflags-$(CONFIG_ZINC_ARCH_MIPS) += -DCONFIG_ZINC_ARCH_MIPS
 +ccflags-$(CONFIG_ZINC_ARCH_MIPS64) += -DCONFIG_ZINC_ARCH_MIPS64
 +ccflags-$(CONFIG_WIREGUARD_DEBUG) += -DCONFIG_ZINC_SELFTEST
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/Makefile	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,16 @@
 +# SPDX-License-Identifier: GPL-2.0
@@ -50695,7 +50703,7 @@
 +include $(src)/compat/Makefile.include
 +
 +obj-$(if $(KBUILD_EXTMOD),m,$(CONFIG_WIREGUARD)) := wireguard.o
---- /dev/null	2020-11-12 16:36:27.709079720 -0800
+--- /dev/null	2020-12-16 00:57:33.294923893 -0800
 +++ b/net/wireguard/Kconfig	2020-08-02 10:36:29.935302532 -0700
 @@ -0,0 +1,33 @@
 +config WIREGUARD
