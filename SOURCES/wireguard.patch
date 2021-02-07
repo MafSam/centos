@@ -1,7 +1,7 @@
-From f6ccc0027d3b18f38c5f96f8bae522fad2492c98 Mon Sep 17 00:00:00 2001
+From b197871d28940a799b029951e35297a0e7d8ce39 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:07 +0100
-Subject: [PATCH 001/117] crypto: lib - tidy up lib/crypto Kconfig and Makefile
+Subject: [PATCH 001/115] crypto: lib - tidy up lib/crypto Kconfig and Makefile
 
 commit 746b2e024c67aa605ac12d135cd7085a49cf9dc4 upstream.
 
@@ -19,7 +19,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/Kconfig
 
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index b2cc0ad3792a..7d19b46a7ef7 100644
+index b2cc0ad3792ad..7d19b46a7ef72 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -878,9 +878,6 @@ config CRYPTO_SHA1_PPC_SPE
@@ -72,7 +72,7 @@ index b2cc0ad3792a..7d19b46a7ef7 100644
  source "certs/Kconfig"
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
 new file mode 100644
-index 000000000000..261430051595
+index 0000000000000..2614300515952
 --- /dev/null
 +++ b/lib/crypto/Kconfig
 @@ -0,0 +1,15 @@
@@ -92,7 +92,7 @@ index 000000000000..261430051595
 +config CRYPTO_LIB_SHA256
 +	tristate
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index cbe0b6a6450d..63de4cb3fcf8 100644
+index cbe0b6a6450d7..63de4cb3fcf82 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -1,13 +1,13 @@
@@ -121,10 +121,10 @@ index cbe0b6a6450d..63de4cb3fcf8 100644
 2.18.4
 
 
-From 6b2cb077c6b1fb093ec8174a8ddce787446c9e57 Mon Sep 17 00:00:00 2001
+From bce5bec8ca8ba0568969300cb8e50c95ea2769e4 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:08 +0100
-Subject: [PATCH 002/117] crypto: chacha - move existing library code into
+Subject: [PATCH 002/115] crypto: chacha - move existing library code into
  lib/crypto
 
 commit 5fb8ef25803ef33e2eb60b626435828b937bed75 upstream.
@@ -166,7 +166,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/libchacha.c
 
 diff --git a/arch/arm/crypto/chacha-neon-glue.c b/arch/arm/crypto/chacha-neon-glue.c
-index a8e9b534c8da..26576772f18b 100644
+index a8e9b534c8da5..26576772f18bb 100644
 --- a/arch/arm/crypto/chacha-neon-glue.c
 +++ b/arch/arm/crypto/chacha-neon-glue.c
 @@ -20,7 +20,7 @@
@@ -179,7 +179,7 @@ index a8e9b534c8da..26576772f18b 100644
  #include <crypto/internal/skcipher.h>
  #include <linux/kernel.h>
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index 1495d2b18518..d4cc61bfe79d 100644
+index 1495d2b18518d..d4cc61bfe79df 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -20,7 +20,7 @@
@@ -192,7 +192,7 @@ index 1495d2b18518..d4cc61bfe79d 100644
  #include <crypto/internal/skcipher.h>
  #include <linux/kernel.h>
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index 388f95a4ec24..bc62daa8dafd 100644
+index 388f95a4ec240..bc62daa8dafd3 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -7,7 +7,7 @@
@@ -205,7 +205,7 @@ index 388f95a4ec24..bc62daa8dafd 100644
  #include <crypto/internal/skcipher.h>
  #include <linux/kernel.h>
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 7d19b46a7ef7..f29bf10c0462 100644
+index 7d19b46a7ef72..f29bf10c04627 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -1393,6 +1393,7 @@ config CRYPTO_SALSA20
@@ -217,7 +217,7 @@ index 7d19b46a7ef7..f29bf10c0462 100644
  	help
  	  The ChaCha20, XChaCha20, and XChaCha12 stream cipher algorithms.
 diff --git a/crypto/chacha_generic.c b/crypto/chacha_generic.c
-index 085d8d219987..ebae6d9d9b32 100644
+index 085d8d219987a..ebae6d9d9b320 100644
 --- a/crypto/chacha_generic.c
 +++ b/crypto/chacha_generic.c
 @@ -8,29 +8,10 @@
@@ -315,7 +315,7 @@ index 085d8d219987..ebae6d9d9b32 100644
  
  	/* Build the real IV */
 diff --git a/include/crypto/chacha.h b/include/crypto/chacha.h
-index d1e723c6a37d..5c662f8fecac 100644
+index d1e723c6a37dd..5c662f8fecac0 100644
 --- a/include/crypto/chacha.h
 +++ b/include/crypto/chacha.h
 @@ -15,9 +15,8 @@
@@ -417,7 +417,7 @@ index d1e723c6a37d..5c662f8fecac 100644
  #endif /* _CRYPTO_CHACHA_H */
 diff --git a/include/crypto/internal/chacha.h b/include/crypto/internal/chacha.h
 new file mode 100644
-index 000000000000..c0e40b245431
+index 0000000000000..c0e40b2454311
 --- /dev/null
 +++ b/include/crypto/internal/chacha.h
 @@ -0,0 +1,53 @@
@@ -475,7 +475,7 @@ index 000000000000..c0e40b245431
 +
 +#endif /* _CRYPTO_CHACHA_H */
 diff --git a/lib/Makefile b/lib/Makefile
-index c5892807e06f..5af38fd5cc60 100644
+index c5892807e06fa..5af38fd5cc603 100644
 --- a/lib/Makefile
 +++ b/lib/Makefile
 @@ -26,8 +26,7 @@ endif
@@ -489,7 +489,7 @@ index c5892807e06f..5af38fd5cc60 100644
  	 is_single_threaded.o plist.o decompress.o kobject_uevent.o \
  	 earlycpio.o seq_buf.o siphash.o dec_and_lock.o \
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 261430051595..6a11931ae105 100644
+index 2614300515952..6a11931ae1052 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -8,6 +8,32 @@ config CRYPTO_LIB_AES
@@ -526,7 +526,7 @@ index 261430051595..6a11931ae105 100644
  	tristate
  
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 63de4cb3fcf8..0ce40604e104 100644
+index 63de4cb3fcf82..0ce40604e104c 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -1,5 +1,9 @@
@@ -543,7 +543,7 @@ diff --git a/lib/chacha.c b/lib/crypto/chacha.c
 similarity index 88%
 rename from lib/chacha.c
 rename to lib/crypto/chacha.c
-index c7c9826564d3..65ead6b0c7e0 100644
+index c7c9826564d31..65ead6b0c7e00 100644
 --- a/lib/chacha.c
 +++ b/lib/crypto/chacha.c
 @@ -5,9 +5,11 @@
@@ -605,7 +605,7 @@ index c7c9826564d3..65ead6b0c7e0 100644
 +EXPORT_SYMBOL(hchacha_block_generic);
 diff --git a/lib/crypto/libchacha.c b/lib/crypto/libchacha.c
 new file mode 100644
-index 000000000000..dabc3accae05
+index 0000000000000..dabc3accae051
 --- /dev/null
 +++ b/lib/crypto/libchacha.c
 @@ -0,0 +1,35 @@
@@ -648,10 +648,10 @@ index 000000000000..dabc3accae05
 2.18.4
 
 
-From b6aac23330329ba2fd5953a2a9e954970b40044a Mon Sep 17 00:00:00 2001
+From 8fb7fcb51aad5548a3bb80f7a3618b518b4c0ff8 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:09 +0100
-Subject: [PATCH 003/117] crypto: x86/chacha - depend on generic chacha library
+Subject: [PATCH 003/115] crypto: x86/chacha - depend on generic chacha library
  instead of crypto driver
 
 commit 28e8d89b1ce8d2e7badfb5f69971dd635acb8863 upstream.
@@ -676,7 +676,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 36 insertions(+), 56 deletions(-)
 
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index bc62daa8dafd..0aabb382edce 100644
+index bc62daa8dafd3..0aabb382edce0 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -123,37 +123,38 @@ static void chacha_dosimd(u32 *state, u8 *dst, const u8 *src,
@@ -833,7 +833,7 @@ index bc62daa8dafd..0aabb382edce 100644
  		.decrypt		= xchacha_simd,
  	},
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index f29bf10c0462..564a3f7b40b8 100644
+index f29bf10c04627..564a3f7b40b85 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -1417,7 +1417,7 @@ config CRYPTO_CHACHA20_X86_64
@@ -849,10 +849,10 @@ index f29bf10c0462..564a3f7b40b8 100644
 2.18.4
 
 
-From 52c0e077b10f891001bc79c8ce063ccc6d46f5b2 Mon Sep 17 00:00:00 2001
+From 0545790d2026a92f2f3fb0a8e8a73afbd1a5b023 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:10 +0100
-Subject: [PATCH 004/117] crypto: x86/chacha - expose SIMD ChaCha routine as
+Subject: [PATCH 004/115] crypto: x86/chacha - expose SIMD ChaCha routine as
  library function
 
 commit 84e03fa39fbe95a5567d43bff458c6d3b3a23ad1 upstream.
@@ -877,7 +877,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 73 insertions(+), 25 deletions(-)
 
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index 0aabb382edce..b391e13a9e41 100644
+index 0aabb382edce0..b391e13a9e415 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -21,24 +21,24 @@ asmlinkage void chacha_block_xor_ssse3(u32 *state, u8 *dst, const u8 *src,
@@ -1033,7 +1033,7 @@ index 0aabb382edce..b391e13a9e41 100644
  }
  
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 564a3f7b40b8..649dc564f242 100644
+index 564a3f7b40b85..649dc564f242b 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -1418,6 +1418,7 @@ config CRYPTO_CHACHA20_X86_64
@@ -1045,7 +1045,7 @@ index 564a3f7b40b8..649dc564f242 100644
  	  SSSE3, AVX2, and AVX-512VL optimized implementations of the ChaCha20,
  	  XChaCha20, and XChaCha12 stream ciphers.
 diff --git a/include/crypto/chacha.h b/include/crypto/chacha.h
-index 5c662f8fecac..2676f4fbd4c1 100644
+index 5c662f8fecac0..2676f4fbd4c16 100644
 --- a/include/crypto/chacha.h
 +++ b/include/crypto/chacha.h
 @@ -25,6 +25,12 @@
@@ -1065,10 +1065,10 @@ index 5c662f8fecac..2676f4fbd4c1 100644
 2.18.4
 
 
-From d03f16ef93414148a4f767850e973fdbc862565c Mon Sep 17 00:00:00 2001
+From 451975d1273dce5cebbe79a81a92049e74f3956b Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:11 +0100
-Subject: [PATCH 005/117] crypto: arm64/chacha - depend on generic chacha
+Subject: [PATCH 005/115] crypto: arm64/chacha - depend on generic chacha
  library instead of crypto driver
 
 commit c77da4867cbb7841177275dbb250f5c09679fae4 upstream.
@@ -1092,7 +1092,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 23 insertions(+), 19 deletions(-)
 
 diff --git a/arch/arm64/crypto/Kconfig b/arch/arm64/crypto/Kconfig
-index 4922c4451e7c..fdf52d5f18f9 100644
+index 4922c4451e7c3..fdf52d5f18f98 100644
 --- a/arch/arm64/crypto/Kconfig
 +++ b/arch/arm64/crypto/Kconfig
 @@ -103,7 +103,7 @@ config CRYPTO_CHACHA20_NEON
@@ -1105,7 +1105,7 @@ index 4922c4451e7c..fdf52d5f18f9 100644
  config CRYPTO_NHPOLY1305_NEON
  	tristate "NHPoly1305 hash function using NEON instructions (for Adiantum)"
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index d4cc61bfe79d..cae2cb92eca8 100644
+index d4cc61bfe79df..cae2cb92eca86 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -68,7 +68,7 @@ static int chacha_neon_stream_xor(struct skcipher_request *req,
@@ -1202,10 +1202,10 @@ index d4cc61bfe79d..cae2cb92eca8 100644
 2.18.4
 
 
-From 9323bf4eee0b433671e3aa6511d9fe4244fc653d Mon Sep 17 00:00:00 2001
+From 85937c6024274450f352e1cb2a070dd9028df852 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:12 +0100
-Subject: [PATCH 006/117] crypto: arm64/chacha - expose arm64 ChaCha routine as
+Subject: [PATCH 006/115] crypto: arm64/chacha - expose arm64 ChaCha routine as
  library function
 
 commit b3aad5bad26a01a4bd8c49a5c5f52aec665f3b7c upstream.
@@ -1228,7 +1228,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 43 insertions(+), 11 deletions(-)
 
 diff --git a/arch/arm64/crypto/Kconfig b/arch/arm64/crypto/Kconfig
-index fdf52d5f18f9..17bada4b9dd2 100644
+index fdf52d5f18f98..17bada4b9dd24 100644
 --- a/arch/arm64/crypto/Kconfig
 +++ b/arch/arm64/crypto/Kconfig
 @@ -104,6 +104,7 @@ config CRYPTO_CHACHA20_NEON
@@ -1240,7 +1240,7 @@ index fdf52d5f18f9..17bada4b9dd2 100644
  config CRYPTO_NHPOLY1305_NEON
  	tristate "NHPoly1305 hash function using NEON instructions (for Adiantum)"
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index cae2cb92eca8..46cd4297761c 100644
+index cae2cb92eca86..46cd4297761c1 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -23,6 +23,7 @@
@@ -1348,10 +1348,10 @@ index cae2cb92eca8..46cd4297761c 100644
 2.18.4
 
 
-From b857fdbbb1f25ec31d1c8f8cc5412f4ab489e7df Mon Sep 17 00:00:00 2001
+From eb371adf803efd33c050d4e672775b8ac773c793 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:13 +0100
-Subject: [PATCH 007/117] crypto: arm/chacha - import Eric Biggers's scalar
+Subject: [PATCH 007/115] crypto: arm/chacha - import Eric Biggers's scalar
  accelerated ChaCha code
 
 commit 29621d099f9c642b22a69dc8e7e20c108473a392 upstream.
@@ -1366,7 +1366,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/arch/arm/crypto/chacha-scalar-core.S b/arch/arm/crypto/chacha-scalar-core.S
 new file mode 100644
-index 000000000000..2140319b64a0
+index 0000000000000..2140319b64a05
 --- /dev/null
 +++ b/arch/arm/crypto/chacha-scalar-core.S
 @@ -0,0 +1,461 @@
@@ -1835,10 +1835,10 @@ index 000000000000..2140319b64a0
 2.18.4
 
 
-From 4635c03f1686b8ada9ecd42700f82d66412d509d Mon Sep 17 00:00:00 2001
+From 6bb971b9ec7e023f65d1bc0edab7c8e2d1af5fe8 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:14 +0100
-Subject: [PATCH 008/117] crypto: arm/chacha - remove dependency on generic
+Subject: [PATCH 008/115] crypto: arm/chacha - remove dependency on generic
  ChaCha driver
 
 commit b36d8c09e710c71f6a9690b6586fea2d1c9e1e27 upstream.
@@ -1864,7 +1864,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  delete mode 100644 arch/arm/crypto/chacha-neon-glue.c
 
 diff --git a/arch/arm/crypto/Kconfig b/arch/arm/crypto/Kconfig
-index 043b0b18bf7e..cee414afeabc 100644
+index 043b0b18bf7e0..cee414afeabc9 100644
 --- a/arch/arm/crypto/Kconfig
 +++ b/arch/arm/crypto/Kconfig
 @@ -127,10 +127,8 @@ config CRYPTO_CRC32_ARM_CE
@@ -1880,7 +1880,7 @@ index 043b0b18bf7e..cee414afeabc 100644
  config CRYPTO_NHPOLY1305_NEON
  	tristate "NEON accelerated NHPoly1305 hash function (for Adiantum)"
 diff --git a/arch/arm/crypto/Makefile b/arch/arm/crypto/Makefile
-index 4180f3a13512..6b97dffcf90f 100644
+index 4180f3a13512c..6b97dffcf90fa 100644
 --- a/arch/arm/crypto/Makefile
 +++ b/arch/arm/crypto/Makefile
 @@ -53,7 +53,8 @@ aes-arm-ce-y	:= aes-ce-core.o aes-ce-glue.o
@@ -1895,7 +1895,7 @@ index 4180f3a13512..6b97dffcf90f 100644
  ifdef REGENERATE_ARM_CRYPTO
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
 new file mode 100644
-index 000000000000..eb40efb3eb34
+index 0000000000000..eb40efb3eb342
 --- /dev/null
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -0,0 +1,304 @@
@@ -2205,7 +2205,7 @@ index 000000000000..eb40efb3eb34
 +#endif
 diff --git a/arch/arm/crypto/chacha-neon-glue.c b/arch/arm/crypto/chacha-neon-glue.c
 deleted file mode 100644
-index 26576772f18b..000000000000
+index 26576772f18bb..0000000000000
 --- a/arch/arm/crypto/chacha-neon-glue.c
 +++ /dev/null
 @@ -1,202 +0,0 @@
@@ -2412,7 +2412,7 @@ index 26576772f18b..000000000000
 -MODULE_ALIAS_CRYPTO("xchacha12");
 -MODULE_ALIAS_CRYPTO("xchacha12-neon");
 diff --git a/arch/arm/crypto/chacha-scalar-core.S b/arch/arm/crypto/chacha-scalar-core.S
-index 2140319b64a0..2985b80a45b5 100644
+index 2140319b64a05..2985b80a45b57 100644
 --- a/arch/arm/crypto/chacha-scalar-core.S
 +++ b/arch/arm/crypto/chacha-scalar-core.S
 @@ -41,14 +41,6 @@
@@ -2530,7 +2530,7 @@ index 2140319b64a0..2985b80a45b5 100644
 +	b		0b
 +ENDPROC(hchacha_block_arm)
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index 46cd4297761c..b08029d7bde6 100644
+index 46cd4297761c1..b08029d7bde62 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -1,5 +1,5 @@
@@ -2544,10 +2544,10 @@ index 46cd4297761c..b08029d7bde6 100644
 2.18.4
 
 
-From 08b87f4bde29a6bffb50c0aaa3b5acc9b9d1be1e Mon Sep 17 00:00:00 2001
+From 6a86c01ffd4830e820184fa9ed8173e7ddfc7939 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:15 +0100
-Subject: [PATCH 009/117] crypto: arm/chacha - expose ARM ChaCha routine as
+Subject: [PATCH 009/115] crypto: arm/chacha - expose ARM ChaCha routine as
  library function
 
 commit a44a3430d71bad4ee56788a59fff099b291ea54c upstream.
@@ -2570,7 +2570,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 41 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/crypto/Kconfig b/arch/arm/crypto/Kconfig
-index cee414afeabc..b25ffec04417 100644
+index cee414afeabc9..b25ffec044175 100644
 --- a/arch/arm/crypto/Kconfig
 +++ b/arch/arm/crypto/Kconfig
 @@ -129,6 +129,7 @@ config CRYPTO_CRC32_ARM_CE
@@ -2582,7 +2582,7 @@ index cee414afeabc..b25ffec04417 100644
  config CRYPTO_NHPOLY1305_NEON
  	tristate "NEON accelerated NHPoly1305 hash function (for Adiantum)"
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
-index eb40efb3eb34..3f0c057aa050 100644
+index eb40efb3eb342..3f0c057aa0502 100644
 --- a/arch/arm/crypto/chacha-glue.c
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -11,6 +11,7 @@
@@ -2660,10 +2660,10 @@ index eb40efb3eb34..3f0c057aa050 100644
 2.18.4
 
 
-From 1d0c6e6f6a9977ebac942667c6f8a3d0d36710a1 Mon Sep 17 00:00:00 2001
+From 1ee79278a7d7a348e72b31c99a8cfe31bb47bbba Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:16 +0100
-Subject: [PATCH 010/117] crypto: mips/chacha - import 32r2 ChaCha code from
+Subject: [PATCH 010/115] crypto: mips/chacha - import 32r2 ChaCha code from
  Zinc
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2687,7 +2687,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/arch/mips/crypto/chacha-core.S b/arch/mips/crypto/chacha-core.S
 new file mode 100644
-index 000000000000..a81e02db95e7
+index 0000000000000..a81e02db95e73
 --- /dev/null
 +++ b/arch/mips/crypto/chacha-core.S
 @@ -0,0 +1,424 @@
@@ -3119,10 +3119,10 @@ index 000000000000..a81e02db95e7
 2.18.4
 
 
-From 222e72f837e62ce3e85751f973e52243832d3388 Mon Sep 17 00:00:00 2001
+From ec942e9965be966bf4571bcd63570f1dcd707119 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:17 +0100
-Subject: [PATCH 011/117] crypto: mips/chacha - wire up accelerated 32r2 code
+Subject: [PATCH 011/115] crypto: mips/chacha - wire up accelerated 32r2 code
  from Zinc
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3157,7 +3157,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/mips/crypto/chacha-glue.c
 
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index 5403a91ce098..573409c85c81 100644
+index 5403a91ce098d..573409c85c81b 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -334,7 +334,7 @@ libs-$(CONFIG_MIPS_FP_SUPPORT) += arch/mips/math-emu/
@@ -3170,7 +3170,7 @@ index 5403a91ce098..573409c85c81 100644
  
  # suspend and hibernation support
 diff --git a/arch/mips/crypto/Makefile b/arch/mips/crypto/Makefile
-index e07aca572c2e..b528b9d300f1 100644
+index e07aca572c2e1..b528b9d300f14 100644
 --- a/arch/mips/crypto/Makefile
 +++ b/arch/mips/crypto/Makefile
 @@ -4,3 +4,7 @@
@@ -3182,7 +3182,7 @@ index e07aca572c2e..b528b9d300f1 100644
 +chacha-mips-y := chacha-core.o chacha-glue.o
 +AFLAGS_chacha-core.o += -O2 # needed to fill branch delay slots
 diff --git a/arch/mips/crypto/chacha-core.S b/arch/mips/crypto/chacha-core.S
-index a81e02db95e7..5755f69cfe00 100644
+index a81e02db95e73..5755f69cfe007 100644
 --- a/arch/mips/crypto/chacha-core.S
 +++ b/arch/mips/crypto/chacha-core.S
 @@ -125,7 +125,7 @@
@@ -3519,7 +3519,7 @@ index a81e02db95e7..5755f69cfe00 100644
  .set at
 diff --git a/arch/mips/crypto/chacha-glue.c b/arch/mips/crypto/chacha-glue.c
 new file mode 100644
-index 000000000000..779e399c9bef
+index 0000000000000..779e399c9befd
 --- /dev/null
 +++ b/arch/mips/crypto/chacha-glue.c
 @@ -0,0 +1,150 @@
@@ -3674,7 +3674,7 @@ index 000000000000..779e399c9bef
 +MODULE_ALIAS_CRYPTO("xchacha12");
 +MODULE_ALIAS_CRYPTO("xchacha12-mips");
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 649dc564f242..6b5e14cee475 100644
+index 649dc564f242b..6b5e14cee4753 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -1423,6 +1423,12 @@ config CRYPTO_CHACHA20_X86_64
@@ -3694,10 +3694,10 @@ index 649dc564f242..6b5e14cee475 100644
 2.18.4
 
 
-From 88565e6edc8ecc3eb7eda65c14a8e91da2a27b9b Mon Sep 17 00:00:00 2001
+From 2801a189f7b496039db36d72d5f73dbb56a42797 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:18 +0100
-Subject: [PATCH 012/117] crypto: chacha - unexport chacha_generic routines
+Subject: [PATCH 012/115] crypto: chacha - unexport chacha_generic routines
 
 commit 22cf705360707ced15f9fe5423938f313c7df536 upstream.
 
@@ -3715,7 +3715,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 8 insertions(+), 28 deletions(-)
 
 diff --git a/crypto/chacha_generic.c b/crypto/chacha_generic.c
-index ebae6d9d9b32..c1b147318393 100644
+index ebae6d9d9b320..c1b1473183938 100644
 --- a/crypto/chacha_generic.c
 +++ b/crypto/chacha_generic.c
 @@ -21,7 +21,7 @@ static int chacha_stream_xor(struct skcipher_request *req,
@@ -3788,7 +3788,7 @@ index ebae6d9d9b32..c1b147318393 100644
  static struct skcipher_alg algs[] = {
  	{
 diff --git a/include/crypto/internal/chacha.h b/include/crypto/internal/chacha.h
-index c0e40b245431..aa5d4a16aac5 100644
+index c0e40b2454311..aa5d4a16aac5d 100644
 --- a/include/crypto/internal/chacha.h
 +++ b/include/crypto/internal/chacha.h
 @@ -12,8 +12,6 @@ struct chacha_ctx {
@@ -3817,10 +3817,10 @@ index c0e40b245431..aa5d4a16aac5 100644
 2.18.4
 
 
-From de61b50f3440e3ea5a46678a997fcd4ee88624ca Mon Sep 17 00:00:00 2001
+From a40d0635d0d17f992f25940e9cac320d5208073a Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:19 +0100
-Subject: [PATCH 013/117] crypto: poly1305 - move core routines into a separate
+Subject: [PATCH 013/115] crypto: poly1305 - move core routines into a separate
  library
 
 commit 48ea8c6ebc96bc0990e12ee1c43d0832c23576bb upstream.
@@ -3853,7 +3853,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/poly1305.c
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 4a1c05dce950..6ccf8eb26324 100644
+index 4a1c05dce950f..6ccf8eb263243 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -7,8 +7,8 @@
@@ -3867,7 +3867,7 @@ index 4a1c05dce950..6ccf8eb26324 100644
  #include <linux/kernel.h>
  #include <linux/module.h>
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 6b5e14cee475..b70b9d7c6e2f 100644
+index 6b5e14cee4753..b70b9d7c6e2f6 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -446,7 +446,7 @@ config CRYPTO_KEYWRAP
@@ -3897,7 +3897,7 @@ index 6b5e14cee475..b70b9d7c6e2f 100644
  	  Poly1305 authenticator algorithm, RFC7539.
  
 diff --git a/crypto/adiantum.c b/crypto/adiantum.c
-index 395a3ddd3707..aded26092268 100644
+index 395a3ddd37074..aded260922684 100644
 --- a/crypto/adiantum.c
 +++ b/crypto/adiantum.c
 @@ -33,6 +33,7 @@
@@ -3923,7 +3923,7 @@ index 395a3ddd3707..aded26092268 100644
  	poly1305_core_emit(&state, &rctx->header_hash);
  }
 diff --git a/crypto/nhpoly1305.c b/crypto/nhpoly1305.c
-index 9ab4e07cde4d..f6b6a52092b4 100644
+index 9ab4e07cde4dc..f6b6a52092b49 100644
 --- a/crypto/nhpoly1305.c
 +++ b/crypto/nhpoly1305.c
 @@ -33,6 +33,7 @@
@@ -3944,7 +3944,7 @@ index 9ab4e07cde4d..f6b6a52092b4 100644
  
  /*
 diff --git a/crypto/poly1305_generic.c b/crypto/poly1305_generic.c
-index adc40298c749..067f493c2504 100644
+index adc40298c7492..067f493c25043 100644
 --- a/crypto/poly1305_generic.c
 +++ b/crypto/poly1305_generic.c
 @@ -13,27 +13,12 @@
@@ -4196,7 +4196,7 @@ index adc40298c749..067f493c2504 100644
  	poly1305_core_emit(&dctx->h, digest);
 diff --git a/include/crypto/internal/poly1305.h b/include/crypto/internal/poly1305.h
 new file mode 100644
-index 000000000000..cb58e61f73a7
+index 0000000000000..cb58e61f73a77
 --- /dev/null
 +++ b/include/crypto/internal/poly1305.h
 @@ -0,0 +1,67 @@
@@ -4268,7 +4268,7 @@ index 000000000000..cb58e61f73a7
 +
 +#endif
 diff --git a/include/crypto/poly1305.h b/include/crypto/poly1305.h
-index 34317ed2071e..f5a4319c2a1f 100644
+index 34317ed2071e6..f5a4319c2a1f3 100644
 --- a/include/crypto/poly1305.h
 +++ b/include/crypto/poly1305.h
 @@ -38,27 +38,4 @@ struct poly1305_desc_ctx {
@@ -4300,7 +4300,7 @@ index 34317ed2071e..f5a4319c2a1f 100644
 -
  #endif
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 6a11931ae105..c4882d29879e 100644
+index 6a11931ae1052..c4882d29879e8 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -37,5 +37,8 @@ config CRYPTO_LIB_CHACHA
@@ -4313,7 +4313,7 @@ index 6a11931ae105..c4882d29879e 100644
  config CRYPTO_LIB_SHA256
  	tristate
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 0ce40604e104..b58ab6843a9d 100644
+index 0ce40604e104c..b58ab6843a9dc 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -13,5 +13,8 @@ libarc4-y					:= arc4.o
@@ -4327,7 +4327,7 @@ index 0ce40604e104..b58ab6843a9d 100644
  libsha256-y					:= sha256.o
 diff --git a/lib/crypto/poly1305.c b/lib/crypto/poly1305.c
 new file mode 100644
-index 000000000000..f019a57dbc1b
+index 0000000000000..f019a57dbc1b9
 --- /dev/null
 +++ b/lib/crypto/poly1305.c
 @@ -0,0 +1,158 @@
@@ -4493,10 +4493,10 @@ index 000000000000..f019a57dbc1b
 2.18.4
 
 
-From bc730a749174bf0429e0b186a75378db13c25cd7 Mon Sep 17 00:00:00 2001
+From 0d420ee8db8b9ee1f978049b59bcb7d03154d2e4 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:20 +0100
-Subject: [PATCH 014/117] crypto: x86/poly1305 - unify Poly1305 state struct
+Subject: [PATCH 014/115] crypto: x86/poly1305 - unify Poly1305 state struct
  with generic code
 
 commit ad8f5b88383ea685f2b8df2a12ee3e08089a1287 upstream.
@@ -4517,7 +4517,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  4 files changed, 43 insertions(+), 73 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 6ccf8eb26324..b43b93c95e79 100644
+index 6ccf8eb263243..b43b93c95e798 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -14,40 +14,14 @@
@@ -4671,7 +4671,7 @@ index 6ccf8eb26324..b43b93c95e79 100644
  }
  
 diff --git a/crypto/poly1305_generic.c b/crypto/poly1305_generic.c
-index 067f493c2504..f3fcd9578a47 100644
+index 067f493c25043..f3fcd9578a47f 100644
 --- a/crypto/poly1305_generic.c
 +++ b/crypto/poly1305_generic.c
 @@ -25,7 +25,7 @@ int crypto_poly1305_init(struct shash_desc *desc)
@@ -4702,7 +4702,7 @@ index 067f493c2504..f3fcd9578a47 100644
  
  	poly1305_core_emit(&dctx->h, digest);
 diff --git a/include/crypto/internal/poly1305.h b/include/crypto/internal/poly1305.h
-index cb58e61f73a7..04fa269e5534 100644
+index cb58e61f73a77..04fa269e5534b 100644
 --- a/include/crypto/internal/poly1305.h
 +++ b/include/crypto/internal/poly1305.h
 @@ -46,10 +46,10 @@ unsigned int crypto_poly1305_setdesckey(struct poly1305_desc_ctx *dctx,
@@ -4719,7 +4719,7 @@ index cb58e61f73a7..04fa269e5534 100644
  		if (srclen >= POLY1305_BLOCK_SIZE) {
  			dctx->s[0] = get_unaligned_le32(src +  0);
 diff --git a/include/crypto/poly1305.h b/include/crypto/poly1305.h
-index f5a4319c2a1f..36b5886cb50c 100644
+index f5a4319c2a1f3..36b5886cb50ca 100644
 --- a/include/crypto/poly1305.h
 +++ b/include/crypto/poly1305.h
 @@ -22,20 +22,20 @@ struct poly1305_state {
@@ -4756,10 +4756,10 @@ index f5a4319c2a1f..36b5886cb50c 100644
 2.18.4
 
 
-From e9e675a106b550e653744cbe5e4e4f6845f66aba Mon Sep 17 00:00:00 2001
+From cffafae217a5e94e450cc39c0baf595dbec32d4c Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:21 +0100
-Subject: [PATCH 015/117] crypto: poly1305 - expose init/update/final library
+Subject: [PATCH 015/115] crypto: poly1305 - expose init/update/final library
  interface
 
 commit a1d93064094cc5e24d64e35cf093e7191d0c9344 upstream.
@@ -4781,7 +4781,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  4 files changed, 138 insertions(+), 22 deletions(-)
 
 diff --git a/crypto/poly1305_generic.c b/crypto/poly1305_generic.c
-index f3fcd9578a47..afe9a9e576dd 100644
+index f3fcd9578a47f..afe9a9e576dda 100644
 --- a/crypto/poly1305_generic.c
 +++ b/crypto/poly1305_generic.c
 @@ -85,31 +85,11 @@ EXPORT_SYMBOL_GPL(crypto_poly1305_update);
@@ -4818,7 +4818,7 @@ index f3fcd9578a47..afe9a9e576dd 100644
  }
  EXPORT_SYMBOL_GPL(crypto_poly1305_final);
 diff --git a/include/crypto/poly1305.h b/include/crypto/poly1305.h
-index 36b5886cb50c..74c6e1cd73ee 100644
+index 36b5886cb50ca..74c6e1cd73eee 100644
 --- a/include/crypto/poly1305.h
 +++ b/include/crypto/poly1305.h
 @@ -35,7 +35,43 @@ struct poly1305_desc_ctx {
@@ -4867,7 +4867,7 @@ index 36b5886cb50c..74c6e1cd73ee 100644
 +
  #endif
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index c4882d29879e..a731ea36bd5c 100644
+index c4882d29879e8..a731ea36bd5c7 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -37,8 +37,34 @@ config CRYPTO_LIB_CHACHA
@@ -4906,7 +4906,7 @@ index c4882d29879e..a731ea36bd5c 100644
  config CRYPTO_LIB_SHA256
  	tristate
 diff --git a/lib/crypto/poly1305.c b/lib/crypto/poly1305.c
-index f019a57dbc1b..32ec293c65ae 100644
+index f019a57dbc1b9..32ec293c65ae7 100644
 --- a/lib/crypto/poly1305.c
 +++ b/lib/crypto/poly1305.c
 @@ -154,5 +154,79 @@ void poly1305_core_emit(const struct poly1305_state *state, void *dst)
@@ -4993,10 +4993,10 @@ index f019a57dbc1b..32ec293c65ae 100644
 2.18.4
 
 
-From 93baad7ba81bf360b41969758112e5a487d55662 Mon Sep 17 00:00:00 2001
+From 71176ba2390b8b777e3704c82fd7e894b6e9f4a8 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:22 +0100
-Subject: [PATCH 016/117] crypto: x86/poly1305 - depend on generic library not
+Subject: [PATCH 016/115] crypto: x86/poly1305 - depend on generic library not
  generic shash
 
 commit 1b2c6a5120489d41c8ea3b8dacd0b4586289b158 upstream.
@@ -5023,7 +5023,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  4 files changed, 60 insertions(+), 28 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index b43b93c95e79..a5b3a054604c 100644
+index b43b93c95e798..a5b3a054604cf 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -34,6 +34,24 @@ static void poly1305_simd_mult(u32 *a, const u32 *b)
@@ -5128,7 +5128,7 @@ index b43b93c95e79..a5b3a054604c 100644
  }
  
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index b70b9d7c6e2f..6178aa627141 100644
+index b70b9d7c6e2f6..6178aa6271412 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -697,7 +697,7 @@ config CRYPTO_POLY1305
@@ -5141,7 +5141,7 @@ index b70b9d7c6e2f..6178aa627141 100644
  	  Poly1305 authenticator algorithm, RFC7539.
  
 diff --git a/crypto/poly1305_generic.c b/crypto/poly1305_generic.c
-index afe9a9e576dd..21edbd8c99fb 100644
+index afe9a9e576dda..21edbd8c99fbc 100644
 --- a/crypto/poly1305_generic.c
 +++ b/crypto/poly1305_generic.c
 @@ -19,7 +19,7 @@
@@ -5192,7 +5192,7 @@ index afe9a9e576dd..21edbd8c99fb 100644
  static struct shash_alg poly1305_alg = {
  	.digestsize	= POLY1305_DIGEST_SIZE,
 diff --git a/include/crypto/internal/poly1305.h b/include/crypto/internal/poly1305.h
-index 04fa269e5534..479b0cab2a1a 100644
+index 04fa269e5534b..479b0cab2a1ad 100644
 --- a/include/crypto/internal/poly1305.h
 +++ b/include/crypto/internal/poly1305.h
 @@ -10,8 +10,6 @@
@@ -5222,10 +5222,10 @@ index 04fa269e5534..479b0cab2a1a 100644
 2.18.4
 
 
-From 459fb048bbcc9c07f559cbf6a37b4bb2cb14c519 Mon Sep 17 00:00:00 2001
+From 86de1a707edadb5219cbd156162933e3addf9d6e Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:23 +0100
-Subject: [PATCH 017/117] crypto: x86/poly1305 - expose existing driver as
+Subject: [PATCH 017/115] crypto: x86/poly1305 - expose existing driver as
  poly1305 library
 
 commit f0e89bcfbb894e5844cd1bbf6b3cf7c63cb0f5ac upstream.
@@ -5244,7 +5244,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 43 insertions(+), 16 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index a5b3a054604c..370cd88068ec 100644
+index a5b3a054604cf..370cd88068ec1 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -10,6 +10,7 @@
@@ -5369,7 +5369,7 @@ index a5b3a054604c..370cd88068ec 100644
  	return crypto_register_shash(&alg);
  }
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 6178aa627141..15cfb02c3e49 100644
+index 6178aa6271412..15cfb02c3e49c 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -698,6 +698,7 @@ config CRYPTO_POLY1305_X86_64
@@ -5381,7 +5381,7 @@ index 6178aa627141..15cfb02c3e49 100644
  	  Poly1305 authenticator algorithm, RFC7539.
  
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index a731ea36bd5c..181754615f73 100644
+index a731ea36bd5c7..181754615f734 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -39,6 +39,7 @@ config CRYPTO_LIB_DES
@@ -5396,10 +5396,10 @@ index a731ea36bd5c..181754615f73 100644
 2.18.4
 
 
-From e9816596e34dbdfd87ee1b3f9482bcc998ced2fc Mon Sep 17 00:00:00 2001
+From 5f07f88b171ef95ba2befa12b0a11ddbc2c7e5b9 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:24 +0100
-Subject: [PATCH 018/117] crypto: arm64/poly1305 - incorporate
+Subject: [PATCH 018/115] crypto: arm64/poly1305 - incorporate
  OpenSSL/CRYPTOGAMS NEON implementation
 
 commit f569ca16475155013525686d0f73bc379c67e635 upstream.
@@ -5431,7 +5431,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/arm64/crypto/poly1305-glue.c
 
 diff --git a/arch/arm64/crypto/Kconfig b/arch/arm64/crypto/Kconfig
-index 17bada4b9dd2..30d9b24ee86e 100644
+index 17bada4b9dd24..30d9b24ee86e3 100644
 --- a/arch/arm64/crypto/Kconfig
 +++ b/arch/arm64/crypto/Kconfig
 @@ -106,6 +106,12 @@ config CRYPTO_CHACHA20_NEON
@@ -5448,7 +5448,7 @@ index 17bada4b9dd2..30d9b24ee86e 100644
  	tristate "NHPoly1305 hash function using NEON instructions (for Adiantum)"
  	depends on KERNEL_MODE_NEON
 diff --git a/arch/arm64/crypto/Makefile b/arch/arm64/crypto/Makefile
-index 0435f2a0610e..d0901e610df3 100644
+index 0435f2a0610ed..d0901e610df3b 100644
 --- a/arch/arm64/crypto/Makefile
 +++ b/arch/arm64/crypto/Makefile
 @@ -50,6 +50,10 @@ sha512-arm64-y := sha512-glue.o sha512-core.o
@@ -5481,7 +5481,7 @@ index 0435f2a0610e..d0901e610df3 100644
 +clean-files += poly1305-core.S sha256-core.S sha512-core.S
 diff --git a/arch/arm64/crypto/poly1305-armv8.pl b/arch/arm64/crypto/poly1305-armv8.pl
 new file mode 100644
-index 000000000000..6e5576d19af8
+index 0000000000000..6e5576d19af8f
 --- /dev/null
 +++ b/arch/arm64/crypto/poly1305-armv8.pl
 @@ -0,0 +1,913 @@
@@ -6400,7 +6400,7 @@ index 000000000000..6e5576d19af8
 +close STDOUT;
 diff --git a/arch/arm64/crypto/poly1305-core.S_shipped b/arch/arm64/crypto/poly1305-core.S_shipped
 new file mode 100644
-index 000000000000..8d1c4e420ccd
+index 0000000000000..8d1c4e420ccdc
 --- /dev/null
 +++ b/arch/arm64/crypto/poly1305-core.S_shipped
 @@ -0,0 +1,835 @@
@@ -7241,7 +7241,7 @@ index 000000000000..8d1c4e420ccd
 +#endif
 diff --git a/arch/arm64/crypto/poly1305-glue.c b/arch/arm64/crypto/poly1305-glue.c
 new file mode 100644
-index 000000000000..dd843d0ee83a
+index 0000000000000..dd843d0ee83ab
 --- /dev/null
 +++ b/arch/arm64/crypto/poly1305-glue.c
 @@ -0,0 +1,237 @@
@@ -7483,7 +7483,7 @@ index 000000000000..dd843d0ee83a
 +MODULE_ALIAS_CRYPTO("poly1305");
 +MODULE_ALIAS_CRYPTO("poly1305-neon");
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 181754615f73..9923445e8225 100644
+index 181754615f734..9923445e82251 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -40,6 +40,7 @@ config CRYPTO_LIB_DES
@@ -7498,10 +7498,10 @@ index 181754615f73..9923445e8225 100644
 2.18.4
 
 
-From b3af3aefd51d8f57070fee8f8074f0c537f23938 Mon Sep 17 00:00:00 2001
+From ddfe74f7a6399d21f7255d5cd125f353762b20e8 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:25 +0100
-Subject: [PATCH 019/117] crypto: arm/poly1305 - incorporate OpenSSL/CRYPTOGAMS
+Subject: [PATCH 019/115] crypto: arm/poly1305 - incorporate OpenSSL/CRYPTOGAMS
  NEON implementation
 
 commit a6b803b3ddc793d6db0c16f12fc12d30d20fa9cc upstream.
@@ -7533,7 +7533,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/arm/crypto/poly1305-glue.c
 
 diff --git a/arch/arm/crypto/Kconfig b/arch/arm/crypto/Kconfig
-index b25ffec04417..2e8a9289bded 100644
+index b25ffec044175..2e8a9289bded3 100644
 --- a/arch/arm/crypto/Kconfig
 +++ b/arch/arm/crypto/Kconfig
 @@ -131,6 +131,11 @@ config CRYPTO_CHACHA20_NEON
@@ -7549,7 +7549,7 @@ index b25ffec04417..2e8a9289bded 100644
  	tristate "NEON accelerated NHPoly1305 hash function (for Adiantum)"
  	depends on KERNEL_MODE_NEON
 diff --git a/arch/arm/crypto/Makefile b/arch/arm/crypto/Makefile
-index 6b97dffcf90f..4f6a8a81dabc 100644
+index 6b97dffcf90fa..4f6a8a81dabc1 100644
 --- a/arch/arm/crypto/Makefile
 +++ b/arch/arm/crypto/Makefile
 @@ -10,6 +10,7 @@ obj-$(CONFIG_CRYPTO_SHA1_ARM_NEON) += sha1-arm-neon.o
@@ -7590,7 +7590,7 @@ index 6b97dffcf90f..4f6a8a81dabc 100644
 +AFLAGS_poly1305-core.o += $(poly1305-aflags-y)
 diff --git a/arch/arm/crypto/poly1305-armv4.pl b/arch/arm/crypto/poly1305-armv4.pl
 new file mode 100644
-index 000000000000..6d79498d3115
+index 0000000000000..6d79498d3115f
 --- /dev/null
 +++ b/arch/arm/crypto/poly1305-armv4.pl
 @@ -0,0 +1,1236 @@
@@ -8832,7 +8832,7 @@ index 000000000000..6d79498d3115
 +close STDOUT; # enforce flush
 diff --git a/arch/arm/crypto/poly1305-core.S_shipped b/arch/arm/crypto/poly1305-core.S_shipped
 new file mode 100644
-index 000000000000..37b71d990293
+index 0000000000000..37b71d9902932
 --- /dev/null
 +++ b/arch/arm/crypto/poly1305-core.S_shipped
 @@ -0,0 +1,1158 @@
@@ -9996,7 +9996,7 @@ index 000000000000..37b71d990293
 +.align	2
 diff --git a/arch/arm/crypto/poly1305-glue.c b/arch/arm/crypto/poly1305-glue.c
 new file mode 100644
-index 000000000000..74a725ac89c9
+index 0000000000000..74a725ac89c9f
 --- /dev/null
 +++ b/arch/arm/crypto/poly1305-glue.c
 @@ -0,0 +1,276 @@
@@ -10277,7 +10277,7 @@ index 000000000000..74a725ac89c9
 +MODULE_ALIAS_CRYPTO("poly1305-arm");
 +MODULE_ALIAS_CRYPTO("poly1305-neon");
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 9923445e8225..9bd15b227e78 100644
+index 9923445e82251..9bd15b227e78e 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -40,7 +40,7 @@ config CRYPTO_LIB_DES
@@ -10293,10 +10293,10 @@ index 9923445e8225..9bd15b227e78 100644
 2.18.4
 
 
-From 187998df04dbbdd4298014f8ad95477cc14b2dc8 Mon Sep 17 00:00:00 2001
+From c8af86e6cecbfdfad9086427f0d5c5ef2b5b97f4 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:26 +0100
-Subject: [PATCH 020/117] crypto: mips/poly1305 - incorporate
+Subject: [PATCH 020/115] crypto: mips/poly1305 - incorporate
  OpenSSL/CRYPTOGAMS optimized implementation
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -10331,7 +10331,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/mips/crypto/poly1305-mips.pl
 
 diff --git a/arch/mips/crypto/Makefile b/arch/mips/crypto/Makefile
-index b528b9d300f1..8e1deaf00e0c 100644
+index b528b9d300f14..8e1deaf00e0c0 100644
 --- a/arch/mips/crypto/Makefile
 +++ b/arch/mips/crypto/Makefile
 @@ -8,3 +8,17 @@ obj-$(CONFIG_CRYPTO_CRC32_MIPS) += crc32-mips.o
@@ -10354,7 +10354,7 @@ index b528b9d300f1..8e1deaf00e0c 100644
 +targets += poly1305-core.S
 diff --git a/arch/mips/crypto/poly1305-glue.c b/arch/mips/crypto/poly1305-glue.c
 new file mode 100644
-index 000000000000..b759b6ccc361
+index 0000000000000..b759b6ccc361c
 --- /dev/null
 +++ b/arch/mips/crypto/poly1305-glue.c
 @@ -0,0 +1,203 @@
@@ -10563,7 +10563,7 @@ index 000000000000..b759b6ccc361
 +MODULE_ALIAS_CRYPTO("poly1305-mips");
 diff --git a/arch/mips/crypto/poly1305-mips.pl b/arch/mips/crypto/poly1305-mips.pl
 new file mode 100644
-index 000000000000..b05bab884ed2
+index 0000000000000..b05bab884ed26
 --- /dev/null
 +++ b/arch/mips/crypto/poly1305-mips.pl
 @@ -0,0 +1,1273 @@
@@ -11841,7 +11841,7 @@ index 000000000000..b05bab884ed2
 +print $code;
 +close STDOUT;
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 15cfb02c3e49..0be5b4092f18 100644
+index 15cfb02c3e49c..0be5b4092f189 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -707,6 +707,11 @@ config CRYPTO_POLY1305_X86_64
@@ -11857,7 +11857,7 @@ index 15cfb02c3e49..0be5b4092f18 100644
  	tristate "MD4 digest algorithm"
  	select CRYPTO_HASH
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 9bd15b227e78..d15ec5382986 100644
+index 9bd15b227e78e..d15ec53829861 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -39,6 +39,7 @@ config CRYPTO_LIB_DES
@@ -11872,10 +11872,10 @@ index 9bd15b227e78..d15ec5382986 100644
 2.18.4
 
 
-From 0e008d9ec1da5489db00a542a88f89e29307ad39 Mon Sep 17 00:00:00 2001
+From 2e91e770953810b21ea65021345a36403ce4f168 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:28 +0100
-Subject: [PATCH 021/117] crypto: blake2s - generic C library implementation
+Subject: [PATCH 021/115] crypto: blake2s - generic C library implementation
  and selftest
 
 commit 66d7fb94e4ffe5acc589e0b2b4710aecc1f07a28 upstream.
@@ -11915,7 +11915,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/include/crypto/blake2s.h b/include/crypto/blake2s.h
 new file mode 100644
-index 000000000000..b471deac28ff
+index 0000000000000..b471deac28ff8
 --- /dev/null
 +++ b/include/crypto/blake2s.h
 @@ -0,0 +1,106 @@
@@ -12027,7 +12027,7 @@ index 000000000000..b471deac28ff
 +#endif /* BLAKE2S_H */
 diff --git a/include/crypto/internal/blake2s.h b/include/crypto/internal/blake2s.h
 new file mode 100644
-index 000000000000..941693effc7d
+index 0000000000000..941693effc7d2
 --- /dev/null
 +++ b/include/crypto/internal/blake2s.h
 @@ -0,0 +1,19 @@
@@ -12051,7 +12051,7 @@ index 000000000000..941693effc7d
 +
 +#endif /* BLAKE2S_INTERNAL_H */
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index d15ec5382986..7ad98b624e55 100644
+index d15ec53829861..7ad98b624e554 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -8,6 +8,31 @@ config CRYPTO_LIB_AES
@@ -12087,7 +12087,7 @@ index d15ec5382986..7ad98b624e55 100644
  	tristate
  	help
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index b58ab6843a9d..8ca66b5f9807 100644
+index b58ab6843a9dc..8ca66b5f9807b 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -10,6 +10,12 @@ libaes-y					:= aes.o
@@ -12113,7 +12113,7 @@ index b58ab6843a9d..8ca66b5f9807 100644
 +endif
 diff --git a/lib/crypto/blake2s-generic.c b/lib/crypto/blake2s-generic.c
 new file mode 100644
-index 000000000000..04ff8df24513
+index 0000000000000..04ff8df245136
 --- /dev/null
 +++ b/lib/crypto/blake2s-generic.c
 @@ -0,0 +1,111 @@
@@ -12230,7 +12230,7 @@ index 000000000000..04ff8df24513
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 diff --git a/lib/crypto/blake2s-selftest.c b/lib/crypto/blake2s-selftest.c
 new file mode 100644
-index 000000000000..79ef404a990d
+index 0000000000000..79ef404a990d2
 --- /dev/null
 +++ b/lib/crypto/blake2s-selftest.c
 @@ -0,0 +1,622 @@
@@ -12858,7 +12858,7 @@ index 000000000000..79ef404a990d
 +}
 diff --git a/lib/crypto/blake2s.c b/lib/crypto/blake2s.c
 new file mode 100644
-index 000000000000..41025a30c524
+index 0000000000000..41025a30c524c
 --- /dev/null
 +++ b/lib/crypto/blake2s.c
 @@ -0,0 +1,126 @@
@@ -12992,10 +12992,10 @@ index 000000000000..41025a30c524
 2.18.4
 
 
-From 9f42471294df40d5298cb9f5c5d0dc39a39b25ae Mon Sep 17 00:00:00 2001
+From 239fea475b647d30a4176d28736f5c6c4b3fda7f Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:29 +0100
-Subject: [PATCH 022/117] crypto: testmgr - add test cases for Blake2s
+Subject: [PATCH 022/115] crypto: testmgr - add test cases for Blake2s
 
 commit 17e1df67023a5c9ccaeb5de8bf5b88f63127ecf7 upstream.
 
@@ -13024,7 +13024,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 275 insertions(+)
 
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 7473c5bc06b1..711390861f71 100644
+index 7473c5bc06b1a..711390861f716 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -4034,6 +4034,30 @@ static const struct alg_test_desc alg_test_descs[] = {
@@ -13059,7 +13059,7 @@ index 7473c5bc06b1..711390861f71 100644
  		.alg = "cbc(aes)",
  		.test = alg_test_skcipher,
 diff --git a/crypto/testmgr.h b/crypto/testmgr.h
-index ef7d21f39d4a..102fcad54966 100644
+index ef7d21f39d4a9..102fcad549665 100644
 --- a/crypto/testmgr.h
 +++ b/crypto/testmgr.h
 @@ -31567,4 +31567,255 @@ static const struct aead_testvec essiv_hmac_sha256_aes_cbc_tv_temp[] = {
@@ -13322,10 +13322,10 @@ index ef7d21f39d4a..102fcad54966 100644
 2.18.4
 
 
-From 424391960ba71b4c1489700275b1786b3679642d Mon Sep 17 00:00:00 2001
+From 89c49ee948f065cc5050666bd4a55203607bda70 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:30 +0100
-Subject: [PATCH 023/117] crypto: blake2s - implement generic shash driver
+Subject: [PATCH 023/115] crypto: blake2s - implement generic shash driver
 
 commit 7f9b0880925f1f9d7d59504ea0892d2ae9cfc233 upstream.
 
@@ -13343,7 +13343,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 crypto/blake2s_generic.c
 
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 0be5b4092f18..81c8a4059afc 100644
+index 0be5b4092f189..81c8a4059afcf 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -639,6 +639,24 @@ config CRYPTO_XXHASH
@@ -13372,7 +13372,7 @@ index 0be5b4092f18..81c8a4059afc 100644
  	tristate "CRCT10DIF algorithm"
  	select CRYPTO_HASH
 diff --git a/crypto/Makefile b/crypto/Makefile
-index aa740c8492b9..fd27edea7c8e 100644
+index aa740c8492b9d..fd27edea7c8ec 100644
 --- a/crypto/Makefile
 +++ b/crypto/Makefile
 @@ -74,6 +74,7 @@ obj-$(CONFIG_CRYPTO_STREEBOG) += streebog_generic.o
@@ -13385,7 +13385,7 @@ index aa740c8492b9..fd27edea7c8e 100644
  obj-$(CONFIG_CRYPTO_CBC) += cbc.o
 diff --git a/crypto/blake2s_generic.c b/crypto/blake2s_generic.c
 new file mode 100644
-index 000000000000..ed0c74640470
+index 0000000000000..ed0c746404703
 --- /dev/null
 +++ b/crypto/blake2s_generic.c
 @@ -0,0 +1,171 @@
@@ -13561,7 +13561,7 @@ index 000000000000..ed0c74640470
 +MODULE_ALIAS_CRYPTO("blake2s-256-generic");
 +MODULE_LICENSE("GPL v2");
 diff --git a/include/crypto/internal/blake2s.h b/include/crypto/internal/blake2s.h
-index 941693effc7d..74ff77032e52 100644
+index 941693effc7d2..74ff77032e526 100644
 --- a/include/crypto/internal/blake2s.h
 +++ b/include/crypto/internal/blake2s.h
 @@ -5,6 +5,11 @@
@@ -13580,10 +13580,10 @@ index 941693effc7d..74ff77032e52 100644
 2.18.4
 
 
-From 338024d73271473dbada45b583fa4b1ae6ed4153 Mon Sep 17 00:00:00 2001
+From 09f81cbc867616e252332ff2c4ec84024dc7f832 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:31 +0100
-Subject: [PATCH 024/117] crypto: blake2s - x86_64 SIMD implementation
+Subject: [PATCH 024/115] crypto: blake2s - x86_64 SIMD implementation
 
 commit ed0356eda153f6a95649e11feb7b07083caf9e20 upstream.
 
@@ -13608,7 +13608,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/x86/crypto/blake2s-glue.c
 
 diff --git a/arch/x86/crypto/Makefile b/arch/x86/crypto/Makefile
-index 759b1a927826..922c8ecfa00f 100644
+index 759b1a927826b..922c8ecfa00f5 100644
 --- a/arch/x86/crypto/Makefile
 +++ b/arch/x86/crypto/Makefile
 @@ -48,6 +48,7 @@ ifeq ($(avx_supported),yes)
@@ -13629,7 +13629,7 @@ index 759b1a927826..922c8ecfa00f 100644
  	camellia-aesni-avx-x86_64-y := camellia-aesni-avx-asm_64.o \
 diff --git a/arch/x86/crypto/blake2s-core.S b/arch/x86/crypto/blake2s-core.S
 new file mode 100644
-index 000000000000..8591938eee26
+index 0000000000000..8591938eee26d
 --- /dev/null
 +++ b/arch/x86/crypto/blake2s-core.S
 @@ -0,0 +1,258 @@
@@ -13893,7 +13893,7 @@ index 000000000000..8591938eee26
 +#endif /* CONFIG_AS_AVX512 */
 diff --git a/arch/x86/crypto/blake2s-glue.c b/arch/x86/crypto/blake2s-glue.c
 new file mode 100644
-index 000000000000..4a37ba7cdbe5
+index 0000000000000..4a37ba7cdbe52
 --- /dev/null
 +++ b/arch/x86/crypto/blake2s-glue.c
 @@ -0,0 +1,233 @@
@@ -14131,7 +14131,7 @@ index 000000000000..4a37ba7cdbe5
 +MODULE_ALIAS_CRYPTO("blake2s-256-x86");
 +MODULE_LICENSE("GPL v2");
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 81c8a4059afc..8fd3954bf64c 100644
+index 81c8a4059afcf..8fd3954bf64c5 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -657,6 +657,12 @@ config CRYPTO_BLAKE2S
@@ -14151,10 +14151,10 @@ index 81c8a4059afc..8fd3954bf64c 100644
 2.18.4
 
 
-From 2c61e345954094816c7b2f1acb21e04935efc2c3 Mon Sep 17 00:00:00 2001
+From 0d751552c61cd6e4b186d92b630b9d119c828cbe Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:32 +0100
-Subject: [PATCH 025/117] crypto: curve25519 - generic C library
+Subject: [PATCH 025/115] crypto: curve25519 - generic C library
  implementations
 
 commit 0ed42a6f431e930b2e8fae21955406e09fe75d70 upstream.
@@ -14195,7 +14195,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/include/crypto/curve25519.h b/include/crypto/curve25519.h
 new file mode 100644
-index 000000000000..4e6dc840b159
+index 0000000000000..4e6dc840b1592
 --- /dev/null
 +++ b/include/crypto/curve25519.h
 @@ -0,0 +1,71 @@
@@ -14271,7 +14271,7 @@ index 000000000000..4e6dc840b159
 +
 +#endif /* CURVE25519_H */
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 7ad98b624e55..b1d830dc1c9e 100644
+index 7ad98b624e554..b1d830dc1c9e0 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -59,6 +59,31 @@ config CRYPTO_LIB_CHACHA
@@ -14307,7 +14307,7 @@ index 7ad98b624e55..b1d830dc1c9e 100644
  	tristate
  
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 8ca66b5f9807..273c55d5e147 100644
+index 8ca66b5f9807b..273c55d5e147b 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -16,6 +16,11 @@ libblake2s-generic-y				+= blake2s-generic.o
@@ -14324,7 +14324,7 @@ index 8ca66b5f9807..273c55d5e147 100644
  
 diff --git a/lib/crypto/curve25519-fiat32.c b/lib/crypto/curve25519-fiat32.c
 new file mode 100644
-index 000000000000..1c455207341d
+index 0000000000000..1c455207341d3
 --- /dev/null
 +++ b/lib/crypto/curve25519-fiat32.c
 @@ -0,0 +1,864 @@
@@ -15194,7 +15194,7 @@ index 000000000000..1c455207341d
 +}
 diff --git a/lib/crypto/curve25519-hacl64.c b/lib/crypto/curve25519-hacl64.c
 new file mode 100644
-index 000000000000..771d82dc5f14
+index 0000000000000..771d82dc5f14e
 --- /dev/null
 +++ b/lib/crypto/curve25519-hacl64.c
 @@ -0,0 +1,788 @@
@@ -15988,7 +15988,7 @@ index 000000000000..771d82dc5f14
 +}
 diff --git a/lib/crypto/curve25519.c b/lib/crypto/curve25519.c
 new file mode 100644
-index 000000000000..0106bebe6900
+index 0000000000000..0106bebe69008
 --- /dev/null
 +++ b/lib/crypto/curve25519.c
 @@ -0,0 +1,25 @@
@@ -16021,10 +16021,10 @@ index 000000000000..0106bebe6900
 2.18.4
 
 
-From 02e6878712b24efce89e3abee79df1218f60d1c4 Mon Sep 17 00:00:00 2001
+From a40eeb82471e0ef3ebaf65329704f571c044a95b Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:33 +0100
-Subject: [PATCH 026/117] crypto: curve25519 - add kpp selftest
+Subject: [PATCH 026/115] crypto: curve25519 - add kpp selftest
 
 commit f613457a7af085728297bef71233c37faf3c01b1 upstream.
 
@@ -16041,7 +16041,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 1231 insertions(+)
 
 diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-index 711390861f71..57ab993b9ad2 100644
+index 711390861f716..57ab993b9ad25 100644
 --- a/crypto/testmgr.c
 +++ b/crypto/testmgr.c
 @@ -4295,6 +4295,12 @@ static const struct alg_test_desc alg_test_descs[] = {
@@ -16058,7 +16058,7 @@ index 711390861f71..57ab993b9ad2 100644
  		.alg = "deflate",
  		.test = alg_test_comp,
 diff --git a/crypto/testmgr.h b/crypto/testmgr.h
-index 102fcad54966..5d132ae996b4 100644
+index 102fcad549665..5d132ae996b4a 100644
 --- a/crypto/testmgr.h
 +++ b/crypto/testmgr.h
 @@ -1030,6 +1030,1231 @@ static const struct kpp_testvec dh_tv_template[] = {
@@ -17297,10 +17297,10 @@ index 102fcad54966..5d132ae996b4 100644
 2.18.4
 
 
-From 3951d5b12d76eefa2a00056eed4a16243379deae Mon Sep 17 00:00:00 2001
+From 65f2f0623cff1e3160affdcfb726b784ead866d8 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:34 +0100
-Subject: [PATCH 027/117] crypto: curve25519 - implement generic KPP driver
+Subject: [PATCH 027/115] crypto: curve25519 - implement generic KPP driver
 
 commit ee772cb641135739c1530647391d5a04c39db192 upstream.
 
@@ -17317,7 +17317,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 crypto/curve25519-generic.c
 
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 8fd3954bf64c..a3fc859830c1 100644
+index 8fd3954bf64c5..a3fc859830c1e 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -264,6 +264,11 @@ config CRYPTO_ECRDSA
@@ -17333,7 +17333,7 @@ index 8fd3954bf64c..a3fc859830c1 100644
  
  config CRYPTO_CCM
 diff --git a/crypto/Makefile b/crypto/Makefile
-index fd27edea7c8e..4e7a0a8f7e35 100644
+index fd27edea7c8ec..4e7a0a8f7e357 100644
 --- a/crypto/Makefile
 +++ b/crypto/Makefile
 @@ -167,6 +167,7 @@ obj-$(CONFIG_CRYPTO_ZSTD) += zstd.o
@@ -17346,7 +17346,7 @@ index fd27edea7c8e..4e7a0a8f7e35 100644
  ecdh_generic-y += ecdh_helper.o
 diff --git a/crypto/curve25519-generic.c b/crypto/curve25519-generic.c
 new file mode 100644
-index 000000000000..bd88fd571393
+index 0000000000000..bd88fd571393d
 --- /dev/null
 +++ b/crypto/curve25519-generic.c
 @@ -0,0 +1,90 @@
@@ -17444,10 +17444,10 @@ index 000000000000..bd88fd571393
 2.18.4
 
 
-From 8c6522f3a73d68c4ccef0f0850e9c34e144de042 Mon Sep 17 00:00:00 2001
+From 4277abf75253a08ebc0ea9638cf413fa8949d243 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:35 +0100
-Subject: [PATCH 028/117] crypto: lib/curve25519 - work around Clang stack
+Subject: [PATCH 028/115] crypto: lib/curve25519 - work around Clang stack
  spilling issue
 
 commit 660bb8e1f833ea63185fe80fde847e3e42f18e3b upstream.
@@ -17473,7 +17473,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/lib/crypto/curve25519-fiat32.c b/lib/crypto/curve25519-fiat32.c
-index 1c455207341d..2fde0ec33dbd 100644
+index 1c455207341d3..2fde0ec33dbd0 100644
 --- a/lib/crypto/curve25519-fiat32.c
 +++ b/lib/crypto/curve25519-fiat32.c
 @@ -223,7 +223,7 @@ static __always_inline void fe_1(fe *h)
@@ -17525,10 +17525,10 @@ index 1c455207341d..2fde0ec33dbd 100644
 2.18.4
 
 
-From b61eb8cd17fecacf95a07d9d9cba19c05015a770 Mon Sep 17 00:00:00 2001
+From 8cde457048ca90996bb4c61871fa365620654050 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:36 +0100
-Subject: [PATCH 029/117] crypto: curve25519 - x86_64 library and KPP
+Subject: [PATCH 029/115] crypto: curve25519 - x86_64 library and KPP
  implementations
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -17560,7 +17560,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/x86/crypto/curve25519-x86_64.c
 
 diff --git a/arch/x86/crypto/Makefile b/arch/x86/crypto/Makefile
-index 922c8ecfa00f..958440eae27e 100644
+index 922c8ecfa00f5..958440eae27ec 100644
 --- a/arch/x86/crypto/Makefile
 +++ b/arch/x86/crypto/Makefile
 @@ -39,6 +39,7 @@ obj-$(CONFIG_CRYPTO_AEGIS128_AESNI_SSE2) += aegis128-aesni.o
@@ -17573,7 +17573,7 @@ index 922c8ecfa00f..958440eae27e 100644
  ifeq ($(avx_supported),yes)
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
 new file mode 100644
-index 000000000000..a52a3fb15727
+index 0000000000000..a52a3fb157279
 --- /dev/null
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -0,0 +1,2475 @@
@@ -20053,7 +20053,7 @@ index 000000000000..a52a3fb15727
 +MODULE_ALIAS_CRYPTO("curve25519-x86");
 +MODULE_LICENSE("GPL v2");
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index a3fc859830c1..b8b738bcc312 100644
+index a3fc859830c1e..b8b738bcc3120 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -269,6 +269,12 @@ config CRYPTO_CURVE25519
@@ -20073,10 +20073,10 @@ index a3fc859830c1..b8b738bcc312 100644
 2.18.4
 
 
-From 3ad42670d1a9a760cc14405a60f0c68b6246accb Mon Sep 17 00:00:00 2001
+From 0ac330f3e7a1b6da6001ce7271180d9615df308e Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:37 +0100
-Subject: [PATCH 030/117] crypto: arm/curve25519 - import Bernstein and
+Subject: [PATCH 030/115] crypto: arm/curve25519 - import Bernstein and
  Schwabe's Curve25519 ARM implementation
 
 commit f0fb006b604f98e2309a30f34ef455ac734f7c1c upstream.
@@ -20102,7 +20102,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/arch/arm/crypto/curve25519-core.S b/arch/arm/crypto/curve25519-core.S
 new file mode 100644
-index 000000000000..f33b85fef382
+index 0000000000000..f33b85fef3823
 --- /dev/null
 +++ b/arch/arm/crypto/curve25519-core.S
 @@ -0,0 +1,2105 @@
@@ -22215,10 +22215,10 @@ index 000000000000..f33b85fef382
 2.18.4
 
 
-From 02073ed5ab5ec53969d0b7ed3e41f070f4e61864 Mon Sep 17 00:00:00 2001
+From ca5550b1462848bd20f90039977f3ae87f632945 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 8 Nov 2019 13:22:38 +0100
-Subject: [PATCH 031/117] crypto: arm/curve25519 - wire up NEON implementation
+Subject: [PATCH 031/115] crypto: arm/curve25519 - wire up NEON implementation
 
 commit d8f1308a025fc7e00414194ed742d5f05a21e13c upstream.
 
@@ -22266,7 +22266,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 arch/arm/crypto/curve25519-glue.c
 
 diff --git a/arch/arm/crypto/Kconfig b/arch/arm/crypto/Kconfig
-index 2e8a9289bded..61fa7e4aa8f9 100644
+index 2e8a9289bded3..61fa7e4aa8f9e 100644
 --- a/arch/arm/crypto/Kconfig
 +++ b/arch/arm/crypto/Kconfig
 @@ -141,4 +141,10 @@ config CRYPTO_NHPOLY1305_NEON
@@ -22281,7 +22281,7 @@ index 2e8a9289bded..61fa7e4aa8f9 100644
 +
  endif
 diff --git a/arch/arm/crypto/Makefile b/arch/arm/crypto/Makefile
-index 4f6a8a81dabc..7700385cec9f 100644
+index 4f6a8a81dabc1..7700385cec9ff 100644
 --- a/arch/arm/crypto/Makefile
 +++ b/arch/arm/crypto/Makefile
 @@ -12,6 +12,7 @@ obj-$(CONFIG_CRYPTO_SHA512_ARM) += sha512-arm.o
@@ -22301,7 +22301,7 @@ index 4f6a8a81dabc..7700385cec9f 100644
  ifdef REGENERATE_ARM_CRYPTO
  quiet_cmd_perl = PERL    $@
 diff --git a/arch/arm/crypto/curve25519-core.S b/arch/arm/crypto/curve25519-core.S
-index f33b85fef382..be18af52e7dc 100644
+index f33b85fef3823..be18af52e7dc9 100644
 --- a/arch/arm/crypto/curve25519-core.S
 +++ b/arch/arm/crypto/curve25519-core.S
 @@ -1,43 +1,35 @@
@@ -23151,7 +23151,7 @@ index f33b85fef382..be18af52e7dc 100644
 +ENDPROC(curve25519_neon)
 diff --git a/arch/arm/crypto/curve25519-glue.c b/arch/arm/crypto/curve25519-glue.c
 new file mode 100644
-index 000000000000..2e9e12d2f642
+index 0000000000000..2e9e12d2f642a
 --- /dev/null
 +++ b/arch/arm/crypto/curve25519-glue.c
 @@ -0,0 +1,127 @@
@@ -23286,10 +23286,10 @@ index 000000000000..2e9e12d2f642
 2.18.4
 
 
-From ac04076064addfc5598008e780dd3a8777c3cec8 Mon Sep 17 00:00:00 2001
+From 82eeda8cb54b3f3011e49c86be311814770b8745 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:39 +0100
-Subject: [PATCH 032/117] crypto: chacha20poly1305 - import construction and
+Subject: [PATCH 032/115] crypto: chacha20poly1305 - import construction and
  selftest from Zinc
 
 commit ed20078b7e3331e82828be357147af6a3282e4ce upstream.
@@ -23319,7 +23319,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/include/crypto/chacha20poly1305.h b/include/crypto/chacha20poly1305.h
 new file mode 100644
-index 000000000000..ad3b1de58df8
+index 0000000000000..ad3b1de58df89
 --- /dev/null
 +++ b/include/crypto/chacha20poly1305.h
 @@ -0,0 +1,37 @@
@@ -23361,7 +23361,7 @@ index 000000000000..ad3b1de58df8
 +
 +#endif /* __CHACHA20POLY1305_H */
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index b1d830dc1c9e..0b2c4fce26d9 100644
+index b1d830dc1c9e0..0b2c4fce26d95 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -119,5 +119,12 @@ config CRYPTO_LIB_POLY1305
@@ -23378,7 +23378,7 @@ index b1d830dc1c9e..0b2c4fce26d9 100644
  config CRYPTO_LIB_SHA256
  	tristate
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 273c55d5e147..34a701ab8b92 100644
+index 273c55d5e147b..34a701ab8b92e 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -16,6 +16,9 @@ libblake2s-generic-y				+= blake2s-generic.o
@@ -23399,7 +23399,7 @@ index 273c55d5e147..34a701ab8b92 100644
  endif
 diff --git a/lib/crypto/chacha20poly1305-selftest.c b/lib/crypto/chacha20poly1305-selftest.c
 new file mode 100644
-index 000000000000..d1ed0f27cfdb
+index 0000000000000..d1ed0f27cfdbd
 --- /dev/null
 +++ b/lib/crypto/chacha20poly1305-selftest.c
 @@ -0,0 +1,7348 @@
@@ -30753,7 +30753,7 @@ index 000000000000..d1ed0f27cfdb
 +}
 diff --git a/lib/crypto/chacha20poly1305.c b/lib/crypto/chacha20poly1305.c
 new file mode 100644
-index 000000000000..c12ddbe9eb92
+index 0000000000000..c12ddbe9eb92a
 --- /dev/null
 +++ b/lib/crypto/chacha20poly1305.c
 @@ -0,0 +1,219 @@
@@ -30980,10 +30980,10 @@ index 000000000000..c12ddbe9eb92
 2.18.4
 
 
-From 11518a9a623618b7a02d621f75f341770185e44d Mon Sep 17 00:00:00 2001
+From a3dd68c75fa2e267ebc0e2619cfa3bc2924474d3 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 8 Nov 2019 13:22:40 +0100
-Subject: [PATCH 033/117] crypto: lib/chacha20poly1305 - reimplement
+Subject: [PATCH 033/115] crypto: lib/chacha20poly1305 - reimplement
  crypt_from_sg() routine
 
 commit d95312a3ccc0cd544d374be2fc45aeaa803e5fd9 upstream.
@@ -31017,7 +31017,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 206 insertions(+)
 
 diff --git a/include/crypto/chacha20poly1305.h b/include/crypto/chacha20poly1305.h
-index ad3b1de58df8..234ee28078ef 100644
+index ad3b1de58df89..234ee28078efd 100644
 --- a/include/crypto/chacha20poly1305.h
 +++ b/include/crypto/chacha20poly1305.h
 @@ -7,6 +7,7 @@
@@ -31044,7 +31044,7 @@ index ad3b1de58df8..234ee28078ef 100644
 +
  #endif /* __CHACHA20POLY1305_H */
 diff --git a/lib/crypto/chacha20poly1305-selftest.c b/lib/crypto/chacha20poly1305-selftest.c
-index d1ed0f27cfdb..465de46dbdef 100644
+index d1ed0f27cfdbd..465de46dbdef2 100644
 --- a/lib/crypto/chacha20poly1305-selftest.c
 +++ b/lib/crypto/chacha20poly1305-selftest.c
 @@ -7250,6 +7250,7 @@ bool __init chacha20poly1305_selftest(void)
@@ -31114,7 +31114,7 @@ index d1ed0f27cfdb..465de46dbdef 100644
  	for (i = 0; i < ARRAY_SIZE(xchacha20poly1305_enc_vectors); ++i) {
  		memset(computed_output, 0, MAXIMUM_TEST_BUFFER_LEN);
 diff --git a/lib/crypto/chacha20poly1305.c b/lib/crypto/chacha20poly1305.c
-index c12ddbe9eb92..821e5cc9b14e 100644
+index c12ddbe9eb92a..821e5cc9b14eb 100644
 --- a/lib/crypto/chacha20poly1305.c
 +++ b/lib/crypto/chacha20poly1305.c
 @@ -11,6 +11,7 @@
@@ -31285,10 +31285,10 @@ index c12ddbe9eb92..821e5cc9b14e 100644
 2.18.4
 
 
-From 43eef635407f6e17a86aedf9302d60bf595af851 Mon Sep 17 00:00:00 2001
+From ae6edeabca36ddc9a7dcad0798b70b469cafcbb0 Mon Sep 17 00:00:00 2001
 From: Eric Biggers <ebiggers@google.com>
 Date: Sun, 17 Nov 2019 23:21:29 -0800
-Subject: [PATCH 034/117] crypto: chacha_generic - remove unnecessary setkey()
+Subject: [PATCH 034/115] crypto: chacha_generic - remove unnecessary setkey()
  functions
 
 commit 2043323a799a660bc84bbee404cf7a2617ec6157 upstream.
@@ -31306,7 +31306,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 3 insertions(+), 15 deletions(-)
 
 diff --git a/crypto/chacha_generic.c b/crypto/chacha_generic.c
-index c1b147318393..8beea79ab117 100644
+index c1b1473183938..8beea79ab1178 100644
 --- a/crypto/chacha_generic.c
 +++ b/crypto/chacha_generic.c
 @@ -37,18 +37,6 @@ static int chacha_stream_xor(struct skcipher_request *req,
@@ -31359,10 +31359,10 @@ index c1b147318393..8beea79ab117 100644
 2.18.4
 
 
-From 3ef9f1930acdb457134a24dabfb719073d63a8be Mon Sep 17 00:00:00 2001
+From 89f5ca0475e73f4752d3a6795c1949ed2a76d29e Mon Sep 17 00:00:00 2001
 From: Eric Biggers <ebiggers@google.com>
 Date: Sun, 17 Nov 2019 23:21:58 -0800
-Subject: [PATCH 035/117] crypto: x86/chacha - only unregister algorithms if
+Subject: [PATCH 035/115] crypto: x86/chacha - only unregister algorithms if
  registered
 
 commit b62755aed3a3f5ca9edd2718339ccea3b6bbbe57 upstream.
@@ -31380,7 +31380,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index b391e13a9e41..a94e30b6f941 100644
+index b391e13a9e415..a94e30b6f9413 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -304,7 +304,8 @@ static int __init chacha_simd_mod_init(void)
@@ -31397,10 +31397,10 @@ index b391e13a9e41..a94e30b6f941 100644
 2.18.4
 
 
-From e01b39b5457012eb184ed3058222f0276401be12 Mon Sep 17 00:00:00 2001
+From 1c70211beccb66b1b506cc8006c147a9d59bd7f2 Mon Sep 17 00:00:00 2001
 From: Eric Biggers <ebiggers@google.com>
 Date: Sun, 17 Nov 2019 23:22:16 -0800
-Subject: [PATCH 036/117] crypto: lib/chacha20poly1305 - use chacha20_crypt()
+Subject: [PATCH 036/115] crypto: lib/chacha20poly1305 - use chacha20_crypt()
 
 commit 413808b71e6204b0cc1eeaa77960f7c3cd381d33 upstream.
 
@@ -31417,7 +31417,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/lib/crypto/chacha20poly1305.c b/lib/crypto/chacha20poly1305.c
-index 821e5cc9b14e..6d83cafebc69 100644
+index 821e5cc9b14eb..6d83cafebc69c 100644
 --- a/lib/crypto/chacha20poly1305.c
 +++ b/lib/crypto/chacha20poly1305.c
 @@ -66,14 +66,14 @@ __chacha20poly1305_encrypt(u8 *dst, const u8 *src, const size_t src_len,
@@ -31486,10 +31486,10 @@ index 821e5cc9b14e..6d83cafebc69 100644
 2.18.4
 
 
-From 7553c9edd4fc620058f9149d1db82dba088cff68 Mon Sep 17 00:00:00 2001
+From 2882dd79df72546111aaecd936be7e5b40507d32 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 25 Nov 2019 11:31:12 +0100
-Subject: [PATCH 037/117] crypto: arch - conditionalize crypto api in arch glue
+Subject: [PATCH 037/115] crypto: arch - conditionalize crypto api in arch glue
  for lib code
 
 commit 8394bfec51e0e565556101bcc4e2fe7551104cd8 upstream.
@@ -31519,7 +31519,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  11 files changed, 53 insertions(+), 32 deletions(-)
 
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
-index 3f0c057aa050..7bdf8823066d 100644
+index 3f0c057aa0502..7bdf8823066d0 100644
 --- a/arch/arm/crypto/chacha-glue.c
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -286,11 +286,13 @@ static struct skcipher_alg neon_algs[] = {
@@ -31570,7 +31570,7 @@ index 3f0c057aa050..7bdf8823066d 100644
  
  module_init(chacha_simd_mod_init);
 diff --git a/arch/arm/crypto/curve25519-glue.c b/arch/arm/crypto/curve25519-glue.c
-index 2e9e12d2f642..f3f42cf3b893 100644
+index 2e9e12d2f642a..f3f42cf3b8937 100644
 --- a/arch/arm/crypto/curve25519-glue.c
 +++ b/arch/arm/crypto/curve25519-glue.c
 @@ -108,14 +108,15 @@ static int __init mod_init(void)
@@ -31592,7 +31592,7 @@ index 2e9e12d2f642..f3f42cf3b893 100644
  }
  
 diff --git a/arch/arm/crypto/poly1305-glue.c b/arch/arm/crypto/poly1305-glue.c
-index 74a725ac89c9..abe3f2d587dc 100644
+index 74a725ac89c9f..abe3f2d587dcb 100644
 --- a/arch/arm/crypto/poly1305-glue.c
 +++ b/arch/arm/crypto/poly1305-glue.c
 @@ -249,16 +249,19 @@ static int __init arm_poly1305_mod_init(void)
@@ -31619,7 +31619,7 @@ index 74a725ac89c9..abe3f2d587dc 100644
  		crypto_unregister_shash(&arm_poly1305_algs[0]);
  		return;
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index b08029d7bde6..71c11d2e9fcd 100644
+index b08029d7bde62..71c11d2e9fcda 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -211,12 +211,13 @@ static int __init chacha_simd_mod_init(void)
@@ -31639,7 +31639,7 @@ index b08029d7bde6..71c11d2e9fcd 100644
  }
  
 diff --git a/arch/arm64/crypto/poly1305-glue.c b/arch/arm64/crypto/poly1305-glue.c
-index dd843d0ee83a..83a2338a8826 100644
+index dd843d0ee83ab..83a2338a88263 100644
 --- a/arch/arm64/crypto/poly1305-glue.c
 +++ b/arch/arm64/crypto/poly1305-glue.c
 @@ -220,12 +220,13 @@ static int __init neon_poly1305_mod_init(void)
@@ -31659,7 +31659,7 @@ index dd843d0ee83a..83a2338a8826 100644
  }
  
 diff --git a/arch/mips/crypto/chacha-glue.c b/arch/mips/crypto/chacha-glue.c
-index 779e399c9bef..90896029d0cd 100644
+index 779e399c9befd..90896029d0cdf 100644
 --- a/arch/mips/crypto/chacha-glue.c
 +++ b/arch/mips/crypto/chacha-glue.c
 @@ -128,12 +128,14 @@ static struct skcipher_alg algs[] = {
@@ -31680,7 +31680,7 @@ index 779e399c9bef..90896029d0cd 100644
  
  module_init(chacha_simd_mod_init);
 diff --git a/arch/mips/crypto/poly1305-glue.c b/arch/mips/crypto/poly1305-glue.c
-index b759b6ccc361..b37d29cf5d0a 100644
+index b759b6ccc361c..b37d29cf5d0a8 100644
 --- a/arch/mips/crypto/poly1305-glue.c
 +++ b/arch/mips/crypto/poly1305-glue.c
 @@ -187,12 +187,14 @@ static struct shash_alg mips_poly1305_alg = {
@@ -31701,7 +31701,7 @@ index b759b6ccc361..b37d29cf5d0a 100644
  
  module_init(mips_poly1305_mod_init);
 diff --git a/arch/x86/crypto/blake2s-glue.c b/arch/x86/crypto/blake2s-glue.c
-index 4a37ba7cdbe5..1d9ff8a45e1f 100644
+index 4a37ba7cdbe52..1d9ff8a45e1fd 100644
 --- a/arch/x86/crypto/blake2s-glue.c
 +++ b/arch/x86/crypto/blake2s-glue.c
 @@ -210,12 +210,14 @@ static int __init blake2s_mod_init(void)
@@ -31722,7 +31722,7 @@ index 4a37ba7cdbe5..1d9ff8a45e1f 100644
  }
  
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index a94e30b6f941..1bebe11b9ec9 100644
+index a94e30b6f9413..1bebe11b9ec95 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -299,12 +299,13 @@ static int __init chacha_simd_mod_init(void)
@@ -31742,7 +31742,7 @@ index a94e30b6f941..1bebe11b9ec9 100644
  }
  
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
-index a52a3fb15727..eec7d2d24239 100644
+index a52a3fb157279..eec7d2d242396 100644
 --- a/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -2457,13 +2457,14 @@ static int __init curve25519_mod_init(void)
@@ -31764,7 +31764,7 @@ index a52a3fb15727..eec7d2d24239 100644
  }
  
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 370cd88068ec..0cc4537e6617 100644
+index 370cd88068ec1..0cc4537e6617c 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -224,12 +224,13 @@ static int __init poly1305_simd_mod_init(void)
@@ -31787,10 +31787,10 @@ index 370cd88068ec..0cc4537e6617 100644
 2.18.4
 
 
-From 43a81baff514a4fdc89594156a520b9f86c8bfb9 Mon Sep 17 00:00:00 2001
+From 74b89ee28db1d76c44ea3f1e9ef5839a803de29d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Valdis=20Kl=C4=93tnieks?= <valdis.kletnieks@vt.edu>
 Date: Thu, 5 Dec 2019 20:58:36 -0500
-Subject: [PATCH 038/117] crypto: chacha - fix warning message in header file
+Subject: [PATCH 038/115] crypto: chacha - fix warning message in header file
 
 commit 579d705cd64e44f3fcda1a6cfd5f37468a5ddf63 upstream.
 
@@ -31812,7 +31812,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/crypto/internal/chacha.h b/include/crypto/internal/chacha.h
-index aa5d4a16aac5..b085dc1ac151 100644
+index aa5d4a16aac5d..b085dc1ac1516 100644
 --- a/include/crypto/internal/chacha.h
 +++ b/include/crypto/internal/chacha.h
 @@ -34,7 +34,7 @@ static inline int chacha20_setkey(struct crypto_skcipher *tfm, const u8 *key,
@@ -31828,10 +31828,10 @@ index aa5d4a16aac5..b085dc1ac151 100644
 2.18.4
 
 
-From ea1b43de85bc840383235c460b249d326a4ab8ad Mon Sep 17 00:00:00 2001
+From 4b798e161c3f1a846a48ea91b27f3cb18100220a Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 11 Dec 2019 10:26:39 +0100
-Subject: [PATCH 039/117] crypto: arm/curve25519 - add arch-specific key
+Subject: [PATCH 039/115] crypto: arm/curve25519 - add arch-specific key
  generation function
 
 commit 84faa307249b341f6ad8de3e1869d77a65e26669 upstream.
@@ -31851,7 +31851,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/arch/arm/crypto/curve25519-glue.c b/arch/arm/crypto/curve25519-glue.c
-index f3f42cf3b893..776ae07e0469 100644
+index f3f42cf3b8937..776ae07e04697 100644
 --- a/arch/arm/crypto/curve25519-glue.c
 +++ b/arch/arm/crypto/curve25519-glue.c
 @@ -38,6 +38,13 @@ void curve25519_arch(u8 out[CURVE25519_KEY_SIZE],
@@ -31872,10 +31872,10 @@ index f3f42cf3b893..776ae07e0469 100644
 2.18.4
 
 
-From fae58695a6e4bb3a22a234a3bd212c65daaf3183 Mon Sep 17 00:00:00 2001
+From c8c17cad23f8635d751ec0aad621fdf7ded5d6d1 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 16 Dec 2019 19:53:26 +0100
-Subject: [PATCH 040/117] crypto: lib/curve25519 - re-add selftests
+Subject: [PATCH 040/115] crypto: lib/curve25519 - re-add selftests
 
 commit aa127963f1cab2b93c74c9b128a84610203fb674 upstream.
 
@@ -31895,7 +31895,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/curve25519-selftest.c
 
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 34a701ab8b92..f97f9b941110 100644
+index 34a701ab8b92e..f97f9b9411105 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -36,4 +36,5 @@ libsha256-y					:= sha256.o
@@ -31906,7 +31906,7 @@ index 34a701ab8b92..f97f9b941110 100644
  endif
 diff --git a/lib/crypto/curve25519-selftest.c b/lib/crypto/curve25519-selftest.c
 new file mode 100644
-index 000000000000..c85e85381e78
+index 0000000000000..c85e85381e788
 --- /dev/null
 +++ b/lib/crypto/curve25519-selftest.c
 @@ -0,0 +1,1321 @@
@@ -33232,7 +33232,7 @@ index 000000000000..c85e85381e78
 +	return success;
 +}
 diff --git a/lib/crypto/curve25519.c b/lib/crypto/curve25519.c
-index 0106bebe6900..c03ccdb99434 100644
+index 0106bebe69008..c03ccdb994340 100644
 --- a/lib/crypto/curve25519.c
 +++ b/lib/crypto/curve25519.c
 @@ -13,6 +13,8 @@
@@ -33270,10 +33270,10 @@ index 0106bebe6900..c03ccdb99434 100644
 2.18.4
 
 
-From 5f996db51979df92dc9ee78a1101bec85a9a04af Mon Sep 17 00:00:00 2001
+From 78834bc0be45631e091ada3cdad050267aa962cd Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 5 Jan 2020 22:40:46 -0500
-Subject: [PATCH 041/117] crypto: poly1305 - add new 32 and 64-bit generic
+Subject: [PATCH 041/115] crypto: poly1305 - add new 32 and 64-bit generic
  versions
 
 commit 1c08a104360f3e18f4ee6346c21cc3923efb952e upstream.
@@ -33328,7 +33328,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/poly1305-donna64.c
 
 diff --git a/arch/x86/crypto/poly1305-avx2-x86_64.S b/arch/x86/crypto/poly1305-avx2-x86_64.S
-index 8b341bc29d41..1688fb551070 100644
+index 8b341bc29d416..1688fb551070c 100644
 --- a/arch/x86/crypto/poly1305-avx2-x86_64.S
 +++ b/arch/x86/crypto/poly1305-avx2-x86_64.S
 @@ -34,16 +34,16 @@ ORMASK:	.octa 0x00000000010000000000000001000000
@@ -33359,7 +33359,7 @@ index 8b341bc29d41..1688fb551070 100644
  #define hc0 %ymm0
  #define hc1 %ymm1
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 0cc4537e6617..edb7113e36f3 100644
+index 0cc4537e6617c..edb7113e36f32 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -25,6 +25,21 @@ asmlinkage void poly1305_4block_avx2(u32 *h, const u8 *src, const u32 *r,
@@ -33621,7 +33621,7 @@ index 0cc4537e6617..edb7113e36f3 100644
  }
  
 diff --git a/crypto/adiantum.c b/crypto/adiantum.c
-index aded26092268..c846a887abe1 100644
+index aded260922684..c846a887abe19 100644
 --- a/crypto/adiantum.c
 +++ b/crypto/adiantum.c
 @@ -72,7 +72,7 @@ struct adiantum_tfm_ctx {
@@ -33643,7 +33643,7 @@ index aded26092268..c846a887abe1 100644
  
  /* Hash the left-hand part (the "bulk") of the message using NHPoly1305 */
 diff --git a/crypto/nhpoly1305.c b/crypto/nhpoly1305.c
-index f6b6a52092b4..8a3006c3b51b 100644
+index f6b6a52092b49..8a3006c3b51b9 100644
 --- a/crypto/nhpoly1305.c
 +++ b/crypto/nhpoly1305.c
 @@ -210,7 +210,7 @@ int crypto_nhpoly1305_final_helper(struct shash_desc *desc, u8 *dst, nh_t nh_fn)
@@ -33656,7 +33656,7 @@ index f6b6a52092b4..8a3006c3b51b 100644
  }
  EXPORT_SYMBOL(crypto_nhpoly1305_final_helper);
 diff --git a/crypto/poly1305_generic.c b/crypto/poly1305_generic.c
-index 21edbd8c99fb..94af47eb6fa6 100644
+index 21edbd8c99fbc..94af47eb6fa69 100644
 --- a/crypto/poly1305_generic.c
 +++ b/crypto/poly1305_generic.c
 @@ -31,6 +31,29 @@ static int crypto_poly1305_init(struct shash_desc *desc)
@@ -33699,7 +33699,7 @@ index 21edbd8c99fb..94af47eb6fa6 100644
  }
  
 diff --git a/include/crypto/internal/poly1305.h b/include/crypto/internal/poly1305.h
-index 479b0cab2a1a..064e52ca5248 100644
+index 479b0cab2a1ad..064e52ca52480 100644
 --- a/include/crypto/internal/poly1305.h
 +++ b/include/crypto/internal/poly1305.h
 @@ -11,48 +11,23 @@
@@ -33762,7 +33762,7 @@ index 479b0cab2a1a..064e52ca5248 100644
  
  #endif
 diff --git a/include/crypto/nhpoly1305.h b/include/crypto/nhpoly1305.h
-index 53c04423c582..306925fea190 100644
+index 53c04423c582e..306925fea1904 100644
 --- a/include/crypto/nhpoly1305.h
 +++ b/include/crypto/nhpoly1305.h
 @@ -7,7 +7,7 @@
@@ -33784,7 +33784,7 @@ index 53c04423c582..306925fea190 100644
  };
  
 diff --git a/include/crypto/poly1305.h b/include/crypto/poly1305.h
-index 74c6e1cd73ee..f1f67fc749cf 100644
+index 74c6e1cd73eee..f1f67fc749cf4 100644
 --- a/include/crypto/poly1305.h
 +++ b/include/crypto/poly1305.h
 @@ -13,12 +13,29 @@
@@ -33832,7 +33832,7 @@ index 74c6e1cd73ee..f1f67fc749cf 100644
  
  void poly1305_init_arch(struct poly1305_desc_ctx *desc, const u8 *key);
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index f97f9b941110..6ecaf83a5a9a 100644
+index f97f9b9411105..6ecaf83a5a9aa 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -28,7 +28,9 @@ obj-$(CONFIG_CRYPTO_LIB_DES)			+= libdes.o
@@ -33848,7 +33848,7 @@ index f97f9b941110..6ecaf83a5a9a 100644
  libsha256-y					:= sha256.o
 diff --git a/lib/crypto/poly1305-donna32.c b/lib/crypto/poly1305-donna32.c
 new file mode 100644
-index 000000000000..3cc77d94390b
+index 0000000000000..3cc77d94390b2
 --- /dev/null
 +++ b/lib/crypto/poly1305-donna32.c
 @@ -0,0 +1,204 @@
@@ -34058,7 +34058,7 @@ index 000000000000..3cc77d94390b
 +EXPORT_SYMBOL(poly1305_core_emit);
 diff --git a/lib/crypto/poly1305-donna64.c b/lib/crypto/poly1305-donna64.c
 new file mode 100644
-index 000000000000..6ae181bb4345
+index 0000000000000..6ae181bb43450
 --- /dev/null
 +++ b/lib/crypto/poly1305-donna64.c
 @@ -0,0 +1,185 @@
@@ -34248,7 +34248,7 @@ index 000000000000..6ae181bb4345
 +}
 +EXPORT_SYMBOL(poly1305_core_emit);
 diff --git a/lib/crypto/poly1305.c b/lib/crypto/poly1305.c
-index 32ec293c65ae..9d2d14df0fee 100644
+index 32ec293c65ae7..9d2d14df0fee5 100644
 --- a/lib/crypto/poly1305.c
 +++ b/lib/crypto/poly1305.c
 @@ -12,151 +12,9 @@
@@ -34465,10 +34465,10 @@ index 32ec293c65ae..9d2d14df0fee 100644
 2.18.4
 
 
-From cf9813215cb5b32c82af3d478c2ccc538d006af4 Mon Sep 17 00:00:00 2001
+From 58127c498379d26e9fceea96c1808c88338c874e Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 5 Jan 2020 22:40:47 -0500
-Subject: [PATCH 042/117] crypto: x86/poly1305 - import unmodified cryptogams
+Subject: [PATCH 042/115] crypto: x86/poly1305 - import unmodified cryptogams
  implementation
 
 commit 0896ca2a0cb6127e8a129f1f2a680d49b6b0f65c upstream.
@@ -34488,7 +34488,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/arch/x86/crypto/poly1305-x86_64-cryptogams.pl b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 new file mode 100644
-index 000000000000..342ad7f18aa7
+index 0000000000000..342ad7f18aa71
 --- /dev/null
 +++ b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 @@ -0,0 +1,4159 @@
@@ -38655,10 +38655,10 @@ index 000000000000..342ad7f18aa7
 2.18.4
 
 
-From a24ec3524a4acab25230f46ff6660f432419d9bc Mon Sep 17 00:00:00 2001
+From 1de7e70cdad987e708e276ed6c584f17f44a445a Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 5 Jan 2020 22:40:48 -0500
-Subject: [PATCH 043/117] crypto: x86/poly1305 - wire up faster implementations
+Subject: [PATCH 043/115] crypto: x86/poly1305 - wire up faster implementations
  for kernel
 
 commit d7d7b853566254648df59f7ea27ea05952a6cfa8 upstream.
@@ -38783,13 +38783,13 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/arch/x86/crypto/.gitignore b/arch/x86/crypto/.gitignore
 new file mode 100644
-index 000000000000..c406ea6571fa
+index 0000000000000..c406ea6571fac
 --- /dev/null
 +++ b/arch/x86/crypto/.gitignore
 @@ -0,0 +1 @@
 +poly1305-x86_64.S
 diff --git a/arch/x86/crypto/Makefile b/arch/x86/crypto/Makefile
-index 958440eae27e..b69e00bf20b8 100644
+index 958440eae27ec..b69e00bf20b82 100644
 --- a/arch/x86/crypto/Makefile
 +++ b/arch/x86/crypto/Makefile
 @@ -73,6 +73,10 @@ aegis128-aesni-y := aegis128-aesni-asm.o aegis128-aesni-glue.o
@@ -38825,7 +38825,7 @@ index 958440eae27e..b69e00bf20b8 100644
 +	$(call if_changed,perlasm)
 diff --git a/arch/x86/crypto/poly1305-avx2-x86_64.S b/arch/x86/crypto/poly1305-avx2-x86_64.S
 deleted file mode 100644
-index 1688fb551070..000000000000
+index 1688fb551070c..0000000000000
 --- a/arch/x86/crypto/poly1305-avx2-x86_64.S
 +++ /dev/null
 @@ -1,390 +0,0 @@
@@ -39221,7 +39221,7 @@ index 1688fb551070..000000000000
 -ENDPROC(poly1305_4block_avx2)
 diff --git a/arch/x86/crypto/poly1305-sse2-x86_64.S b/arch/x86/crypto/poly1305-sse2-x86_64.S
 deleted file mode 100644
-index 5578f846e622..000000000000
+index 5578f846e622b..0000000000000
 --- a/arch/x86/crypto/poly1305-sse2-x86_64.S
 +++ /dev/null
 @@ -1,590 +0,0 @@
@@ -39816,7 +39816,7 @@ index 5578f846e622..000000000000
 -	ret
 -ENDPROC(poly1305_2block_sse2)
 diff --git a/arch/x86/crypto/poly1305-x86_64-cryptogams.pl b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
-index 342ad7f18aa7..80061bea6b16 100644
+index 342ad7f18aa71..80061bea6b16a 100644
 --- a/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 +++ b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 @@ -1,11 +1,14 @@
@@ -40987,7 +40987,7 @@ index 342ad7f18aa7..80061bea6b16 100644
  }
  close STDOUT;
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index edb7113e36f3..657363588e0c 100644
+index edb7113e36f32..657363588e0c8 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -1,8 +1,6 @@
@@ -41576,7 +41576,7 @@ index edb7113e36f3..657363588e0c 100644
  MODULE_ALIAS_CRYPTO("poly1305");
  MODULE_ALIAS_CRYPTO("poly1305-simd");
 diff --git a/lib/crypto/Kconfig b/lib/crypto/Kconfig
-index 0b2c4fce26d9..14c032de276e 100644
+index 0b2c4fce26d95..14c032de276e6 100644
 --- a/lib/crypto/Kconfig
 +++ b/lib/crypto/Kconfig
 @@ -90,7 +90,7 @@ config CRYPTO_LIB_DES
@@ -41592,10 +41592,10 @@ index 0b2c4fce26d9..14c032de276e 100644
 2.18.4
 
 
-From 30fba118109bf9f9246d8fee7841e7c1a4f10512 Mon Sep 17 00:00:00 2001
+From 9d88649f8ef5028453ecde65a843e711b0945eec Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 5 Jan 2020 22:40:49 -0500
-Subject: [PATCH 044/117] crypto: {arm,arm64,mips}/poly1305 - remove redundant
+Subject: [PATCH 044/115] crypto: {arm,arm64,mips}/poly1305 - remove redundant
  non-reduction from emit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -41641,7 +41641,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 6 insertions(+), 48 deletions(-)
 
 diff --git a/arch/arm/crypto/poly1305-glue.c b/arch/arm/crypto/poly1305-glue.c
-index abe3f2d587dc..ceec04ec2f40 100644
+index abe3f2d587dcb..ceec04ec2f405 100644
 --- a/arch/arm/crypto/poly1305-glue.c
 +++ b/arch/arm/crypto/poly1305-glue.c
 @@ -20,7 +20,7 @@
@@ -41684,7 +41684,7 @@ index abe3f2d587dc..ceec04ec2f40 100644
  }
  EXPORT_SYMBOL(poly1305_final_arch);
 diff --git a/arch/arm64/crypto/poly1305-glue.c b/arch/arm64/crypto/poly1305-glue.c
-index 83a2338a8826..e97b092f56b8 100644
+index 83a2338a88263..e97b092f56b8f 100644
 --- a/arch/arm64/crypto/poly1305-glue.c
 +++ b/arch/arm64/crypto/poly1305-glue.c
 @@ -21,7 +21,7 @@
@@ -41727,7 +41727,7 @@ index 83a2338a8826..e97b092f56b8 100644
  }
  EXPORT_SYMBOL(poly1305_final_arch);
 diff --git a/arch/mips/crypto/poly1305-glue.c b/arch/mips/crypto/poly1305-glue.c
-index b37d29cf5d0a..fc881b46d911 100644
+index b37d29cf5d0a8..fc881b46d9111 100644
 --- a/arch/mips/crypto/poly1305-glue.c
 +++ b/arch/mips/crypto/poly1305-glue.c
 @@ -15,7 +15,7 @@
@@ -41773,10 +41773,10 @@ index b37d29cf5d0a..fc881b46d911 100644
 2.18.4
 
 
-From 6737f9545cacd65ae9799a645b620347ee7a51d2 Mon Sep 17 00:00:00 2001
+From 57a90de716992b58c20baa24628e902cce26e4fd Mon Sep 17 00:00:00 2001
 From: Herbert Xu <herbert@gondor.apana.org.au>
 Date: Wed, 8 Jan 2020 12:37:35 +0800
-Subject: [PATCH 045/117] crypto: curve25519 - Fix selftest build error
+Subject: [PATCH 045/115] crypto: curve25519 - Fix selftest build error
 
 commit a8bdf2c42ee4d1ee42af1f3601f85de94e70a421 upstream.
 
@@ -41815,7 +41815,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100644 lib/crypto/curve25519-generic.c
 
 diff --git a/lib/crypto/Makefile b/lib/crypto/Makefile
-index 6ecaf83a5a9a..3a435629d9ce 100644
+index 6ecaf83a5a9aa..3a435629d9ce9 100644
 --- a/lib/crypto/Makefile
 +++ b/lib/crypto/Makefile
 @@ -19,9 +19,12 @@ libblake2s-y					+= blake2s.o
@@ -41836,7 +41836,7 @@ index 6ecaf83a5a9a..3a435629d9ce 100644
  obj-$(CONFIG_CRYPTO_LIB_DES)			+= libdes.o
 diff --git a/lib/crypto/curve25519-generic.c b/lib/crypto/curve25519-generic.c
 new file mode 100644
-index 000000000000..de7c99172fa2
+index 0000000000000..de7c99172fa25
 --- /dev/null
 +++ b/lib/crypto/curve25519-generic.c
 @@ -0,0 +1,24 @@
@@ -41865,7 +41865,7 @@ index 000000000000..de7c99172fa2
 +MODULE_DESCRIPTION("Curve25519 scalar multiplication");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 diff --git a/lib/crypto/curve25519.c b/lib/crypto/curve25519.c
-index c03ccdb99434..288a62cd29b2 100644
+index c03ccdb994340..288a62cd29b22 100644
 --- a/lib/crypto/curve25519.c
 +++ b/lib/crypto/curve25519.c
 @@ -15,13 +15,6 @@
@@ -41886,10 +41886,10 @@ index c03ccdb99434..288a62cd29b2 100644
 2.18.4
 
 
-From e702869c233b03f1d1d767c036a03c09606419ea Mon Sep 17 00:00:00 2001
+From 209d764b1645563f12dc852cd5124d158aa7f2ed Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 16 Jan 2020 18:23:55 +0100
-Subject: [PATCH 046/117] crypto: x86/poly1305 - fix .gitignore typo
+Subject: [PATCH 046/115] crypto: x86/poly1305 - fix .gitignore typo
 
 commit 1f6868995326cc82102049e349d8dbd116bdb656 upstream.
 
@@ -41905,7 +41905,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/crypto/.gitignore b/arch/x86/crypto/.gitignore
-index c406ea6571fa..30be0400a439 100644
+index c406ea6571fac..30be0400a4392 100644
 --- a/arch/x86/crypto/.gitignore
 +++ b/arch/x86/crypto/.gitignore
 @@ -1 +1 @@
@@ -41915,10 +41915,10 @@ index c406ea6571fa..30be0400a439 100644
 2.18.4
 
 
-From 3dc8b37f6bcbf7e98b786c34370960d7470ba724 Mon Sep 17 00:00:00 2001
+From aa5d3f33ed4293ebe39f4a00f334df6cf058a97c Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 16 Jan 2020 21:26:34 +0100
-Subject: [PATCH 047/117] crypto: chacha20poly1305 - add back missing test
+Subject: [PATCH 047/115] crypto: chacha20poly1305 - add back missing test
  vectors and test chunking
 
 commit 72c7943792c9e7788ddd182337bcf8f650cf56f5 upstream.
@@ -41942,7 +41942,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1698 insertions(+), 14 deletions(-)
 
 diff --git a/lib/crypto/chacha20poly1305-selftest.c b/lib/crypto/chacha20poly1305-selftest.c
-index 465de46dbdef..c391a91364e9 100644
+index 465de46dbdef2..c391a91364e9d 100644
 --- a/lib/crypto/chacha20poly1305-selftest.c
 +++ b/lib/crypto/chacha20poly1305-selftest.c
 @@ -4,6 +4,7 @@
@@ -43779,10 +43779,10 @@ index 465de46dbdef..c391a91364e9 100644
 2.18.4
 
 
-From ce650dc24906469138236b00ef851cb7e32e84f7 Mon Sep 17 00:00:00 2001
+From b9130d65de27aa574c43d36309566d2d661f562e Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 17 Jan 2020 11:42:22 +0100
-Subject: [PATCH 048/117] crypto: x86/poly1305 - emit does base conversion
+Subject: [PATCH 048/115] crypto: x86/poly1305 - emit does base conversion
  itself
 
 commit f9e7fe32a792726186301423ff63a465d63386e1 upstream.
@@ -43799,7 +43799,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 6 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 657363588e0c..79bb58737d52 100644
+index 657363588e0c8..79bb58737d528 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -123,13 +123,9 @@ static void poly1305_simd_blocks(void *ctx, const u8 *inp, size_t len,
@@ -43822,10 +43822,10 @@ index 657363588e0c..79bb58737d52 100644
 2.18.4
 
 
-From 761be588ab38a61c4b7288322750b02ddc4da2ee Mon Sep 17 00:00:00 2001
+From e4912683de95e6badfefdfcab00e5728580acfe3 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 17 Jan 2020 17:43:18 +0100
-Subject: [PATCH 049/117] crypto: arm/chacha - fix build failured when kernel
+Subject: [PATCH 049/115] crypto: arm/chacha - fix build failured when kernel
  mode NEON is disabled
 
 commit 0bc81767c5bd9d005fae1099fb39eb3688370cb1 upstream.
@@ -43861,7 +43861,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
-index 7bdf8823066d..893692ed12b7 100644
+index 7bdf8823066d0..893692ed12b76 100644
 --- a/arch/arm/crypto/chacha-glue.c
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -115,7 +115,7 @@ static int chacha_stream_xor(struct skcipher_request *req,
@@ -43886,10 +43886,10 @@ index 7bdf8823066d..893692ed12b7 100644
 2.18.4
 
 
-From c3efcd3d0abfa6027751040d89c769bcd10e1667 Mon Sep 17 00:00:00 2001
+From c0906d8f3e64011cbde6687f67dfd224a7a01055 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 17 Jan 2020 12:01:36 +0100
-Subject: [PATCH 050/117] crypto: Kconfig - allow tests to be disabled when
+Subject: [PATCH 050/115] crypto: Kconfig - allow tests to be disabled when
  manager is disabled
 
 commit 2343d1529aff8b552589f622c23932035ed7a05d upstream.
@@ -43907,7 +43907,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 4 deletions(-)
 
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index b8b738bcc312..8fcf630471dc 100644
+index b8b738bcc3120..8fcf630471dcf 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -136,8 +136,6 @@ config CRYPTO_USER
@@ -43932,10 +43932,10 @@ index b8b738bcc312..8fcf630471dc 100644
 2.18.4
 
 
-From 48681c2021772277b48acd1069157075d352f40d Mon Sep 17 00:00:00 2001
+From 44e282e3975c6fd03529c5524c2dd7ef7cb87a69 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 6 Feb 2020 12:42:01 +0100
-Subject: [PATCH 051/117] crypto: chacha20poly1305 - prevent integer overflow
+Subject: [PATCH 051/115] crypto: chacha20poly1305 - prevent integer overflow
  on large input
 
 commit c9cc0517bba9f0213f1e55172feceb99e5512daf upstream.
@@ -43961,7 +43961,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/lib/crypto/chacha20poly1305.c b/lib/crypto/chacha20poly1305.c
-index 6d83cafebc69..ad0699ce702f 100644
+index 6d83cafebc69c..ad0699ce702f9 100644
 --- a/lib/crypto/chacha20poly1305.c
 +++ b/lib/crypto/chacha20poly1305.c
 @@ -235,6 +235,9 @@ bool chacha20poly1305_crypt_sg_inplace(struct scatterlist *src,
@@ -43978,10 +43978,10 @@ index 6d83cafebc69..ad0699ce702f 100644
 2.18.4
 
 
-From c0726d01004c0f482aed8ef2bc71726ce4d327e4 Mon Sep 17 00:00:00 2001
+From 783a2c65af5ba9746c9aa98116fff07cbadb4b45 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 1 Mar 2020 22:52:35 +0800
-Subject: [PATCH 052/117] crypto: x86/curve25519 - support assemblers with no
+Subject: [PATCH 052/115] crypto: x86/curve25519 - support assemblers with no
  adx support
 
 commit 1579f1bc3b753d17a44de3457d5c6f4a5b14c752 upstream.
@@ -44003,7 +44003,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 13 insertions(+), 5 deletions(-)
 
 diff --git a/arch/x86/Makefile b/arch/x86/Makefile
-index 94df0868804b..513a55562d75 100644
+index 94df0868804bc..513a55562d750 100644
 --- a/arch/x86/Makefile
 +++ b/arch/x86/Makefile
 @@ -194,9 +194,10 @@ avx2_instr :=$(call as-instr,vpbroadcastb %xmm0$(comma)%ymm1,-DCONFIG_AS_AVX2=1)
@@ -44020,7 +44020,7 @@ index 94df0868804b..513a55562d75 100644
  KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
  
 diff --git a/arch/x86/crypto/Makefile b/arch/x86/crypto/Makefile
-index b69e00bf20b8..8c2e9eadee8a 100644
+index b69e00bf20b82..8c2e9eadee8a0 100644
 --- a/arch/x86/crypto/Makefile
 +++ b/arch/x86/crypto/Makefile
 @@ -11,6 +11,7 @@ avx2_supported := $(call as-instr,vpgatherdd %ymm0$(comma)(%eax$(comma)%ymm1\
@@ -44045,7 +44045,7 @@ index b69e00bf20b8..8c2e9eadee8a 100644
  # These modules require assembler to support AVX.
  ifeq ($(avx_supported),yes)
 diff --git a/include/crypto/curve25519.h b/include/crypto/curve25519.h
-index 4e6dc840b159..9ecb3c1f0f15 100644
+index 4e6dc840b1592..9ecb3c1f0f15d 100644
 --- a/include/crypto/curve25519.h
 +++ b/include/crypto/curve25519.h
 @@ -33,7 +33,8 @@ bool __must_check curve25519(u8 mypublic[CURVE25519_KEY_SIZE],
@@ -44072,10 +44072,10 @@ index 4e6dc840b159..9ecb3c1f0f15 100644
 2.18.4
 
 
-From 589bee17e20a2ad4b8b20955ee9c970e4a377a2a Mon Sep 17 00:00:00 2001
+From 445cdda06d2d6cf0aeb6ff3c96c18d1970bbb622 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 18 Mar 2020 20:27:32 -0600
-Subject: [PATCH 053/117] crypto: arm64/chacha - correctly walk through blocks
+Subject: [PATCH 053/115] crypto: arm64/chacha - correctly walk through blocks
 
 commit c8cfcb78c65877313cda7bcbace624d3dbd1f3b3 upstream.
 
@@ -44103,7 +44103,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 12 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index 71c11d2e9fcd..218943612261 100644
+index 71c11d2e9fcda..2189436122617 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -55,10 +55,10 @@ static void chacha_doneon(u32 *state, u8 *dst, const u8 *src,
@@ -44122,7 +44122,7 @@ index 71c11d2e9fcd..218943612261 100644
  }
  
 diff --git a/lib/crypto/chacha20poly1305-selftest.c b/lib/crypto/chacha20poly1305-selftest.c
-index c391a91364e9..fa43deda2660 100644
+index c391a91364e9d..fa43deda2660d 100644
 --- a/lib/crypto/chacha20poly1305-selftest.c
 +++ b/lib/crypto/chacha20poly1305-selftest.c
 @@ -9028,10 +9028,15 @@ bool __init chacha20poly1305_selftest(void)
@@ -44148,10 +44148,10 @@ index c391a91364e9..fa43deda2660 100644
 2.18.4
 
 
-From d9083adec8a8c5f981dcb02daf8eac99d682946b Mon Sep 17 00:00:00 2001
+From 79a9b936012f72abf2e10ba16fc449f2a0905eef Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 20 Jan 2020 18:18:15 +0100
-Subject: [PATCH 054/117] crypto: x86/curve25519 - replace with formally
+Subject: [PATCH 054/115] crypto: x86/curve25519 - replace with formally
  verified implementation
 
 commit 07b586fe06625b0b610dc3d3a969c51913d143d4 upstream.
@@ -44231,7 +44231,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1292 insertions(+), 2254 deletions(-)
 
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
-index eec7d2d24239..e4e58b8e9afe 100644
+index eec7d2d242396..e4e58b8e9afe4 100644
 --- a/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -1,8 +1,7 @@
@@ -47905,10 +47905,10 @@ index eec7d2d24239..e4e58b8e9afe 100644
 2.18.4
 
 
-From 6eef3f525ec5236732d20e8a1177fd8cf8cb25bb Mon Sep 17 00:00:00 2001
+From 816354525a1157f6243e1e992dffa6bed19db5d5 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 1 Mar 2020 16:06:56 +0800
-Subject: [PATCH 055/117] crypto: x86/curve25519 - leave r12 as spare register
+Subject: [PATCH 055/115] crypto: x86/curve25519 - leave r12 as spare register
 
 commit dc7fc3a53ae158263196b1892b672aedf67796c5 upstream.
 
@@ -47924,7 +47924,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 55 insertions(+), 55 deletions(-)
 
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
-index e4e58b8e9afe..8a17621f7d3a 100644
+index e4e58b8e9afe4..8a17621f7d3a3 100644
 --- a/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -167,28 +167,28 @@ static inline void fmul(u64 *out, const u64 *f1, const u64 *f2, u64 *tmp)
@@ -48287,10 +48287,10 @@ index e4e58b8e9afe..8a17621f7d3a 100644
 2.18.4
 
 
-From e43146bf39f9bf1210d49fe6aefc4937f88b8a62 Mon Sep 17 00:00:00 2001
+From 37c87cbf1de4258cadb0417f95c8e37eda4c06ac Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 19 Mar 2020 11:56:17 -0600
-Subject: [PATCH 056/117] crypto: arm[64]/poly1305 - add artifact to .gitignore
+Subject: [PATCH 056/115] crypto: arm[64]/poly1305 - add artifact to .gitignore
  files
 
 commit 6e4e00d8b68ca7eb30d08afb740033e0d36abe55 upstream.
@@ -48311,7 +48311,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 2 insertions(+)
 
 diff --git a/arch/arm/crypto/.gitignore b/arch/arm/crypto/.gitignore
-index 31e1f538df7d..a3c7ad52a469 100644
+index 31e1f538df7de..a3c7ad52a469f 100644
 --- a/arch/arm/crypto/.gitignore
 +++ b/arch/arm/crypto/.gitignore
 @@ -1,3 +1,4 @@
@@ -48320,7 +48320,7 @@ index 31e1f538df7d..a3c7ad52a469 100644
  sha512-core.S
 +poly1305-core.S
 diff --git a/arch/arm64/crypto/.gitignore b/arch/arm64/crypto/.gitignore
-index 879df8781ed5..e403b1343328 100644
+index 879df8781ed56..e403b1343328d 100644
 --- a/arch/arm64/crypto/.gitignore
 +++ b/arch/arm64/crypto/.gitignore
 @@ -1,2 +1,3 @@
@@ -48331,10 +48331,10 @@ index 879df8781ed5..e403b1343328 100644
 2.18.4
 
 
-From 0d3456f5b8bf4246e5f9ec45f688a6f6586a38dd Mon Sep 17 00:00:00 2001
+From 47b920bf9d66a9e52905251430a3612c43fe16d5 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 23 Apr 2020 15:54:04 -0600
-Subject: [PATCH 057/117] crypto: arch/lib - limit simd usage to 4k chunks
+Subject: [PATCH 057/115] crypto: arch/lib - limit simd usage to 4k chunks
 
 commit 706024a52c614b478b63f7728d202532ce6591a9 upstream.
 
@@ -48380,7 +48380,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  7 files changed, 65 insertions(+), 30 deletions(-)
 
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
-index 893692ed12b7..cd131b454c2e 100644
+index 893692ed12b76..cd131b454c2ee 100644
 --- a/arch/arm/crypto/chacha-glue.c
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -91,9 +91,17 @@ void chacha_crypt_arch(u32 *state, u8 *dst, const u8 *src, unsigned int bytes,
@@ -48405,7 +48405,7 @@ index 893692ed12b7..cd131b454c2e 100644
  EXPORT_SYMBOL(chacha_crypt_arch);
  
 diff --git a/arch/arm/crypto/poly1305-glue.c b/arch/arm/crypto/poly1305-glue.c
-index ceec04ec2f40..13cfef4ae22e 100644
+index ceec04ec2f405..13cfef4ae22e3 100644
 --- a/arch/arm/crypto/poly1305-glue.c
 +++ b/arch/arm/crypto/poly1305-glue.c
 @@ -160,13 +160,20 @@ void poly1305_update_arch(struct poly1305_desc_ctx *dctx, const u8 *src,
@@ -48434,7 +48434,7 @@ index ceec04ec2f40..13cfef4ae22e 100644
  	}
  
 diff --git a/arch/arm64/crypto/chacha-neon-glue.c b/arch/arm64/crypto/chacha-neon-glue.c
-index 218943612261..1d9824c4ae43 100644
+index 2189436122617..1d9824c4ae43b 100644
 --- a/arch/arm64/crypto/chacha-neon-glue.c
 +++ b/arch/arm64/crypto/chacha-neon-glue.c
 @@ -87,9 +87,17 @@ void chacha_crypt_arch(u32 *state, u8 *dst, const u8 *src, unsigned int bytes,
@@ -48459,7 +48459,7 @@ index 218943612261..1d9824c4ae43 100644
  EXPORT_SYMBOL(chacha_crypt_arch);
  
 diff --git a/arch/arm64/crypto/poly1305-glue.c b/arch/arm64/crypto/poly1305-glue.c
-index e97b092f56b8..f33ada70c4ed 100644
+index e97b092f56b8f..f33ada70c4ed8 100644
 --- a/arch/arm64/crypto/poly1305-glue.c
 +++ b/arch/arm64/crypto/poly1305-glue.c
 @@ -143,13 +143,20 @@ void poly1305_update_arch(struct poly1305_desc_ctx *dctx, const u8 *src,
@@ -48488,7 +48488,7 @@ index e97b092f56b8..f33ada70c4ed 100644
  	}
  
 diff --git a/arch/x86/crypto/blake2s-glue.c b/arch/x86/crypto/blake2s-glue.c
-index 1d9ff8a45e1f..94ac5bdd9f6f 100644
+index 1d9ff8a45e1fd..94ac5bdd9f6f2 100644
 --- a/arch/x86/crypto/blake2s-glue.c
 +++ b/arch/x86/crypto/blake2s-glue.c
 @@ -32,16 +32,16 @@ void blake2s_compress_arch(struct blake2s_state *state,
@@ -48524,7 +48524,7 @@ index 1d9ff8a45e1f..94ac5bdd9f6f 100644
  EXPORT_SYMBOL(blake2s_compress_arch);
  
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index 1bebe11b9ec9..f3bfce21bc0d 100644
+index 1bebe11b9ec95..f3bfce21bc0d4 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -154,9 +154,17 @@ void chacha_crypt_arch(u32 *state, u8 *dst, const u8 *src, unsigned int bytes,
@@ -48549,7 +48549,7 @@ index 1bebe11b9ec9..f3bfce21bc0d 100644
  EXPORT_SYMBOL(chacha_crypt_arch);
  
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 79bb58737d52..61b2bc8b6986 100644
+index 79bb58737d528..61b2bc8b69861 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -91,8 +91,8 @@ static void poly1305_simd_blocks(void *ctx, const u8 *inp, size_t len,
@@ -48592,10 +48592,10 @@ index 79bb58737d52..61b2bc8b6986 100644
 2.18.4
 
 
-From 7b7550e61d7662fe40c6a31e0c9a131e21c2b518 Mon Sep 17 00:00:00 2001
+From 487339cfa7eef7b7be65777ac82ba738108d4288 Mon Sep 17 00:00:00 2001
 From: Herbert Xu <herbert@gondor.apana.org.au>
 Date: Wed, 8 Jul 2020 12:41:13 +1000
-Subject: [PATCH 058/117] crypto: lib/chacha20poly1305 - Add missing function
+Subject: [PATCH 058/115] crypto: lib/chacha20poly1305 - Add missing function
  declaration
 
 commit 06cc2afbbdf9a9e8df3e2f8db724997dd6e1b4ac upstream.
@@ -48611,7 +48611,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/include/crypto/chacha20poly1305.h b/include/crypto/chacha20poly1305.h
-index 234ee28078ef..d2ac3ff7dc1e 100644
+index 234ee28078efd..d2ac3ff7dc1ec 100644
 --- a/include/crypto/chacha20poly1305.h
 +++ b/include/crypto/chacha20poly1305.h
 @@ -45,4 +45,6 @@ bool chacha20poly1305_decrypt_sg_inplace(struct scatterlist *src, size_t src_len
@@ -48622,7 +48622,7 @@ index 234ee28078ef..d2ac3ff7dc1e 100644
 +
  #endif /* __CHACHA20POLY1305_H */
 diff --git a/lib/crypto/chacha20poly1305.c b/lib/crypto/chacha20poly1305.c
-index ad0699ce702f..431e04280332 100644
+index ad0699ce702f9..431e042803327 100644
 --- a/lib/crypto/chacha20poly1305.c
 +++ b/lib/crypto/chacha20poly1305.c
 @@ -21,8 +21,6 @@
@@ -48638,10 +48638,10 @@ index ad0699ce702f..431e04280332 100644
 2.18.4
 
 
-From 46032c60e3eaf64fe98fac85e658c15137140ab1 Mon Sep 17 00:00:00 2001
+From c331c0664a83c27565d6fa1b6d8d9f40f6ff5d7f Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Wed, 8 Jul 2020 12:11:18 +0300
-Subject: [PATCH 059/117] crypto: x86/chacha-sse3 - use unaligned loads for
+Subject: [PATCH 059/115] crypto: x86/chacha-sse3 - use unaligned loads for
  state array
 
 commit e79a31715193686e92dadb4caedfbb1f5de3659c upstream.
@@ -48672,7 +48672,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 10 insertions(+), 27 deletions(-)
 
 diff --git a/arch/x86/crypto/chacha-ssse3-x86_64.S b/arch/x86/crypto/chacha-ssse3-x86_64.S
-index 2d86c7d6dc88..a556a57f1a4a 100644
+index 2d86c7d6dc88c..a556a57f1a4af 100644
 --- a/arch/x86/crypto/chacha-ssse3-x86_64.S
 +++ b/arch/x86/crypto/chacha-ssse3-x86_64.S
 @@ -120,10 +120,10 @@ ENTRY(chacha_block_xor_ssse3)
@@ -48706,7 +48706,7 @@ index 2d86c7d6dc88..a556a57f1a4a 100644
  	mov		%edx,%r8d
  	call		chacha_permute
 diff --git a/arch/x86/crypto/chacha_glue.c b/arch/x86/crypto/chacha_glue.c
-index f3bfce21bc0d..4c4dc64398cb 100644
+index f3bfce21bc0d4..4c4dc64398cbb 100644
 --- a/arch/x86/crypto/chacha_glue.c
 +++ b/arch/x86/crypto/chacha_glue.c
 @@ -14,8 +14,6 @@
@@ -48777,7 +48777,7 @@ index f3bfce21bc0d..4c4dc64398cb 100644
  
  	if (req->cryptlen > CHACHA_BLOCK_SIZE && crypto_simd_usable()) {
 diff --git a/include/crypto/chacha.h b/include/crypto/chacha.h
-index 2676f4fbd4c1..3a1c72fdb7cf 100644
+index 2676f4fbd4c16..3a1c72fdb7cf5 100644
 --- a/include/crypto/chacha.h
 +++ b/include/crypto/chacha.h
 @@ -25,11 +25,7 @@
@@ -48796,10 +48796,10 @@ index 2676f4fbd4c1..3a1c72fdb7cf 100644
 2.18.4
 
 
-From d187d34e30b2e271c8f1df2d4b3f64c931d970d2 Mon Sep 17 00:00:00 2001
+From 57637608dd8f1939dac22e52e325bbf2f12a7c47 Mon Sep 17 00:00:00 2001
 From: Herbert Xu <herbert@gondor.apana.org.au>
 Date: Thu, 23 Jul 2020 17:50:48 +1000
-Subject: [PATCH 060/117] crypto: x86/curve25519 - Remove unused carry
+Subject: [PATCH 060/115] crypto: x86/curve25519 - Remove unused carry
  variables
 
 commit 054a5540fb8f7268e2c79e9deab4242db15c8cba upstream.
@@ -48817,7 +48817,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
-index 8a17621f7d3a..8acbb6584a37 100644
+index 8a17621f7d3a3..8acbb6584a370 100644
 --- a/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -948,10 +948,8 @@ static void store_felem(u64 *b, u64 *f)
@@ -48849,10 +48849,10 @@ index 8a17621f7d3a..8acbb6584a37 100644
 2.18.4
 
 
-From 4b4f358b85ee2326462429c7769133396f3aac3b Mon Sep 17 00:00:00 2001
+From 3b768a37972cfa1441f0a4a4018e068f814bdaae Mon Sep 17 00:00:00 2001
 From: Fabio Estevam <festevam@gmail.com>
 Date: Mon, 24 Aug 2020 11:09:53 -0300
-Subject: [PATCH 061/117] crypto: arm/curve25519 - include
+Subject: [PATCH 061/115] crypto: arm/curve25519 - include
  <linux/scatterlist.h>
 
 commit 6779d0e6b0fe193ab3010ea201782ca6f75a3862 upstream.
@@ -48877,7 +48877,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/crypto/curve25519-glue.c b/arch/arm/crypto/curve25519-glue.c
-index 776ae07e0469..31eb75b6002f 100644
+index 776ae07e04697..31eb75b6002fb 100644
 --- a/arch/arm/crypto/curve25519-glue.c
 +++ b/arch/arm/crypto/curve25519-glue.c
 @@ -16,6 +16,7 @@
@@ -48892,10 +48892,10 @@ index 776ae07e0469..31eb75b6002f 100644
 2.18.4
 
 
-From e1ef395778860e98d3a5bb72cb9752e4708edf4a Mon Sep 17 00:00:00 2001
+From 0d2293356e77e411eb0018c97876730ca3230be8 Mon Sep 17 00:00:00 2001
 From: Herbert Xu <herbert@gondor.apana.org.au>
 Date: Tue, 25 Aug 2020 11:23:00 +1000
-Subject: [PATCH 062/117] crypto: arm/poly1305 - Add prototype for
+Subject: [PATCH 062/115] crypto: arm/poly1305 - Add prototype for
  poly1305_blocks_neon
 
 commit 51982ea02aef972132eb35c583d3e4c5b83166e5 upstream.
@@ -48917,7 +48917,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/crypto/poly1305-glue.c b/arch/arm/crypto/poly1305-glue.c
-index 13cfef4ae22e..3023c1acfa19 100644
+index 13cfef4ae22e3..3023c1acfa194 100644
 --- a/arch/arm/crypto/poly1305-glue.c
 +++ b/arch/arm/crypto/poly1305-glue.c
 @@ -20,6 +20,7 @@
@@ -48932,10 +48932,10 @@ index 13cfef4ae22e..3023c1acfa19 100644
 2.18.4
 
 
-From 9cae67a1eae75350c36e399f47b9a73d9d3633fe Mon Sep 17 00:00:00 2001
+From 7c4160370b416193dafaee369d8225f212217c6c Mon Sep 17 00:00:00 2001
 From: Uros Bizjak <ubizjak@gmail.com>
 Date: Thu, 27 Aug 2020 19:30:58 +0200
-Subject: [PATCH 063/117] crypto: curve25519-x86_64 - Use XORL r32,32
+Subject: [PATCH 063/115] crypto: curve25519-x86_64 - Use XORL r32,32
 
 commit db719539fd3889836900bf912755aa30a5985e9a upstream.
 
@@ -48954,7 +48954,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 34 insertions(+), 34 deletions(-)
 
 diff --git a/arch/x86/crypto/curve25519-x86_64.c b/arch/x86/crypto/curve25519-x86_64.c
-index 8acbb6584a37..a9edb6f8a0ba 100644
+index 8acbb6584a370..a9edb6f8a0ba6 100644
 --- a/arch/x86/crypto/curve25519-x86_64.c
 +++ b/arch/x86/crypto/curve25519-x86_64.c
 @@ -45,11 +45,11 @@ static inline u64 add_scalar(u64 *out, const u64 *f1, u64 f2)
@@ -49199,10 +49199,10 @@ index 8acbb6584a37..a9edb6f8a0ba 100644
 2.18.4
 
 
-From 6f0e39358e26838078348467159fe1c87ba52761 Mon Sep 17 00:00:00 2001
+From 3683d0494205583fd48a4e1e66b1171c50e1ce4d Mon Sep 17 00:00:00 2001
 From: Uros Bizjak <ubizjak@gmail.com>
 Date: Thu, 27 Aug 2020 19:38:31 +0200
-Subject: [PATCH 064/117] crypto: poly1305-x86_64 - Use XORL r32,32
+Subject: [PATCH 064/115] crypto: poly1305-x86_64 - Use XORL r32,32
 
 commit 7dfd1e01b3dfc13431b1b25720cf2692a7e111ef upstream.
 
@@ -49221,7 +49221,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305-x86_64-cryptogams.pl b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
-index 80061bea6b16..5b593990501d 100644
+index 80061bea6b16a..5b593990501d3 100644
 --- a/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 +++ b/arch/x86/crypto/poly1305-x86_64-cryptogams.pl
 @@ -246,7 +246,7 @@ $code.=<<___ if (!$kernel);
@@ -49264,10 +49264,10 @@ index 80061bea6b16..5b593990501d 100644
 2.18.4
 
 
-From 2482cf2431216e859c36dcd145d2c6bbcef81062 Mon Sep 17 00:00:00 2001
+From d178f243b50c4d96ca2e837e24fc6a4eae120f06 Mon Sep 17 00:00:00 2001
 From: Herbert Xu <herbert@gondor.apana.org.au>
 Date: Thu, 24 Sep 2020 13:29:04 +1000
-Subject: [PATCH 065/117] crypto: x86/poly1305 - Remove assignments with no
+Subject: [PATCH 065/115] crypto: x86/poly1305 - Remove assignments with no
  effect
 
 commit 4a0c1de64bf9d9027a6f19adfba89fc27893db23 upstream.
@@ -49283,7 +49283,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 3 deletions(-)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 61b2bc8b6986..7de5046fe583 100644
+index 61b2bc8b69861..7de5046fe5832 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -157,9 +157,6 @@ static unsigned int crypto_poly1305_setdctxkey(struct poly1305_desc_ctx *dctx,
@@ -49300,10 +49300,10 @@ index 61b2bc8b6986..7de5046fe583 100644
 2.18.4
 
 
-From 4e551d7df6818bbe788c01da7d2c6a3af0c2f5c5 Mon Sep 17 00:00:00 2001
+From 03b3e2d25b02791303c5025c620b8a9c04f2fe8b Mon Sep 17 00:00:00 2001
 From: Eric Biggers <ebiggers@google.com>
 Date: Fri, 23 Oct 2020 15:27:48 -0700
-Subject: [PATCH 066/117] crypto: x86/poly1305 - add back a needed assignment
+Subject: [PATCH 066/115] crypto: x86/poly1305 - add back a needed assignment
 
 commit c3a98c3ad5c0dc60a1ac66bf91147a3f39cac96b upstream.
 
@@ -49324,7 +49324,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/x86/crypto/poly1305_glue.c b/arch/x86/crypto/poly1305_glue.c
-index 7de5046fe583..b69e362730d0 100644
+index 7de5046fe5832..b69e362730d02 100644
 --- a/arch/x86/crypto/poly1305_glue.c
 +++ b/arch/x86/crypto/poly1305_glue.c
 @@ -157,6 +157,7 @@ static unsigned int crypto_poly1305_setdctxkey(struct poly1305_desc_ctx *dctx,
@@ -49339,10 +49339,10 @@ index 7de5046fe583..b69e362730d0 100644
 2.18.4
 
 
-From 6a36f18ecb9d1454314a5d8860f82906ca3e5188 Mon Sep 17 00:00:00 2001
+From 527d549345d69bce58e7664d454cb65588a257f3 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 2 Nov 2020 14:48:15 +0100
-Subject: [PATCH 067/117] crypto: Kconfig - CRYPTO_MANAGER_EXTRA_TESTS requires
+Subject: [PATCH 067/115] crypto: Kconfig - CRYPTO_MANAGER_EXTRA_TESTS requires
  the manager
 
 commit 6569e3097f1c4a490bdf2b23d326855e04942dfd upstream.
@@ -49362,7 +49362,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/crypto/Kconfig b/crypto/Kconfig
-index 8fcf630471dc..fd5a8724ed38 100644
+index 8fcf630471dcf..fd5a8724ed385 100644
 --- a/crypto/Kconfig
 +++ b/crypto/Kconfig
 @@ -145,7 +145,7 @@ config CRYPTO_MANAGER_DISABLE_TESTS
@@ -49378,10 +49378,10 @@ index 8fcf630471dc..fd5a8724ed38 100644
 2.18.4
 
 
-From d847e1ea725d22908f4e1e8b723205939d3a947a Mon Sep 17 00:00:00 2001
+From ace7208e3bb70742cd2717770424234424cabf93 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Tue, 3 Nov 2020 17:28:09 +0100
-Subject: [PATCH 068/117] crypto: arm/chacha-neon - optimize for non-block size
+Subject: [PATCH 068/115] crypto: arm/chacha-neon - optimize for non-block size
  multiples
 
 commit 86cd97ec4b943af35562a74688bc4e909b32c3d1 upstream.
@@ -49424,7 +49424,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 107 insertions(+), 24 deletions(-)
 
 diff --git a/arch/arm/crypto/chacha-glue.c b/arch/arm/crypto/chacha-glue.c
-index cd131b454c2e..f603184dc0f5 100644
+index cd131b454c2ee..f603184dc0f58 100644
 --- a/arch/arm/crypto/chacha-glue.c
 +++ b/arch/arm/crypto/chacha-glue.c
 @@ -23,7 +23,7 @@
@@ -49478,7 +49478,7 @@ index cd131b454c2e..f603184dc0f5 100644
  }
  
 diff --git a/arch/arm/crypto/chacha-neon-core.S b/arch/arm/crypto/chacha-neon-core.S
-index eb22926d4912..13d12f672656 100644
+index eb22926d49127..13d12f672656b 100644
 --- a/arch/arm/crypto/chacha-neon-core.S
 +++ b/arch/arm/crypto/chacha-neon-core.S
 @@ -47,6 +47,7 @@
@@ -49658,10 +49658,10 @@ index eb22926d4912..13d12f672656 100644
 2.18.4
 
 
-From c5520fdf42a2d4f06ae977e2f6da1216b73a180a Mon Sep 17 00:00:00 2001
+From c3c512ae16575c9a768cbe0c678812cea27cacc0 Mon Sep 17 00:00:00 2001
 From: Ard Biesheuvel <ardb@kernel.org>
 Date: Fri, 6 Nov 2020 17:39:38 +0100
-Subject: [PATCH 069/117] crypto: arm64/chacha - simplify tail block handling
+Subject: [PATCH 069/115] crypto: arm64/chacha - simplify tail block handling
 
 commit c4fc6328d6c67690a7e6e03f43a5a976a13120ef upstream.
 
@@ -49691,7 +49691,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 69 insertions(+), 124 deletions(-)
 
 diff --git a/arch/arm64/crypto/chacha-neon-core.S b/arch/arm64/crypto/chacha-neon-core.S
-index 706c4e10e9e2..50d9dd173be7 100644
+index 706c4e10e9e29..50d9dd173be79 100644
 --- a/arch/arm64/crypto/chacha-neon-core.S
 +++ b/arch/arm64/crypto/chacha-neon-core.S
 @@ -195,7 +195,6 @@ ENTRY(chacha_4block_xor_neon)
@@ -49988,10 +49988,10 @@ index 706c4e10e9e2..50d9dd173be7 100644
 2.18.4
 
 
-From c896750facb1b60386a2db00930d4f493bf3f9f3 Mon Sep 17 00:00:00 2001
+From d08426b3c0fc045f9794e7e3f2adb1d909dbd165 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 11 Feb 2020 20:47:05 +0100
-Subject: [PATCH 070/117] icmp: introduce helper for nat'd source address in
+Subject: [PATCH 070/115] icmp: introduce helper for nat'd source address in
  network device context
 
 commit 0b41713b606694257b90d61ba7e2712d8457648b upstream.
@@ -50014,7 +50014,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  4 files changed, 83 insertions(+)
 
 diff --git a/include/linux/icmpv6.h b/include/linux/icmpv6.h
-index a8f888976137..024b7a4cd98e 100644
+index a8f8889761378..024b7a4cd98e2 100644
 --- a/include/linux/icmpv6.h
 +++ b/include/linux/icmpv6.h
 @@ -22,12 +22,22 @@ extern int inet6_unregister_icmp_sender(ip6_icmp_send_t *fn);
@@ -50041,7 +50041,7 @@ index a8f888976137..024b7a4cd98e 100644
  #endif
  
 diff --git a/include/net/icmp.h b/include/net/icmp.h
-index 5d4bfdba9adf..9ac2d2672a93 100644
+index 5d4bfdba9adf0..9ac2d2672a938 100644
 --- a/include/net/icmp.h
 +++ b/include/net/icmp.h
 @@ -43,6 +43,12 @@ static inline void icmp_send(struct sk_buff *skb_in, int type, int code, __be32
@@ -50058,7 +50058,7 @@ index 5d4bfdba9adf..9ac2d2672a93 100644
  int icmp_err(struct sk_buff *skb, u32 info);
  int icmp_init(void);
 diff --git a/net/ipv4/icmp.c b/net/ipv4/icmp.c
-index d00533aea1f0..5b7717da168d 100644
+index d00533aea1f05..5b7717da168db 100644
 --- a/net/ipv4/icmp.c
 +++ b/net/ipv4/icmp.c
 @@ -750,6 +750,39 @@ out:;
@@ -50102,7 +50102,7 @@ index d00533aea1f0..5b7717da168d 100644
  static void icmp_socket_deliver(struct sk_buff *skb, u32 info)
  {
 diff --git a/net/ipv6/ip6_icmp.c b/net/ipv6/ip6_icmp.c
-index 02045494c24c..e0086758b6ee 100644
+index 02045494c24cc..e0086758b6ee3 100644
 --- a/net/ipv6/ip6_icmp.c
 +++ b/net/ipv6/ip6_icmp.c
 @@ -45,4 +45,38 @@ void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info)
@@ -50148,10 +50148,10 @@ index 02045494c24c..e0086758b6ee 100644
 2.18.4
 
 
-From d3f3014bf616f4cfadddad719c5fed79c3995612 Mon Sep 17 00:00:00 2001
+From 39f2f7f90703df3f272dd8d2bd88fbe1542eb512 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 9 Dec 2019 00:27:34 +0100
-Subject: [PATCH 071/117] net: WireGuard secure network tunnel
+Subject: [PATCH 071/115] net: WireGuard secure network tunnel
 
 commit e7096c131e5161fa3b8e52a650d7719d2857adfd upstream.
 
@@ -50340,7 +50340,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  create mode 100755 tools/testing/selftests/wireguard/netns.sh
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 1407008df749..2395dfb37d1a 100644
+index 1407008df7491..2395dfb37d1ac 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -17584,6 +17584,14 @@ L:	linux-gpio@vger.kernel.org
@@ -50359,7 +50359,7 @@ index 1407008df749..2395dfb37d1a 100644
  M:	Miloslav Trmac <mitr@volny.cz>
  S:	Maintained
 diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
-index df3cd2589bcf..16ad145e22c9 100644
+index df3cd2589bcfe..16ad145e22c91 100644
 --- a/drivers/net/Kconfig
 +++ b/drivers/net/Kconfig
 @@ -71,6 +71,47 @@ config DUMMY
@@ -50411,7 +50411,7 @@ index df3cd2589bcf..16ad145e22c9 100644
  	tristate "EQL (serial line load balancing) support"
  	---help---
 diff --git a/drivers/net/Makefile b/drivers/net/Makefile
-index 0d3ba056cda3..953b7c12f0b0 100644
+index 0d3ba056cda3c..953b7c12f0b0c 100644
 --- a/drivers/net/Makefile
 +++ b/drivers/net/Makefile
 @@ -10,6 +10,7 @@ obj-$(CONFIG_BONDING) += bonding/
@@ -50424,7 +50424,7 @@ index 0d3ba056cda3..953b7c12f0b0 100644
  obj-$(CONFIG_MACSEC) += macsec.o
 diff --git a/drivers/net/wireguard/Makefile b/drivers/net/wireguard/Makefile
 new file mode 100644
-index 000000000000..fc52b2cb500b
+index 0000000000000..fc52b2cb500b3
 --- /dev/null
 +++ b/drivers/net/wireguard/Makefile
 @@ -0,0 +1,18 @@
@@ -50448,7 +50448,7 @@ index 000000000000..fc52b2cb500b
 +obj-$(CONFIG_WIREGUARD) := wireguard.o
 diff --git a/drivers/net/wireguard/allowedips.c b/drivers/net/wireguard/allowedips.c
 new file mode 100644
-index 000000000000..72667d5399c3
+index 0000000000000..72667d5399c34
 --- /dev/null
 +++ b/drivers/net/wireguard/allowedips.c
 @@ -0,0 +1,381 @@
@@ -50835,7 +50835,7 @@ index 000000000000..72667d5399c3
 +#include "selftest/allowedips.c"
 diff --git a/drivers/net/wireguard/allowedips.h b/drivers/net/wireguard/allowedips.h
 new file mode 100644
-index 000000000000..e5c83cafcef4
+index 0000000000000..e5c83cafcef4c
 --- /dev/null
 +++ b/drivers/net/wireguard/allowedips.h
 @@ -0,0 +1,59 @@
@@ -50900,7 +50900,7 @@ index 000000000000..e5c83cafcef4
 +#endif /* _WG_ALLOWEDIPS_H */
 diff --git a/drivers/net/wireguard/cookie.c b/drivers/net/wireguard/cookie.c
 new file mode 100644
-index 000000000000..4956f0499c19
+index 0000000000000..4956f0499c198
 --- /dev/null
 +++ b/drivers/net/wireguard/cookie.c
 @@ -0,0 +1,236 @@
@@ -51142,7 +51142,7 @@ index 000000000000..4956f0499c19
 +}
 diff --git a/drivers/net/wireguard/cookie.h b/drivers/net/wireguard/cookie.h
 new file mode 100644
-index 000000000000..c4bd61ca03f2
+index 0000000000000..c4bd61ca03f24
 --- /dev/null
 +++ b/drivers/net/wireguard/cookie.h
 @@ -0,0 +1,59 @@
@@ -51207,7 +51207,7 @@ index 000000000000..c4bd61ca03f2
 +#endif /* _WG_COOKIE_H */
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
 new file mode 100644
-index 000000000000..16b19824b9ad
+index 0000000000000..16b19824b9ad0
 --- /dev/null
 +++ b/drivers/net/wireguard/device.c
 @@ -0,0 +1,458 @@
@@ -51671,7 +51671,7 @@ index 000000000000..16b19824b9ad
 +}
 diff --git a/drivers/net/wireguard/device.h b/drivers/net/wireguard/device.h
 new file mode 100644
-index 000000000000..c91f3051c5c7
+index 0000000000000..c91f3051c5c78
 --- /dev/null
 +++ b/drivers/net/wireguard/device.h
 @@ -0,0 +1,73 @@
@@ -51750,7 +51750,7 @@ index 000000000000..c91f3051c5c7
 +#endif /* _WG_DEVICE_H */
 diff --git a/drivers/net/wireguard/main.c b/drivers/net/wireguard/main.c
 new file mode 100644
-index 000000000000..10c0a40f6a9e
+index 0000000000000..10c0a40f6a9e5
 --- /dev/null
 +++ b/drivers/net/wireguard/main.c
 @@ -0,0 +1,64 @@
@@ -51820,7 +51820,7 @@ index 000000000000..10c0a40f6a9e
 +MODULE_ALIAS_GENL_FAMILY(WG_GENL_NAME);
 diff --git a/drivers/net/wireguard/messages.h b/drivers/net/wireguard/messages.h
 new file mode 100644
-index 000000000000..b8a7b9ce32ba
+index 0000000000000..b8a7b9ce32ba7
 --- /dev/null
 +++ b/drivers/net/wireguard/messages.h
 @@ -0,0 +1,128 @@
@@ -51954,7 +51954,7 @@ index 000000000000..b8a7b9ce32ba
 +#endif /* _WG_MESSAGES_H */
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
 new file mode 100644
-index 000000000000..0739a2cd1920
+index 0000000000000..0739a2cd19203
 --- /dev/null
 +++ b/drivers/net/wireguard/netlink.c
 @@ -0,0 +1,648 @@
@@ -52608,7 +52608,7 @@ index 000000000000..0739a2cd1920
 +}
 diff --git a/drivers/net/wireguard/netlink.h b/drivers/net/wireguard/netlink.h
 new file mode 100644
-index 000000000000..15100d92e2e3
+index 0000000000000..15100d92e2e32
 --- /dev/null
 +++ b/drivers/net/wireguard/netlink.h
 @@ -0,0 +1,12 @@
@@ -52626,7 +52626,7 @@ index 000000000000..15100d92e2e3
 +#endif /* _WG_NETLINK_H */
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
 new file mode 100644
-index 000000000000..d71c8db68a8c
+index 0000000000000..d71c8db68a8ce
 --- /dev/null
 +++ b/drivers/net/wireguard/noise.c
 @@ -0,0 +1,828 @@
@@ -53460,7 +53460,7 @@ index 000000000000..d71c8db68a8c
 +}
 diff --git a/drivers/net/wireguard/noise.h b/drivers/net/wireguard/noise.h
 new file mode 100644
-index 000000000000..138a07bb817c
+index 0000000000000..138a07bb817ce
 --- /dev/null
 +++ b/drivers/net/wireguard/noise.h
 @@ -0,0 +1,137 @@
@@ -53603,7 +53603,7 @@ index 000000000000..138a07bb817c
 +#endif /* _WG_NOISE_H */
 diff --git a/drivers/net/wireguard/peer.c b/drivers/net/wireguard/peer.c
 new file mode 100644
-index 000000000000..071eedf33f5a
+index 0000000000000..071eedf33f5aa
 --- /dev/null
 +++ b/drivers/net/wireguard/peer.c
 @@ -0,0 +1,240 @@
@@ -53849,7 +53849,7 @@ index 000000000000..071eedf33f5a
 +}
 diff --git a/drivers/net/wireguard/peer.h b/drivers/net/wireguard/peer.h
 new file mode 100644
-index 000000000000..23af40922997
+index 0000000000000..23af409229972
 --- /dev/null
 +++ b/drivers/net/wireguard/peer.h
 @@ -0,0 +1,83 @@
@@ -53938,7 +53938,7 @@ index 000000000000..23af40922997
 +#endif /* _WG_PEER_H */
 diff --git a/drivers/net/wireguard/peerlookup.c b/drivers/net/wireguard/peerlookup.c
 new file mode 100644
-index 000000000000..e4deb331476b
+index 0000000000000..e4deb331476b3
 --- /dev/null
 +++ b/drivers/net/wireguard/peerlookup.c
 @@ -0,0 +1,221 @@
@@ -54165,7 +54165,7 @@ index 000000000000..e4deb331476b
 +}
 diff --git a/drivers/net/wireguard/peerlookup.h b/drivers/net/wireguard/peerlookup.h
 new file mode 100644
-index 000000000000..ced811797680
+index 0000000000000..ced8117976800
 --- /dev/null
 +++ b/drivers/net/wireguard/peerlookup.h
 @@ -0,0 +1,64 @@
@@ -54235,7 +54235,7 @@ index 000000000000..ced811797680
 +#endif /* _WG_PEERLOOKUP_H */
 diff --git a/drivers/net/wireguard/queueing.c b/drivers/net/wireguard/queueing.c
 new file mode 100644
-index 000000000000..5c964fcb994e
+index 0000000000000..5c964fcb994ec
 --- /dev/null
 +++ b/drivers/net/wireguard/queueing.c
 @@ -0,0 +1,53 @@
@@ -54294,7 +54294,7 @@ index 000000000000..5c964fcb994e
 +}
 diff --git a/drivers/net/wireguard/queueing.h b/drivers/net/wireguard/queueing.h
 new file mode 100644
-index 000000000000..58fdd630b246
+index 0000000000000..58fdd630b246c
 --- /dev/null
 +++ b/drivers/net/wireguard/queueing.h
 @@ -0,0 +1,197 @@
@@ -54497,7 +54497,7 @@ index 000000000000..58fdd630b246
 +#endif /* _WG_QUEUEING_H */
 diff --git a/drivers/net/wireguard/ratelimiter.c b/drivers/net/wireguard/ratelimiter.c
 new file mode 100644
-index 000000000000..3fedd1d21f5e
+index 0000000000000..3fedd1d21f5ee
 --- /dev/null
 +++ b/drivers/net/wireguard/ratelimiter.c
 @@ -0,0 +1,223 @@
@@ -54726,7 +54726,7 @@ index 000000000000..3fedd1d21f5e
 +#include "selftest/ratelimiter.c"
 diff --git a/drivers/net/wireguard/ratelimiter.h b/drivers/net/wireguard/ratelimiter.h
 new file mode 100644
-index 000000000000..83067f71ea99
+index 0000000000000..83067f71ea99e
 --- /dev/null
 +++ b/drivers/net/wireguard/ratelimiter.h
 @@ -0,0 +1,19 @@
@@ -54751,7 +54751,7 @@ index 000000000000..83067f71ea99
 +#endif /* _WG_RATELIMITER_H */
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
 new file mode 100644
-index 000000000000..7e675f541491
+index 0000000000000..7e675f5414910
 --- /dev/null
 +++ b/drivers/net/wireguard/receive.c
 @@ -0,0 +1,595 @@
@@ -55352,7 +55352,7 @@ index 000000000000..7e675f541491
 +}
 diff --git a/drivers/net/wireguard/selftest/allowedips.c b/drivers/net/wireguard/selftest/allowedips.c
 new file mode 100644
-index 000000000000..846db14cb046
+index 0000000000000..846db14cb046b
 --- /dev/null
 +++ b/drivers/net/wireguard/selftest/allowedips.c
 @@ -0,0 +1,683 @@
@@ -56041,7 +56041,7 @@ index 000000000000..846db14cb046
 +#endif
 diff --git a/drivers/net/wireguard/selftest/counter.c b/drivers/net/wireguard/selftest/counter.c
 new file mode 100644
-index 000000000000..f4fbb9072ed7
+index 0000000000000..f4fbb9072ed73
 --- /dev/null
 +++ b/drivers/net/wireguard/selftest/counter.c
 @@ -0,0 +1,104 @@
@@ -56151,7 +56151,7 @@ index 000000000000..f4fbb9072ed7
 +#endif
 diff --git a/drivers/net/wireguard/selftest/ratelimiter.c b/drivers/net/wireguard/selftest/ratelimiter.c
 new file mode 100644
-index 000000000000..bcd6462e4540
+index 0000000000000..bcd6462e45401
 --- /dev/null
 +++ b/drivers/net/wireguard/selftest/ratelimiter.c
 @@ -0,0 +1,226 @@
@@ -56383,7 +56383,7 @@ index 000000000000..bcd6462e4540
 +#endif
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
 new file mode 100644
-index 000000000000..c13260563446
+index 0000000000000..c132605634460
 --- /dev/null
 +++ b/drivers/net/wireguard/send.c
 @@ -0,0 +1,413 @@
@@ -56802,7 +56802,7 @@ index 000000000000..c13260563446
 +}
 diff --git a/drivers/net/wireguard/socket.c b/drivers/net/wireguard/socket.c
 new file mode 100644
-index 000000000000..c46256d0d81c
+index 0000000000000..c46256d0d81c1
 --- /dev/null
 +++ b/drivers/net/wireguard/socket.c
 @@ -0,0 +1,437 @@
@@ -57245,7 +57245,7 @@ index 000000000000..c46256d0d81c
 +}
 diff --git a/drivers/net/wireguard/socket.h b/drivers/net/wireguard/socket.h
 new file mode 100644
-index 000000000000..bab5848efbcd
+index 0000000000000..bab5848efbcdf
 --- /dev/null
 +++ b/drivers/net/wireguard/socket.h
 @@ -0,0 +1,44 @@
@@ -57295,7 +57295,7 @@ index 000000000000..bab5848efbcd
 +#endif /* _WG_SOCKET_H */
 diff --git a/drivers/net/wireguard/timers.c b/drivers/net/wireguard/timers.c
 new file mode 100644
-index 000000000000..d54d32ac9bc4
+index 0000000000000..d54d32ac9bc41
 --- /dev/null
 +++ b/drivers/net/wireguard/timers.c
 @@ -0,0 +1,243 @@
@@ -57544,7 +57544,7 @@ index 000000000000..d54d32ac9bc4
 +}
 diff --git a/drivers/net/wireguard/timers.h b/drivers/net/wireguard/timers.h
 new file mode 100644
-index 000000000000..f0653dcb1326
+index 0000000000000..f0653dcb13266
 --- /dev/null
 +++ b/drivers/net/wireguard/timers.h
 @@ -0,0 +1,31 @@
@@ -57581,14 +57581,14 @@ index 000000000000..f0653dcb1326
 +#endif /* _WG_TIMERS_H */
 diff --git a/drivers/net/wireguard/version.h b/drivers/net/wireguard/version.h
 new file mode 100644
-index 000000000000..a1a269a11634
+index 0000000000000..a1a269a116344
 --- /dev/null
 +++ b/drivers/net/wireguard/version.h
 @@ -0,0 +1 @@
 +#define WIREGUARD_VERSION "1.0.0"
 diff --git a/include/uapi/linux/wireguard.h b/include/uapi/linux/wireguard.h
 new file mode 100644
-index 000000000000..dd8a47c4ad11
+index 0000000000000..dd8a47c4ad11f
 --- /dev/null
 +++ b/include/uapi/linux/wireguard.h
 @@ -0,0 +1,196 @@
@@ -57790,7 +57790,7 @@ index 000000000000..dd8a47c4ad11
 +#endif /* _WG_UAPI_WIREGUARD_H */
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
 new file mode 100755
-index 000000000000..e7310d9390f7
+index 0000000000000..e7310d9390f7e
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -0,0 +1,537 @@
@@ -58335,10 +58335,10 @@ index 000000000000..e7310d9390f7
 2.18.4
 
 
-From ff03dd85c86a85e0a5e0b66cf35d50aa8bdf9e10 Mon Sep 17 00:00:00 2001
+From b1a7d1d40af85d1e0376bfd6d731601c5e1c395a Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 15 Dec 2019 22:08:00 +0100
-Subject: [PATCH 072/117] wireguard: selftests: import harness makefile for
+Subject: [PATCH 072/115] wireguard: selftests: import harness makefile for
  test suite
 
 commit 65d88d04114bca7d85faebd5fed61069cb2b632c upstream.
@@ -58415,7 +58415,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 
 diff --git a/tools/testing/selftests/wireguard/qemu/.gitignore b/tools/testing/selftests/wireguard/qemu/.gitignore
 new file mode 100644
-index 000000000000..415b542a9d59
+index 0000000000000..415b542a9d599
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/.gitignore
 @@ -0,0 +1,2 @@
@@ -58423,7 +58423,7 @@ index 000000000000..415b542a9d59
 +distfiles/
 diff --git a/tools/testing/selftests/wireguard/qemu/Makefile b/tools/testing/selftests/wireguard/qemu/Makefile
 new file mode 100644
-index 000000000000..6d51bf78eeff
+index 0000000000000..6d51bf78eeff4
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/Makefile
 @@ -0,0 +1,385 @@
@@ -58814,7 +58814,7 @@ index 000000000000..6d51bf78eeff
 +.DELETE_ON_ERROR:
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/aarch64.config b/tools/testing/selftests/wireguard/qemu/arch/aarch64.config
 new file mode 100644
-index 000000000000..3d063bb247bb
+index 0000000000000..3d063bb247bbe
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/aarch64.config
 @@ -0,0 +1,5 @@
@@ -58825,7 +58825,7 @@ index 000000000000..3d063bb247bb
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/aarch64_be.config b/tools/testing/selftests/wireguard/qemu/arch/aarch64_be.config
 new file mode 100644
-index 000000000000..dbdc7e406a7b
+index 0000000000000..dbdc7e406a7ba
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/aarch64_be.config
 @@ -0,0 +1,6 @@
@@ -58837,7 +58837,7 @@ index 000000000000..dbdc7e406a7b
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/arm.config b/tools/testing/selftests/wireguard/qemu/arch/arm.config
 new file mode 100644
-index 000000000000..148f49905418
+index 0000000000000..148f499054182
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/arm.config
 @@ -0,0 +1,9 @@
@@ -58852,7 +58852,7 @@ index 000000000000..148f49905418
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/armeb.config b/tools/testing/selftests/wireguard/qemu/arch/armeb.config
 new file mode 100644
-index 000000000000..bd76b07d00a2
+index 0000000000000..bd76b07d00a2c
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/armeb.config
 @@ -0,0 +1,10 @@
@@ -58868,7 +58868,7 @@ index 000000000000..bd76b07d00a2
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/i686.config b/tools/testing/selftests/wireguard/qemu/arch/i686.config
 new file mode 100644
-index 000000000000..a85025d7206e
+index 0000000000000..a85025d7206ee
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/i686.config
 @@ -0,0 +1,5 @@
@@ -58879,7 +58879,7 @@ index 000000000000..a85025d7206e
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/m68k.config b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
 new file mode 100644
-index 000000000000..5381ea10896c
+index 0000000000000..5381ea10896c3
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
 @@ -0,0 +1,9 @@
@@ -58894,7 +58894,7 @@ index 000000000000..5381ea10896c
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/mips.config b/tools/testing/selftests/wireguard/qemu/arch/mips.config
 new file mode 100644
-index 000000000000..df71d6b95546
+index 0000000000000..df71d6b95546f
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips.config
 @@ -0,0 +1,11 @@
@@ -58911,7 +58911,7 @@ index 000000000000..df71d6b95546
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/mips64.config b/tools/testing/selftests/wireguard/qemu/arch/mips64.config
 new file mode 100644
-index 000000000000..90c783f725c4
+index 0000000000000..90c783f725c4d
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips64.config
 @@ -0,0 +1,14 @@
@@ -58931,7 +58931,7 @@ index 000000000000..90c783f725c4
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/mips64el.config b/tools/testing/selftests/wireguard/qemu/arch/mips64el.config
 new file mode 100644
-index 000000000000..435b0b43e00c
+index 0000000000000..435b0b43e00cb
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mips64el.config
 @@ -0,0 +1,15 @@
@@ -58952,7 +58952,7 @@ index 000000000000..435b0b43e00c
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/mipsel.config b/tools/testing/selftests/wireguard/qemu/arch/mipsel.config
 new file mode 100644
-index 000000000000..62bb50c4a85f
+index 0000000000000..62bb50c4a85fc
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/mipsel.config
 @@ -0,0 +1,12 @@
@@ -58970,7 +58970,7 @@ index 000000000000..62bb50c4a85f
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/powerpc.config b/tools/testing/selftests/wireguard/qemu/arch/powerpc.config
 new file mode 100644
-index 000000000000..57957093b71b
+index 0000000000000..57957093b71b8
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc.config
 @@ -0,0 +1,10 @@
@@ -58986,7 +58986,7 @@ index 000000000000..57957093b71b
 +CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
 new file mode 100644
-index 000000000000..990c510a9cfa
+index 0000000000000..990c510a9cfa5
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
 @@ -0,0 +1,12 @@
@@ -59004,7 +59004,7 @@ index 000000000000..990c510a9cfa
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/x86_64.config b/tools/testing/selftests/wireguard/qemu/arch/x86_64.config
 new file mode 100644
-index 000000000000..00a1ef4869d5
+index 0000000000000..00a1ef4869d58
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/arch/x86_64.config
 @@ -0,0 +1,5 @@
@@ -59015,7 +59015,7 @@ index 000000000000..00a1ef4869d5
 +CONFIG_FRAME_WARN=1280
 diff --git a/tools/testing/selftests/wireguard/qemu/debug.config b/tools/testing/selftests/wireguard/qemu/debug.config
 new file mode 100644
-index 000000000000..b9c72706fe4d
+index 0000000000000..b9c72706fe4db
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/debug.config
 @@ -0,0 +1,67 @@
@@ -59088,7 +59088,7 @@ index 000000000000..b9c72706fe4d
 +CONFIG_DEBUG_WW_MUTEX_SLOWPATH=y
 diff --git a/tools/testing/selftests/wireguard/qemu/init.c b/tools/testing/selftests/wireguard/qemu/init.c
 new file mode 100644
-index 000000000000..51e5ddedee88
+index 0000000000000..51e5ddedee886
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/init.c
 @@ -0,0 +1,284 @@
@@ -59378,7 +59378,7 @@ index 000000000000..51e5ddedee88
 +}
 diff --git a/tools/testing/selftests/wireguard/qemu/kernel.config b/tools/testing/selftests/wireguard/qemu/kernel.config
 new file mode 100644
-index 000000000000..9cca30206014
+index 0000000000000..9cca30206014d
 --- /dev/null
 +++ b/tools/testing/selftests/wireguard/qemu/kernel.config
 @@ -0,0 +1,86 @@
@@ -59472,10 +59472,10 @@ index 000000000000..9cca30206014
 2.18.4
 
 
-From 66ccca5752057dec27807224049365b2ffe9acc7 Mon Sep 17 00:00:00 2001
+From 8dc975a7427f7038811800fef712fd713aae7a61 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Sun, 15 Dec 2019 22:08:01 +0100
-Subject: [PATCH 073/117] wireguard: Kconfig: select parent dependency for
+Subject: [PATCH 073/115] wireguard: Kconfig: select parent dependency for
  crypto
 
 commit d7c68a38bb4f9b7c1a2e4a772872c752ee5c44a6 upstream.
@@ -59493,7 +59493,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
-index 16ad145e22c9..57f1ba924f4e 100644
+index 16ad145e22c91..57f1ba924f4ec 100644
 --- a/drivers/net/Kconfig
 +++ b/drivers/net/Kconfig
 @@ -85,6 +85,8 @@ config WIREGUARD
@@ -59509,10 +59509,10 @@ index 16ad145e22c9..57f1ba924f4e 100644
 2.18.4
 
 
-From c11e11e6b0e6a2397e799c3992181031ed3eae04 Mon Sep 17 00:00:00 2001
+From 585480d0587e45e1e266a071224e05ec33bfc115 Mon Sep 17 00:00:00 2001
 From: Josh Soref <jsoref@gmail.com>
 Date: Sun, 15 Dec 2019 22:08:02 +0100
-Subject: [PATCH 074/117] wireguard: global: fix spelling mistakes in comments
+Subject: [PATCH 074/115] wireguard: global: fix spelling mistakes in comments
 
 commit a2ec8b5706944d228181c8b91d815f41d6dd8e7b upstream.
 
@@ -59529,7 +59529,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 7e675f541491..9c6bab9c981f 100644
+index 7e675f5414910..9c6bab9c981f4 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -380,7 +380,7 @@ static void wg_packet_consume_data_done(struct wg_peer *peer,
@@ -59542,7 +59542,7 @@ index 7e675f541491..9c6bab9c981f 100644
  	 */
  	skb->ip_summed = CHECKSUM_UNNECESSARY;
 diff --git a/include/uapi/linux/wireguard.h b/include/uapi/linux/wireguard.h
-index dd8a47c4ad11..ae88be14c947 100644
+index dd8a47c4ad11f..ae88be14c9478 100644
 --- a/include/uapi/linux/wireguard.h
 +++ b/include/uapi/linux/wireguard.h
 @@ -18,13 +18,13 @@
@@ -59583,10 +59583,10 @@ index dd8a47c4ad11..ae88be14c947 100644
 2.18.4
 
 
-From 868dfe47cfe68645314493b71fde4eb081bf6fef Mon Sep 17 00:00:00 2001
+From 06066ce74329f8b71dab647b3793da9baf7ee235 Mon Sep 17 00:00:00 2001
 From: YueHaibing <yuehaibing@huawei.com>
 Date: Sun, 15 Dec 2019 22:08:03 +0100
-Subject: [PATCH 075/117] wireguard: main: remove unused include
+Subject: [PATCH 075/115] wireguard: main: remove unused include
  <linux/version.h>
 
 commit 43967b6ff91e53bcce5ae08c16a0588a475b53a1 upstream.
@@ -59603,7 +59603,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 deletion(-)
 
 diff --git a/drivers/net/wireguard/main.c b/drivers/net/wireguard/main.c
-index 10c0a40f6a9e..7a7d5f1a80fc 100644
+index 10c0a40f6a9e5..7a7d5f1a80fc7 100644
 --- a/drivers/net/wireguard/main.c
 +++ b/drivers/net/wireguard/main.c
 @@ -12,7 +12,6 @@
@@ -59618,10 +59618,10 @@ index 10c0a40f6a9e..7a7d5f1a80fc 100644
 2.18.4
 
 
-From 96d9926cb49105e894d6395995fb591542ed36f6 Mon Sep 17 00:00:00 2001
+From dd22819ca61b35927811636f161b46dca950a3fa Mon Sep 17 00:00:00 2001
 From: Wei Yongjun <weiyongjun1@huawei.com>
 Date: Sun, 15 Dec 2019 22:08:04 +0100
-Subject: [PATCH 076/117] wireguard: allowedips: use kfree_rcu() instead of
+Subject: [PATCH 076/115] wireguard: allowedips: use kfree_rcu() instead of
  call_rcu()
 
 commit d89ee7d5c73af15c1c6f12b016cdf469742b5726 upstream.
@@ -59638,7 +59638,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 6 deletions(-)
 
 diff --git a/drivers/net/wireguard/allowedips.c b/drivers/net/wireguard/allowedips.c
-index 72667d5399c3..121d9ea0f135 100644
+index 72667d5399c34..121d9ea0f1358 100644
 --- a/drivers/net/wireguard/allowedips.c
 +++ b/drivers/net/wireguard/allowedips.c
 @@ -31,11 +31,6 @@ static void copy_and_assign_cidr(struct allowedips_node *node, const u8 *src,
@@ -59666,10 +59666,10 @@ index 72667d5399c3..121d9ea0f135 100644
 2.18.4
 
 
-From c53da73ef139d2cf7f6be32859a3006dc383a52d Mon Sep 17 00:00:00 2001
+From 6e7cae5376e453f49a50cf28e2136b40d515520f Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 2 Jan 2020 17:47:49 +0100
-Subject: [PATCH 077/117] wireguard: selftests: remove ancient kernel
+Subject: [PATCH 077/115] wireguard: selftests: remove ancient kernel
  compatibility code
 
 commit 9a69a4c8802adf642bc4a13d471b5a86b44ed434 upstream.
@@ -59696,7 +59696,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  5 files changed, 50 insertions(+), 48 deletions(-)
 
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index e7310d9390f7..d5c85c7494f2 100755
+index e7310d9390f7e..d5c85c7494f2e 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -37,7 +37,7 @@ n2() { pretty 2 "$*"; maybe_exec ip netns exec $netns2 "$@"; }
@@ -59725,7 +59725,7 @@ index e7310d9390f7..d5c85c7494f2 100755
  n0 iptables -t nat -F
  ip0 link del vethrc
 diff --git a/tools/testing/selftests/wireguard/qemu/Makefile b/tools/testing/selftests/wireguard/qemu/Makefile
-index 6d51bf78eeff..f10aa3590adc 100644
+index 6d51bf78eeff4..f10aa3590adc4 100644
 --- a/tools/testing/selftests/wireguard/qemu/Makefile
 +++ b/tools/testing/selftests/wireguard/qemu/Makefile
 @@ -5,6 +5,7 @@
@@ -60003,7 +60003,7 @@ index 6d51bf78eeff..f10aa3590adc 100644
  .PHONY: qemu build clean distclean menuconfig
  .DELETE_ON_ERROR:
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/m68k.config b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
-index 5381ea10896c..62a15bdb877e 100644
+index 5381ea10896c3..62a15bdb877e7 100644
 --- a/tools/testing/selftests/wireguard/qemu/arch/m68k.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/m68k.config
 @@ -1,9 +1,9 @@
@@ -60018,7 +60018,7 @@ index 5381ea10896c..62a15bdb877e 100644
  CONFIG_CMDLINE="console=ttyS0 wg.success=ttyS1"
  CONFIG_FRAME_WARN=1024
 diff --git a/tools/testing/selftests/wireguard/qemu/init.c b/tools/testing/selftests/wireguard/qemu/init.c
-index 51e5ddedee88..90bc9813cadc 100644
+index 51e5ddedee886..90bc9813cadcd 100644
 --- a/tools/testing/selftests/wireguard/qemu/init.c
 +++ b/tools/testing/selftests/wireguard/qemu/init.c
 @@ -21,6 +21,7 @@
@@ -60030,7 +60030,7 @@ index 51e5ddedee88..90bc9813cadc 100644
  #include <linux/version.h>
  
 diff --git a/tools/testing/selftests/wireguard/qemu/kernel.config b/tools/testing/selftests/wireguard/qemu/kernel.config
-index 9cca30206014..af9323a0b6e0 100644
+index 9cca30206014d..af9323a0b6e09 100644
 --- a/tools/testing/selftests/wireguard/qemu/kernel.config
 +++ b/tools/testing/selftests/wireguard/qemu/kernel.config
 @@ -39,6 +39,7 @@ CONFIG_PRINTK=y
@@ -60053,10 +60053,10 @@ index 9cca30206014..af9323a0b6e0 100644
 2.18.4
 
 
-From cef197f8fda5274ed18dfac7a9f8b56dacd40375 Mon Sep 17 00:00:00 2001
+From fd376f084fcdb55820e412bb59b3057089c5d240 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 2 Jan 2020 17:47:50 +0100
-Subject: [PATCH 078/117] wireguard: queueing: do not account for pfmemalloc
+Subject: [PATCH 078/115] wireguard: queueing: do not account for pfmemalloc
  when clearing skb header
 
 commit 04d2ea92a18417619182cbb79063f154892b0150 upstream.
@@ -60077,7 +60077,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 3 deletions(-)
 
 diff --git a/drivers/net/wireguard/queueing.h b/drivers/net/wireguard/queueing.h
-index 58fdd630b246..e62c714a548e 100644
+index 58fdd630b246c..e62c714a548ee 100644
 --- a/drivers/net/wireguard/queueing.h
 +++ b/drivers/net/wireguard/queueing.h
 @@ -83,13 +83,10 @@ static inline __be16 wg_skb_examine_untrusted_ip_hdr(struct sk_buff *skb)
@@ -60098,10 +60098,10 @@ index 58fdd630b246..e62c714a548e 100644
 2.18.4
 
 
-From 35250a750b764c1cfe9f551ad26e27384de913cc Mon Sep 17 00:00:00 2001
+From b4d022a01246cfc45f3a851582fe4e3a7bc05399 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 2 Jan 2020 17:47:51 +0100
-Subject: [PATCH 079/117] wireguard: socket: mark skbs as not on list when
+Subject: [PATCH 079/115] wireguard: socket: mark skbs as not on list when
  receiving via gro
 
 commit 736775d06bac60d7a353e405398b48b2bd8b1e54 upstream.
@@ -60123,7 +60123,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/net/wireguard/socket.c b/drivers/net/wireguard/socket.c
-index c46256d0d81c..262f3b5c819d 100644
+index c46256d0d81c1..262f3b5c819d5 100644
 --- a/drivers/net/wireguard/socket.c
 +++ b/drivers/net/wireguard/socket.c
 @@ -333,6 +333,7 @@ static int wg_receive(struct sock *sk, struct sk_buff *skb)
@@ -60138,129 +60138,10 @@ index c46256d0d81c..262f3b5c819d 100644
 2.18.4
 
 
-From 5ec10b531579f77bfc70a15e7418819511a42d73 Mon Sep 17 00:00:00 2001
-From: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date: Wed, 8 Jan 2020 16:59:02 -0500
-Subject: [PATCH 080/117] net: introduce skb_list_walk_safe for skb segment
- walking
-
-commit dcfea72e79b0aa7a057c8f6024169d86a1bbc84b upstream.
-
-As part of the continual effort to remove direct usage of skb->next and
-skb->prev, this patch adds a helper for iterating through the
-singly-linked variant of skb lists, which are used for lists of GSO
-packet. The name "skb_list_..." has been chosen to match the existing
-function, "kfree_skb_list, which also operates on these singly-linked
-lists, and the "..._walk_safe" part is the same idiom as elsewhere in
-the kernel.
-
-This patch removes the helper from wireguard and puts it into
-linux/skbuff.h, while making it a bit more robust for general usage. In
-particular, parenthesis are added around the macro argument usage, and it
-now accounts for trying to iterate through an already-null skb pointer,
-which will simply run the iteration zero times. This latter enhancement
-means it can be used to replace both do { ... } while and while (...)
-open-coded idioms.
-
-This should take care of these three possible usages, which match all
-current methods of iterations.
-
-skb_list_walk_safe(segs, skb, next) { ... }
-skb_list_walk_safe(skb, skb, next) { ... }
-skb_list_walk_safe(segs, skb, segs) { ... }
-
-Gcc appears to generate efficient code for each of these.
-
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
-Signed-off-by: David S. Miller <davem@davemloft.net>
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
----
- drivers/net/wireguard/device.h | 8 --------
- include/linux/skbuff.h         | 5 +++++
- 2 files changed, 5 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/net/wireguard/device.h b/drivers/net/wireguard/device.h
-index c91f3051c5c7..b15a8be9d816 100644
---- a/drivers/net/wireguard/device.h
-+++ b/drivers/net/wireguard/device.h
-@@ -62,12 +62,4 @@ struct wg_device {
- int wg_device_init(void);
- void wg_device_uninit(void);
- 
--/* Later after the dust settles, this can be moved into include/linux/skbuff.h,
-- * where virtually all code that deals with GSO segs can benefit, around ~30
-- * drivers as of writing.
-- */
--#define skb_list_walk_safe(first, skb, next)                                   \
--	for (skb = first, next = skb->next; skb;                               \
--	     skb = next, next = skb ? skb->next : NULL)
--
- #endif /* _WG_DEVICE_H */
-diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
-index 68139cc2f3ca..03cf61e8a43f 100644
---- a/include/linux/skbuff.h
-+++ b/include/linux/skbuff.h
-@@ -1480,6 +1480,11 @@ static inline void skb_mark_not_on_list(struct sk_buff *skb)
- 	skb->next = NULL;
- }
- 
-+/* Iterate through singly-linked GSO fragments of an skb. */
-+#define skb_list_walk_safe(first, skb, next)                                   \
-+	for ((skb) = (first), (next) = (skb) ? (skb)->next : NULL; (skb);      \
-+	     (skb) = (next), (next) = (skb) ? (skb)->next : NULL)
-+
- static inline void skb_list_del_init(struct sk_buff *skb)
- {
- 	__list_del_entry(&skb->list);
--- 
-2.18.4
-
-
-From a423ad10a308831d50f86c81f0291b51d801e53c Mon Sep 17 00:00:00 2001
-From: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date: Mon, 13 Jan 2020 18:42:26 -0500
-Subject: [PATCH 081/117] net: skbuff: disambiguate argument and member for
- skb_list_walk_safe helper
-
-commit 5eee7bd7e245914e4e050c413dfe864e31805207 upstream.
-
-This worked before, because we made all callers name their next pointer
-"next". But in trying to be more "drop-in" ready, the silliness here is
-revealed. This commit fixes the problem by making the macro argument and
-the member use different names.
-
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
-Signed-off-by: David S. Miller <davem@davemloft.net>
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
----
- include/linux/skbuff.h | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
-index 03cf61e8a43f..6493c98c8631 100644
---- a/include/linux/skbuff.h
-+++ b/include/linux/skbuff.h
-@@ -1481,9 +1481,9 @@ static inline void skb_mark_not_on_list(struct sk_buff *skb)
- }
- 
- /* Iterate through singly-linked GSO fragments of an skb. */
--#define skb_list_walk_safe(first, skb, next)                                   \
--	for ((skb) = (first), (next) = (skb) ? (skb)->next : NULL; (skb);      \
--	     (skb) = (next), (next) = (skb) ? (skb)->next : NULL)
-+#define skb_list_walk_safe(first, skb, next_skb)                               \
-+	for ((skb) = (first), (next_skb) = (skb) ? (skb)->next : NULL; (skb);  \
-+	     (skb) = (next_skb), (next_skb) = (skb) ? (skb)->next : NULL)
- 
- static inline void skb_list_del_init(struct sk_buff *skb)
- {
--- 
-2.18.4
-
-
-From e257c5a9de187ade2531a9075aa84a78e182166d Mon Sep 17 00:00:00 2001
+From 98f74bef92c9a71e0b13fa71019c7cf4d9edb33d Mon Sep 17 00:00:00 2001
 From: Eric Dumazet <edumazet@google.com>
 Date: Tue, 4 Feb 2020 22:17:25 +0100
-Subject: [PATCH 082/117] wireguard: allowedips: fix use-after-free in
+Subject: [PATCH 080/115] wireguard: allowedips: fix use-after-free in
  root_remove_peer_lists
 
 commit 9981159fc3b677b357f84e069a11de5a5ec8a2a8 upstream.
@@ -60412,7 +60293,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/net/wireguard/allowedips.c b/drivers/net/wireguard/allowedips.c
-index 121d9ea0f135..3725e9cd85f4 100644
+index 121d9ea0f1358..3725e9cd85f4f 100644
 --- a/drivers/net/wireguard/allowedips.c
 +++ b/drivers/net/wireguard/allowedips.c
 @@ -263,6 +263,7 @@ static int add(struct allowedips_node __rcu **trie, u8 bits, const u8 *key,
@@ -60427,10 +60308,10 @@ index 121d9ea0f135..3725e9cd85f4 100644
 2.18.4
 
 
-From b3d2803255c144d08798504d6885de4ca725b132 Mon Sep 17 00:00:00 2001
+From 9f8727b2a89423083a3d0a9d2a05613e5702f2c3 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 4 Feb 2020 22:17:26 +0100
-Subject: [PATCH 083/117] wireguard: noise: reject peers with low order public
+Subject: [PATCH 081/115] wireguard: noise: reject peers with low order public
  keys
 
 commit ec31c2676a10e064878927b243fada8c2fb0c03c upstream.
@@ -60620,7 +60501,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
-index 0739a2cd1920..45a631e79d7a 100644
+index 0739a2cd19203..45a631e79d7ab 100644
 --- a/drivers/net/wireguard/netlink.c
 +++ b/drivers/net/wireguard/netlink.c
 @@ -575,10 +575,8 @@ static int wg_set_device(struct sk_buff *skb, struct genl_info *info)
@@ -60637,7 +60518,7 @@ index 0739a2cd1920..45a631e79d7a 100644
  		wg_cookie_checker_precompute_device_keys(&wg->cookie_checker);
  		up_write(&wg->static_identity.lock);
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index d71c8db68a8c..919d9d866446 100644
+index d71c8db68a8ce..919d9d866446a 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -46,17 +46,21 @@ void __init wg_noise_init(void)
@@ -60669,10 +60550,10 @@ index d71c8db68a8c..919d9d866446 100644
 2.18.4
 
 
-From 40409019d17b22d196464112350e574ad17edcf7 Mon Sep 17 00:00:00 2001
+From 63c65ef93ff74fe306f16513a29ae71ddb5039f6 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 4 Feb 2020 22:17:27 +0100
-Subject: [PATCH 084/117] wireguard: selftests: ensure non-addition of peers
+Subject: [PATCH 082/115] wireguard: selftests: ensure non-addition of peers
  with failed precomputation
 
 commit f9398acba6a4ae9cb98bfe4d56414d376eff8d57 upstream.
@@ -60689,7 +60570,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index d5c85c7494f2..b03647d1bbf6 100755
+index d5c85c7494f2e..b03647d1bbf6c 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -516,6 +516,12 @@ n0 wg set wg0 peer "$pub2" allowed-ips 0.0.0.0/0,10.0.0.0/8,100.0.0.0/10,172.16.
@@ -60709,10 +60590,10 @@ index d5c85c7494f2..b03647d1bbf6 100755
 2.18.4
 
 
-From b7ddef4ada39278975785409561342e6ab55162e Mon Sep 17 00:00:00 2001
+From 1fcd6b9256a02f1cab771dad818fc2b96d5260b0 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 4 Feb 2020 22:17:29 +0100
-Subject: [PATCH 085/117] wireguard: selftests: tie socket waiting to target
+Subject: [PATCH 083/115] wireguard: selftests: tie socket waiting to target
  pid
 
 commit 88f404a9b1d75388225b1c67b6dd327cb2182777 upstream.
@@ -60729,7 +60610,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 8 insertions(+), 9 deletions(-)
 
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index b03647d1bbf6..f5ab1cda8bb5 100755
+index b03647d1bbf6c..f5ab1cda8bb55 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -38,9 +38,8 @@ ip0() { pretty 0 "ip $*"; ip -n $netns0 "$@"; }
@@ -60793,10 +60674,10 @@ index b03647d1bbf6..f5ab1cda8bb5 100755
 2.18.4
 
 
-From 515d03a657177e95843fe3540e56d162b820c396 Mon Sep 17 00:00:00 2001
+From 91973a963eefb5a01dc58ad39556b7b2bdbd1fc6 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 11 Feb 2020 20:47:08 +0100
-Subject: [PATCH 086/117] wireguard: device: use icmp_ndo_send helper
+Subject: [PATCH 084/115] wireguard: device: use icmp_ndo_send helper
 
 commit a12d7f3cbdc72c7625881c8dc2660fc2c979fdf2 upstream.
 
@@ -60816,7 +60697,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
-index 16b19824b9ad..43db442b1373 100644
+index 16b19824b9ad0..43db442b13730 100644
 --- a/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
 @@ -203,9 +203,9 @@ static netdev_tx_t wg_xmit(struct sk_buff *skb, struct net_device *dev)
@@ -60832,7 +60713,7 @@ index 16b19824b9ad..43db442b1373 100644
  	return ret;
  }
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index f5ab1cda8bb5..138d46b3f330 100755
+index f5ab1cda8bb55..138d46b3f3306 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -24,6 +24,7 @@
@@ -60865,10 +60746,10 @@ index f5ab1cda8bb5..138d46b3f330 100755
 2.18.4
 
 
-From 9fb389b4fef1f060e62cb931a07e6c1da5633624 Mon Sep 17 00:00:00 2001
+From fd3733b4a7d72a7010acbea75ff2998f1f0176cc Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 14 Feb 2020 23:57:20 +0100
-Subject: [PATCH 087/117] wireguard: selftests: reduce complexity and fix make
+Subject: [PATCH 085/115] wireguard: selftests: reduce complexity and fix make
  races
 
 commit 04ddf1208f03e1dbc39a4619c40eba640051b950 upstream.
@@ -60885,7 +60766,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 14 insertions(+), 24 deletions(-)
 
 diff --git a/tools/testing/selftests/wireguard/qemu/Makefile b/tools/testing/selftests/wireguard/qemu/Makefile
-index f10aa3590adc..28d477683e8a 100644
+index f10aa3590adc4..28d477683e8ab 100644
 --- a/tools/testing/selftests/wireguard/qemu/Makefile
 +++ b/tools/testing/selftests/wireguard/qemu/Makefile
 @@ -38,19 +38,17 @@ endef
@@ -60975,10 +60856,10 @@ index f10aa3590adc..28d477683e8a 100644
 2.18.4
 
 
-From 831a463b30cad290fc7d008bdac2845288375602 Mon Sep 17 00:00:00 2001
+From 58a6e7b509abdf6f12213d1d25c79f03a60723dc Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 14 Feb 2020 23:57:21 +0100
-Subject: [PATCH 088/117] wireguard: receive: reset last_under_load to zero
+Subject: [PATCH 086/115] wireguard: receive: reset last_under_load to zero
 
 commit 2a8a4df36462aa85b0db87b7c5ea145ba67e34a8 upstream.
 
@@ -60996,7 +60877,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 9c6bab9c981f..4a153894cee2 100644
+index 9c6bab9c981f4..4a153894cee25 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -118,10 +118,13 @@ static void wg_receive_handshake_packet(struct wg_device *wg,
@@ -61019,10 +60900,10 @@ index 9c6bab9c981f..4a153894cee2 100644
 2.18.4
 
 
-From ea70fcce15dab5f0054b4ca65217e5a305e3c145 Mon Sep 17 00:00:00 2001
+From 15e63b5f5a1d129aeb5a2c485826e276e5b1f82d Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 14 Feb 2020 23:57:22 +0100
-Subject: [PATCH 089/117] wireguard: send: account for mtu=0 devices
+Subject: [PATCH 087/115] wireguard: send: account for mtu=0 devices
 
 commit 175f1ca9a9ed8689d2028da1a7c624bb4fb4ff7e upstream.
 
@@ -61062,7 +60943,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 15 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
-index 43db442b1373..cdc96968b0f4 100644
+index 43db442b13730..cdc96968b0f4b 100644
 --- a/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
 @@ -258,6 +258,8 @@ static void wg_setup(struct net_device *dev)
@@ -61087,7 +60968,7 @@ index 43db442b1373..cdc96968b0f4 100644
  	SET_NETDEV_DEVTYPE(dev, &device_type);
  
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index c13260563446..7348c10cbae3 100644
+index c132605634460..7348c10cbae3d 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -143,16 +143,22 @@ static void keep_key_fresh(struct wg_peer *peer)
@@ -61122,10 +61003,10 @@ index c13260563446..7348c10cbae3 100644
 2.18.4
 
 
-From 1d6e9ae34f4a1c67c53b7b715ae514cde6ace0eb Mon Sep 17 00:00:00 2001
+From 0e1149c0ddd63ffa1e1dd5698f5f185df5047295 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Fri, 14 Feb 2020 23:57:23 +0100
-Subject: [PATCH 090/117] wireguard: socket: remove extra call to
+Subject: [PATCH 088/115] wireguard: socket: remove extra call to
  synchronize_net
 
 commit 1fbc33b0a7feb6ca72bf7dc8a05d81485ee8ee2e upstream.
@@ -61146,7 +61027,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 deletion(-)
 
 diff --git a/drivers/net/wireguard/socket.c b/drivers/net/wireguard/socket.c
-index 262f3b5c819d..b0d6541582d3 100644
+index 262f3b5c819d5..b0d6541582d31 100644
 --- a/drivers/net/wireguard/socket.c
 +++ b/drivers/net/wireguard/socket.c
 @@ -432,7 +432,6 @@ void wg_socket_reinit(struct wg_device *wg, struct sock *new4,
@@ -61161,10 +61042,10 @@ index 262f3b5c819d..b0d6541582d3 100644
 2.18.4
 
 
-From ce08a51556bf3f07c0c8312338a3035d8a2421d1 Mon Sep 17 00:00:00 2001
+From 9b5ab1284d6ca4040320e85c7e38edafad633aae Mon Sep 17 00:00:00 2001
 From: YueHaibing <yuehaibing@huawei.com>
 Date: Wed, 18 Mar 2020 18:30:43 -0600
-Subject: [PATCH 091/117] wireguard: selftests: remove duplicated include
+Subject: [PATCH 089/115] wireguard: selftests: remove duplicated include
  <sys/types.h>
 
 commit 166391159c5deb84795d2ff46e95f276177fa5fb upstream.
@@ -61180,7 +61061,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 deletion(-)
 
 diff --git a/tools/testing/selftests/wireguard/qemu/init.c b/tools/testing/selftests/wireguard/qemu/init.c
-index 90bc9813cadc..c9698120ac9d 100644
+index 90bc9813cadcd..c9698120ac9d8 100644
 --- a/tools/testing/selftests/wireguard/qemu/init.c
 +++ b/tools/testing/selftests/wireguard/qemu/init.c
 @@ -13,7 +13,6 @@
@@ -61195,10 +61076,10 @@ index 90bc9813cadc..c9698120ac9d 100644
 2.18.4
 
 
-From aac50fb5b0eb9316f18cca18bed61919b88d41a0 Mon Sep 17 00:00:00 2001
+From 835cf5da1ed821bc7add3f7a83de43785bd76393 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 18 Mar 2020 18:30:45 -0600
-Subject: [PATCH 092/117] wireguard: queueing: account for skb->protocol==0
+Subject: [PATCH 090/115] wireguard: queueing: account for skb->protocol==0
 
 commit a5588604af448664e796daf3c1d5a4523c60667b upstream.
 
@@ -61241,7 +61122,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  3 files changed, 10 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
-index cdc96968b0f4..3ac3f8570ca1 100644
+index cdc96968b0f4b..3ac3f8570ca1b 100644
 --- a/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
 @@ -122,7 +122,7 @@ static netdev_tx_t wg_xmit(struct sk_buff *skb, struct net_device *dev)
@@ -61254,7 +61135,7 @@ index cdc96968b0f4..3ac3f8570ca1 100644
  		net_dbg_ratelimited("%s: Invalid IP packet\n", dev->name);
  		goto err;
 diff --git a/drivers/net/wireguard/queueing.h b/drivers/net/wireguard/queueing.h
-index e62c714a548e..3432232afe06 100644
+index e62c714a548ee..3432232afe061 100644
 --- a/drivers/net/wireguard/queueing.h
 +++ b/drivers/net/wireguard/queueing.h
 @@ -66,7 +66,7 @@ struct packet_cb {
@@ -61280,7 +61161,7 @@ index e62c714a548e..3432232afe06 100644
  {
  	skb_scrub_packet(skb, true);
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 4a153894cee2..243ed7172dd2 100644
+index 4a153894cee25..243ed7172dd27 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -56,7 +56,7 @@ static int prepare_skb_header(struct sk_buff *skb, struct wg_device *wg)
@@ -61305,10 +61186,10 @@ index 4a153894cee2..243ed7172dd2 100644
 2.18.4
 
 
-From 964ce837b332aa9bdc060eb00c2211017838cd82 Mon Sep 17 00:00:00 2001
+From ba8c8c7deda3d34c1e87a7c5d57c3df7dd090426 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 18 Mar 2020 18:30:46 -0600
-Subject: [PATCH 093/117] wireguard: receive: remove dead code from default
+Subject: [PATCH 091/115] wireguard: receive: remove dead code from default
  packet type case
 
 commit 2b8765c52db24c0fbcc81bac9b5e8390f2c7d3c8 upstream.
@@ -61329,7 +61210,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 243ed7172dd2..da3b782ab7d3 100644
+index 243ed7172dd27..da3b782ab7d31 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -587,8 +587,7 @@ void wg_packet_receive(struct wg_device *wg, struct sk_buff *skb)
@@ -61346,10 +61227,10 @@ index 243ed7172dd2..da3b782ab7d3 100644
 2.18.4
 
 
-From 27990b9e02e291207a49ea24bd9cd64ab4c53619 Mon Sep 17 00:00:00 2001
+From 8add8fff243ce9509db0e4cafed3134d326d966e Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 18 Mar 2020 18:30:47 -0600
-Subject: [PATCH 094/117] wireguard: noise: error out precomputed DH during
+Subject: [PATCH 092/115] wireguard: noise: error out precomputed DH during
  handshake rather than config
 
 commit 11a7686aa99c7fe4b3f80f6dcccd54129817984d upstream.
@@ -61379,7 +61260,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  5 files changed, 49 insertions(+), 48 deletions(-)
 
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
-index 45a631e79d7a..ab6cbe95a652 100644
+index 45a631e79d7ab..ab6cbe95a6527 100644
 --- a/drivers/net/wireguard/netlink.c
 +++ b/drivers/net/wireguard/netlink.c
 @@ -417,11 +417,7 @@ static int set_peer(struct wg_device *wg, struct nlattr **attrs)
@@ -61405,7 +61286,7 @@ index 45a631e79d7a..ab6cbe95a652 100644
  		}
  		wg_cookie_checker_precompute_device_keys(&wg->cookie_checker);
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index 919d9d866446..708dc61c974f 100644
+index 919d9d866446a..708dc61c974f7 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -44,32 +44,23 @@ void __init wg_noise_init(void)
@@ -61507,7 +61388,7 @@ index 919d9d866446..708dc61c974f 100644
  	/* {t} */
  	if (!message_decrypt(t, src->encrypted_timestamp,
 diff --git a/drivers/net/wireguard/noise.h b/drivers/net/wireguard/noise.h
-index 138a07bb817c..f532d59d3f19 100644
+index 138a07bb817ce..f532d59d3f19a 100644
 --- a/drivers/net/wireguard/noise.h
 +++ b/drivers/net/wireguard/noise.h
 @@ -94,11 +94,11 @@ struct noise_handshake {
@@ -61537,7 +61418,7 @@ index 138a07bb817c..f532d59d3f19 100644
  bool
  wg_noise_handshake_create_initiation(struct message_handshake_initiation *dst,
 diff --git a/drivers/net/wireguard/peer.c b/drivers/net/wireguard/peer.c
-index 071eedf33f5a..1d634bd3038f 100644
+index 071eedf33f5aa..1d634bd3038f0 100644
 --- a/drivers/net/wireguard/peer.c
 +++ b/drivers/net/wireguard/peer.c
 @@ -34,11 +34,8 @@ struct wg_peer *wg_peer_create(struct wg_device *wg,
@@ -61555,7 +61436,7 @@ index 071eedf33f5a..1d634bd3038f 100644
  		goto err_1;
  	if (wg_packet_queue_init(&peer->tx_queue, wg_packet_tx_worker, false,
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index 138d46b3f330..936e1ca9410e 100755
+index 138d46b3f3306..936e1ca9410ec 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -527,11 +527,16 @@ n0 wg set wg0 peer "$pub2" allowed-ips 0.0.0.0/0
@@ -61584,10 +61465,10 @@ index 138d46b3f330..936e1ca9410e 100755
 2.18.4
 
 
-From e3d013e38879c1a7e93dad7c4cceec6017d0e71e Mon Sep 17 00:00:00 2001
+From bf4d1401c6da622c07cd83e0ebdb80cd822826c3 Mon Sep 17 00:00:00 2001
 From: Sultan Alsawaf <sultan@kerneltoast.com>
 Date: Wed, 29 Apr 2020 14:59:20 -0600
-Subject: [PATCH 095/117] wireguard: send: remove errant newline from
+Subject: [PATCH 093/115] wireguard: send: remove errant newline from
  packet_encrypt_worker
 
 commit d6833e42786e050e7522d6a91a9361e54085897d upstream.
@@ -61604,7 +61485,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 deletion(-)
 
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index 7348c10cbae3..3e030d614df5 100644
+index 7348c10cbae3d..3e030d614df5f 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -304,7 +304,6 @@ void wg_packet_encrypt_worker(struct work_struct *work)
@@ -61619,10 +61500,10 @@ index 7348c10cbae3..3e030d614df5 100644
 2.18.4
 
 
-From 23400553fb68a0eb36708c8a767d68385a795ebf Mon Sep 17 00:00:00 2001
+From 0af14f05e0409c9c654872128d3bd38db881a9dc Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 29 Apr 2020 14:59:21 -0600
-Subject: [PATCH 096/117] wireguard: queueing: cleanup ptr_ring in error path
+Subject: [PATCH 094/115] wireguard: queueing: cleanup ptr_ring in error path
  of packet_queue_init
 
 commit 130c58606171326c81841a49cc913cd354113dd9 upstream.
@@ -61641,7 +61522,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/wireguard/queueing.c b/drivers/net/wireguard/queueing.c
-index 5c964fcb994e..71b8e80b58e1 100644
+index 5c964fcb994ec..71b8e80b58e12 100644
 --- a/drivers/net/wireguard/queueing.c
 +++ b/drivers/net/wireguard/queueing.c
 @@ -35,8 +35,10 @@ int wg_packet_queue_init(struct crypt_queue *queue, work_func_t function,
@@ -61660,10 +61541,10 @@ index 5c964fcb994e..71b8e80b58e1 100644
 2.18.4
 
 
-From faab18ac509618e078a2b4e125fc2b9b9d01cdc2 Mon Sep 17 00:00:00 2001
+From 4876e7f6852def2ce21465e276dc0b41970519cf Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Toke=20H=C3=B8iland-J=C3=B8rgensen?= <toke@redhat.com>
 Date: Wed, 29 Apr 2020 14:59:22 -0600
-Subject: [PATCH 097/117] wireguard: receive: use tunnel helpers for
+Subject: [PATCH 095/115] wireguard: receive: use tunnel helpers for
  decapsulating ECN markings
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -61693,7 +61574,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index da3b782ab7d3..267f202f1931 100644
+index da3b782ab7d31..267f202f19314 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -393,13 +393,11 @@ static void wg_packet_consume_data_done(struct wg_peer *peer,
@@ -61716,10 +61597,10 @@ index da3b782ab7d3..267f202f1931 100644
 2.18.4
 
 
-From 4df414e69f6e40c5cf8242f301a6cb01226cc8a9 Mon Sep 17 00:00:00 2001
+From 20c723b26247f0b52316021a834a507fbed7413f Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 6 May 2020 15:33:02 -0600
-Subject: [PATCH 098/117] wireguard: selftests: use normal kernel stack size on
+Subject: [PATCH 096/115] wireguard: selftests: use normal kernel stack size on
  ppc64
 
 commit a0fd7cc87a018df1a17f9d3f0bd994c1f22c6b34 upstream.
@@ -61739,7 +61620,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
-index 990c510a9cfa..f52f1e2bc7f6 100644
+index 990c510a9cfa5..f52f1e2bc7f64 100644
 --- a/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
 +++ b/tools/testing/selftests/wireguard/qemu/arch/powerpc64le.config
 @@ -10,3 +10,4 @@ CONFIG_CMDLINE_BOOL=y
@@ -61751,10 +61632,10 @@ index 990c510a9cfa..f52f1e2bc7f6 100644
 2.18.4
 
 
-From a0746efe2e6f0487c565b6c739de99180f829ec8 Mon Sep 17 00:00:00 2001
+From 30922f6bb8e31e980d5e112304649de435757819 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 6 May 2020 15:33:03 -0600
-Subject: [PATCH 099/117] wireguard: socket: remove errant restriction on
+Subject: [PATCH 097/115] wireguard: socket: remove errant restriction on
  looping to self
 
 commit b673e24aad36981f327a6570412ffa7754de8911 upstream.
@@ -61788,7 +61669,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 51 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/net/wireguard/socket.c b/drivers/net/wireguard/socket.c
-index b0d6541582d3..f9018027fc13 100644
+index b0d6541582d31..f9018027fc133 100644
 --- a/drivers/net/wireguard/socket.c
 +++ b/drivers/net/wireguard/socket.c
 @@ -76,12 +76,6 @@ static int send4(struct wg_device *wg, struct sk_buff *skb,
@@ -61818,7 +61699,7 @@ index b0d6541582d3..f9018027fc13 100644
  		if (cache)
  			dst_cache_set_ip6(cache, dst, &fl.saddr);
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index 936e1ca9410e..17a1f53ceba0 100755
+index 936e1ca9410ec..17a1f53ceba01 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -48,8 +48,11 @@ cleanup() {
@@ -61921,10 +61802,10 @@ index 936e1ca9410e..17a1f53ceba0 100755
 2.18.4
 
 
-From 16cbafae73e8af8c3b283aaaa785c497e9ee89b4 Mon Sep 17 00:00:00 2001
+From 13059d9ab6aacc2835ce37a7e0be71da26fa8615 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 6 May 2020 15:33:04 -0600
-Subject: [PATCH 100/117] wireguard: send/receive: cond_resched() when
+Subject: [PATCH 098/115] wireguard: send/receive: cond_resched() when
  processing worker ringbuffers
 
 commit 4005f5c3c9d006157ba716594e0d70c88a235c5e upstream.
@@ -61949,7 +61830,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 6 insertions(+)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 267f202f1931..2566e13a292d 100644
+index 267f202f19314..2566e13a292de 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -516,6 +516,8 @@ void wg_packet_decrypt_worker(struct work_struct *work)
@@ -61962,7 +61843,7 @@ index 267f202f1931..2566e13a292d 100644
  }
  
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index 3e030d614df5..dc3079e17c7f 100644
+index 3e030d614df5f..dc3079e17c7fc 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -281,6 +281,8 @@ void wg_packet_tx_worker(struct work_struct *work)
@@ -61987,10 +61868,10 @@ index 3e030d614df5..dc3079e17c7f 100644
 2.18.4
 
 
-From e2fc9350897b60a116ef4e5ab1a37e2122d734ae Mon Sep 17 00:00:00 2001
+From 10c20143d8ae47a6afbe2c4b50d74928267c4e7c Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 6 May 2020 15:33:05 -0600
-Subject: [PATCH 101/117] wireguard: selftests: initalize ipv6 members to NULL
+Subject: [PATCH 099/115] wireguard: selftests: initalize ipv6 members to NULL
  to squelch clang warning
 
 commit 4fed818ef54b08d4b29200e416cce65546ad5312 upstream.
@@ -62025,7 +61906,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/selftest/ratelimiter.c b/drivers/net/wireguard/selftest/ratelimiter.c
-index bcd6462e4540..007cd4457c5f 100644
+index bcd6462e45401..007cd4457c5f6 100644
 --- a/drivers/net/wireguard/selftest/ratelimiter.c
 +++ b/drivers/net/wireguard/selftest/ratelimiter.c
 @@ -120,9 +120,9 @@ bool __init wg_ratelimiter_selftest(void)
@@ -62044,10 +61925,10 @@ index bcd6462e4540..007cd4457c5f 100644
 2.18.4
 
 
-From 7181768ebd2a5227be5150ce3ec0b31cc0526951 Mon Sep 17 00:00:00 2001
+From 56b4e8a94219a5ddb5c379a315785dfd04c8aaf4 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 6 May 2020 15:33:06 -0600
-Subject: [PATCH 102/117] wireguard: send/receive: use explicit unlikely branch
+Subject: [PATCH 100/115] wireguard: send/receive: use explicit unlikely branch
  instead of implicit coalescing
 
 commit 243f2148937adc72bcaaa590d482d599c936efde upstream.
@@ -62074,7 +61955,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 12 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 2566e13a292d..3bb5b9ae7cd1 100644
+index 2566e13a292de..3bb5b9ae7cd15 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -226,21 +226,20 @@ void wg_packet_handshake_receive_worker(struct work_struct *work)
@@ -62106,7 +61987,7 @@ index 2566e13a292d..3bb5b9ae7cd1 100644
  		wg_packet_send_queued_handshake_initiation(peer, false);
  	}
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index dc3079e17c7f..6687db699803 100644
+index dc3079e17c7fc..6687db6998035 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -124,20 +124,17 @@ void wg_packet_send_handshake_cookie(struct wg_device *wg,
@@ -62140,10 +62021,10 @@ index dc3079e17c7f..6687db699803 100644
 2.18.4
 
 
-From 99d8e0929c8bb68772a3da8669c7a9d7a609deca Mon Sep 17 00:00:00 2001
+From 88d56a14ac2ba38ae63931921d00a218e5df57ba Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 19 May 2020 22:49:27 -0600
-Subject: [PATCH 103/117] wireguard: selftests: use newer iproute2 for gcc-10
+Subject: [PATCH 101/115] wireguard: selftests: use newer iproute2 for gcc-10
 
 commit ee3c1aa3f34b7842c1557cfe5d8c3f7b8c692de8 upstream.
 
@@ -62161,7 +62042,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tools/testing/selftests/wireguard/qemu/Makefile b/tools/testing/selftests/wireguard/qemu/Makefile
-index 28d477683e8a..2dab4f57516d 100644
+index 28d477683e8ab..2dab4f57516dc 100644
 --- a/tools/testing/selftests/wireguard/qemu/Makefile
 +++ b/tools/testing/selftests/wireguard/qemu/Makefile
 @@ -44,7 +44,7 @@ endef
@@ -62177,10 +62058,10 @@ index 28d477683e8a..2dab4f57516d 100644
 2.18.4
 
 
-From 0df08bac3b1a5b8b47093b93803943e644b6cf65 Mon Sep 17 00:00:00 2001
+From 6a5a86046d080b05bf9b7f6522451c3862bf8b51 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 19 May 2020 22:49:28 -0600
-Subject: [PATCH 104/117] wireguard: noise: read preshared key while taking
+Subject: [PATCH 102/115] wireguard: noise: read preshared key while taking
  lock
 
 commit bc67d371256f5c47d824e2eec51e46c8d62d022e upstream.
@@ -62204,7 +62085,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index 708dc61c974f..07eb438a6dee 100644
+index 708dc61c974f7..07eb438a6deee 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -715,6 +715,7 @@ wg_noise_handshake_consume_response(struct message_handshake_response *src,
@@ -62245,10 +62126,10 @@ index 708dc61c974f..07eb438a6dee 100644
 2.18.4
 
 
-From ec6425628d4fa655a92ae6984ebda0be980016ed Mon Sep 17 00:00:00 2001
+From 7b2b427ec4f4a0543122a3b5ae2b8ffcc17651a8 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 19 May 2020 22:49:29 -0600
-Subject: [PATCH 105/117] wireguard: queueing: preserve flow hash across packet
+Subject: [PATCH 103/115] wireguard: queueing: preserve flow hash across packet
  scrubbing
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -62293,7 +62174,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  4 files changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/wireguard/messages.h b/drivers/net/wireguard/messages.h
-index b8a7b9ce32ba..208da72673fc 100644
+index b8a7b9ce32ba7..208da72673fc0 100644
 --- a/drivers/net/wireguard/messages.h
 +++ b/drivers/net/wireguard/messages.h
 @@ -32,7 +32,7 @@ enum cookie_values {
@@ -62306,7 +62187,7 @@ index b8a7b9ce32ba..208da72673fc 100644
  	COUNTER_WINDOW_SIZE = COUNTER_BITS_TOTAL - COUNTER_REDUNDANT_BITS
  };
 diff --git a/drivers/net/wireguard/queueing.h b/drivers/net/wireguard/queueing.h
-index 3432232afe06..c58df439dbbe 100644
+index 3432232afe061..c58df439dbbe0 100644
 --- a/drivers/net/wireguard/queueing.h
 +++ b/drivers/net/wireguard/queueing.h
 @@ -87,12 +87,20 @@ static inline bool wg_check_packet_protocol(struct sk_buff *skb)
@@ -62332,7 +62213,7 @@ index 3432232afe06..c58df439dbbe 100644
  	skb->nohdr = 0;
  	skb->peeked = 0;
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 3bb5b9ae7cd1..d0eebd90c9d5 100644
+index 3bb5b9ae7cd15..d0eebd90c9d50 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -484,7 +484,7 @@ int wg_packet_rx_poll(struct napi_struct *napi, int budget)
@@ -62345,7 +62226,7 @@ index 3bb5b9ae7cd1..d0eebd90c9d5 100644
  		free = false;
  
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index 6687db699803..2f5119ff93d8 100644
+index 6687db6998035..2f5119ff93d8f 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -167,6 +167,11 @@ static bool encrypt_packet(struct sk_buff *skb, struct noise_keypair *keypair)
@@ -62373,10 +62254,10 @@ index 6687db699803..2f5119ff93d8 100644
 2.18.4
 
 
-From 84c0736cea5596e02ecce0bea45a69718704432d Mon Sep 17 00:00:00 2001
+From 38d02be9e01adc98e3e86b49fc1a5c0d56a73510 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 19 May 2020 22:49:30 -0600
-Subject: [PATCH 106/117] wireguard: noise: separate receive counter from send
+Subject: [PATCH 104/115] wireguard: noise: separate receive counter from send
  counter
 
 commit a9e90d9931f3a474f04bab782ccd9d77904941e9 upstream.
@@ -62425,7 +62306,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  5 files changed, 48 insertions(+), 53 deletions(-)
 
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index 07eb438a6dee..626433690abb 100644
+index 07eb438a6deee..626433690abb3 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -104,6 +104,7 @@ static struct noise_keypair *keypair_create(struct wg_peer *peer)
@@ -62466,7 +62347,7 @@ index 07eb438a6dee..626433690abb 100644
  
  static bool __must_check mix_dh(u8 chaining_key[NOISE_HASH_LEN],
 diff --git a/drivers/net/wireguard/noise.h b/drivers/net/wireguard/noise.h
-index f532d59d3f19..c527253dba80 100644
+index f532d59d3f19a..c527253dba80e 100644
 --- a/drivers/net/wireguard/noise.h
 +++ b/drivers/net/wireguard/noise.h
 @@ -15,18 +15,14 @@
@@ -62503,7 +62384,7 @@ index f532d59d3f19..c527253dba80 100644
  	bool i_am_the_initiator;
  	struct kref refcount;
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index d0eebd90c9d5..91438144e4f7 100644
+index d0eebd90c9d50..91438144e4f7a 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -245,20 +245,20 @@ static void keep_key_fresh(struct wg_peer *peer)
@@ -62621,7 +62502,7 @@ index d0eebd90c9d5..91438144e4f7 100644
  		wg_queue_enqueue_per_peer_napi(skb, state);
  		if (need_resched())
 diff --git a/drivers/net/wireguard/selftest/counter.c b/drivers/net/wireguard/selftest/counter.c
-index f4fbb9072ed7..ec3c156bf91b 100644
+index f4fbb9072ed73..ec3c156bf91ba 100644
 --- a/drivers/net/wireguard/selftest/counter.c
 +++ b/drivers/net/wireguard/selftest/counter.c
 @@ -6,18 +6,24 @@
@@ -62663,7 +62544,7 @@ index f4fbb9072ed7..ec3c156bf91b 100644
  }
  #endif
 diff --git a/drivers/net/wireguard/send.c b/drivers/net/wireguard/send.c
-index 2f5119ff93d8..f74b9341ab0f 100644
+index 2f5119ff93d8f..f74b9341ab0fe 100644
 --- a/drivers/net/wireguard/send.c
 +++ b/drivers/net/wireguard/send.c
 @@ -129,7 +129,7 @@ static void keep_key_fresh(struct wg_peer *peer)
@@ -62718,10 +62599,10 @@ index 2f5119ff93d8..f74b9341ab0f 100644
 2.18.4
 
 
-From b8b2620c99253cac9a5008249391fee8fb3d0377 Mon Sep 17 00:00:00 2001
+From f6351f448c77e1588d85dae86c42f4f87ff40986 Mon Sep 17 00:00:00 2001
 From: Frank Werner-Krippendorf <mail@hb9fxq.ch>
 Date: Tue, 23 Jun 2020 03:59:44 -0600
-Subject: [PATCH 107/117] wireguard: noise: do not assign initiation time in if
+Subject: [PATCH 105/115] wireguard: noise: do not assign initiation time in if
  condition
 
 commit 558b353c9c2a717509f291c066c6bd8f5f5e21be upstream.
@@ -62739,7 +62620,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index 626433690abb..201a22681945 100644
+index 626433690abb3..201a22681945f 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -617,8 +617,8 @@ wg_noise_handshake_consume_initiation(struct message_handshake_initiation *src,
@@ -62757,10 +62638,10 @@ index 626433690abb..201a22681945 100644
 2.18.4
 
 
-From b1f3bfdc335281a83df2ee57d277345df076043c Mon Sep 17 00:00:00 2001
+From 3e9fd6a6a7152497d8cb3fb7e2af0a6872e3fcab Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Tue, 23 Jun 2020 03:59:45 -0600
-Subject: [PATCH 108/117] wireguard: device: avoid circular netns references
+Subject: [PATCH 106/115] wireguard: device: avoid circular netns references
 
 commit 900575aa33a3eaaef802b31de187a85c4a4b4bd0 upstream.
 
@@ -62789,7 +62670,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  5 files changed, 67 insertions(+), 46 deletions(-)
 
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
-index 3ac3f8570ca1..a8f151b1b5fa 100644
+index 3ac3f8570ca1b..a8f151b1b5fab 100644
 --- a/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
 @@ -45,17 +45,18 @@ static int wg_open(struct net_device *dev)
@@ -62925,7 +62806,7 @@ index 3ac3f8570ca1..a8f151b1b5fa 100644
  	unregister_pm_notifier(&pm_notifier);
  #endif
 diff --git a/drivers/net/wireguard/device.h b/drivers/net/wireguard/device.h
-index b15a8be9d816..4d0144e16947 100644
+index c91f3051c5c78..3e01b4c1a60eb 100644
 --- a/drivers/net/wireguard/device.h
 +++ b/drivers/net/wireguard/device.h
 @@ -40,7 +40,7 @@ struct wg_device {
@@ -62946,7 +62827,7 @@ index b15a8be9d816..4d0144e16947 100644
  
  int wg_device_init(void);
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
-index ab6cbe95a652..9756239416fd 100644
+index ab6cbe95a6527..9756239416fde 100644
 --- a/drivers/net/wireguard/netlink.c
 +++ b/drivers/net/wireguard/netlink.c
 @@ -517,11 +517,15 @@ static int wg_set_device(struct sk_buff *skb, struct genl_info *info)
@@ -62971,7 +62852,7 @@ index ab6cbe95a652..9756239416fd 100644
  	++wg->device_update_gen;
  
 diff --git a/drivers/net/wireguard/socket.c b/drivers/net/wireguard/socket.c
-index f9018027fc13..c33e2c81635f 100644
+index f9018027fc133..c33e2c81635fa 100644
 --- a/drivers/net/wireguard/socket.c
 +++ b/drivers/net/wireguard/socket.c
 @@ -347,6 +347,7 @@ static void set_sock_opts(struct socket *sock)
@@ -63038,7 +62919,7 @@ index f9018027fc13..c33e2c81635f 100644
  
  void wg_socket_reinit(struct wg_device *wg, struct sock *new4,
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index 17a1f53ceba0..d77f4829f1e0 100755
+index 17a1f53ceba01..d77f4829f1e07 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -587,9 +587,20 @@ ip0 link set wg0 up
@@ -63067,10 +62948,10 @@ index 17a1f53ceba0..d77f4829f1e0 100755
 2.18.4
 
 
-From 6638d3114d662c256cea902f042dc1cf214eb0b5 Mon Sep 17 00:00:00 2001
+From c610930f666bf70111be96306a961534e88d96a3 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 24 Jun 2020 16:06:03 -0600
-Subject: [PATCH 109/117] wireguard: receive: account for napi_gro_receive
+Subject: [PATCH 107/115] wireguard: receive: account for napi_gro_receive
  never returning GRO_DROP
 
 commit df08126e3833e9dca19e2407db5f5860a7c194fb upstream.
@@ -63091,7 +62972,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 91438144e4f7..9b2ab6fc91cd 100644
+index 91438144e4f7a..9b2ab6fc91cdd 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -414,14 +414,8 @@ static void wg_packet_consume_data_done(struct wg_peer *peer,
@@ -63115,10 +62996,10 @@ index 91438144e4f7..9b2ab6fc91cd 100644
 2.18.4
 
 
-From cf6318bad2a0c74fa1537902c214db46b2863da6 Mon Sep 17 00:00:00 2001
+From e4ce95508d0975af13acb0ebe9ad0cdb64136852 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 29 Jun 2020 19:06:18 -0600
-Subject: [PATCH 110/117] net: ip_tunnel: add header_ops for layer 3 devices
+Subject: [PATCH 108/115] net: ip_tunnel: add header_ops for layer 3 devices
 
 commit 2606aff916854b61234bf85001be9777bab2d5f8 upstream.
 
@@ -63138,7 +63019,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 21 insertions(+)
 
 diff --git a/include/net/ip_tunnels.h b/include/net/ip_tunnels.h
-index 56deb2501e96..8545fa25c7bf 100644
+index 56deb2501e962..8545fa25c7bf4 100644
 --- a/include/net/ip_tunnels.h
 +++ b/include/net/ip_tunnels.h
 @@ -289,6 +289,9 @@ int ip_tunnel_newlink(struct net_device *dev, struct nlattr *tb[],
@@ -63152,7 +63033,7 @@ index 56deb2501e96..8545fa25c7bf 100644
  	size_t (*encap_hlen)(struct ip_tunnel_encap *e);
  	int (*build_header)(struct sk_buff *skb, struct ip_tunnel_encap *e,
 diff --git a/net/ipv4/ip_tunnel_core.c b/net/ipv4/ip_tunnel_core.c
-index 1452a97914a0..cfe21c3ddfc2 100644
+index 1452a97914a0d..cfe21c3ddfc24 100644
 --- a/net/ipv4/ip_tunnel_core.c
 +++ b/net/ipv4/ip_tunnel_core.c
 @@ -446,3 +446,21 @@ void ip_tunnel_unneed_metadata(void)
@@ -63181,10 +63062,10 @@ index 1452a97914a0..cfe21c3ddfc2 100644
 2.18.4
 
 
-From e5bb1068b8eeb03f0b5659de02a16c968ce46e0c Mon Sep 17 00:00:00 2001
+From 2d9a30f41f6e2cb5d94b654f234eefb65db32b6d Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 29 Jun 2020 19:06:20 -0600
-Subject: [PATCH 111/117] wireguard: implement header_ops->parse_protocol for
+Subject: [PATCH 109/115] wireguard: implement header_ops->parse_protocol for
  AF_PACKET
 
 commit 01a4967c71c004f8ecad4ab57021348636502fa9 upstream.
@@ -63209,7 +63090,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/net/wireguard/device.c b/drivers/net/wireguard/device.c
-index a8f151b1b5fa..c9f65e96ccb0 100644
+index a8f151b1b5fab..c9f65e96ccb04 100644
 --- a/drivers/net/wireguard/device.c
 +++ b/drivers/net/wireguard/device.c
 @@ -262,6 +262,7 @@ static void wg_setup(struct net_device *dev)
@@ -63224,10 +63105,10 @@ index a8f151b1b5fa..c9f65e96ccb0 100644
 2.18.4
 
 
-From 6b54af46ff60f401fdb246c9edc0af9f5ee065f1 Mon Sep 17 00:00:00 2001
+From fb8a80f749b420706a45b3554f852506e38de557 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Mon, 29 Jun 2020 19:06:21 -0600
-Subject: [PATCH 112/117] wireguard: queueing: make use of
+Subject: [PATCH 110/115] wireguard: queueing: make use of
  ip_tunnel_parse_protocol
 
 commit 1a574074ae7d1d745c16f7710655f38a53174c27 upstream.
@@ -63246,7 +63127,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 3 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/net/wireguard/queueing.h b/drivers/net/wireguard/queueing.h
-index c58df439dbbe..dfb674e03076 100644
+index c58df439dbbe0..dfb674e030764 100644
 --- a/drivers/net/wireguard/queueing.h
 +++ b/drivers/net/wireguard/queueing.h
 @@ -11,6 +11,7 @@
@@ -63285,7 +63166,7 @@ index c58df439dbbe..dfb674e03076 100644
  }
  
 diff --git a/drivers/net/wireguard/receive.c b/drivers/net/wireguard/receive.c
-index 9b2ab6fc91cd..2c9551ea6dc7 100644
+index 9b2ab6fc91cdd..2c9551ea6dc73 100644
 --- a/drivers/net/wireguard/receive.c
 +++ b/drivers/net/wireguard/receive.c
 @@ -387,7 +387,7 @@ static void wg_packet_consume_data_done(struct wg_peer *peer,
@@ -63301,10 +63182,10 @@ index 9b2ab6fc91cd..2c9551ea6dc7 100644
 2.18.4
 
 
-From ae9aa1fe3f8a82b199ea467ce59bf60ce11728b7 Mon Sep 17 00:00:00 2001
+From dbd344b57d163cd9978e382cede26bdda32b9b4a Mon Sep 17 00:00:00 2001
 From: Johannes Berg <johannes.berg@intel.com>
 Date: Tue, 18 Aug 2020 10:17:31 +0200
-Subject: [PATCH 113/117] netlink: consistently use NLA_POLICY_EXACT_LEN()
+Subject: [PATCH 111/115] netlink: consistently use NLA_POLICY_EXACT_LEN()
 
 commit 8140860c817f3e9f78bcd1e420b9777ddcbaa629 upstream.
 
@@ -63322,7 +63203,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
-index 9756239416fd..2a14f564033a 100644
+index 9756239416fde..2a14f564033a4 100644
 --- a/drivers/net/wireguard/netlink.c
 +++ b/drivers/net/wireguard/netlink.c
 @@ -22,8 +22,8 @@ static struct genl_family genl_family;
@@ -63356,10 +63237,10 @@ index 9756239416fd..2a14f564033a 100644
 2.18.4
 
 
-From 26ffe7c1fb4e919f0fb1182f61fb3ea0b80eaa44 Mon Sep 17 00:00:00 2001
+From f9709ed12e3d82b6e842f8419e646bfdd96d399a Mon Sep 17 00:00:00 2001
 From: Johannes Berg <johannes.berg@intel.com>
 Date: Tue, 18 Aug 2020 10:17:32 +0200
-Subject: [PATCH 114/117] netlink: consistently use NLA_POLICY_MIN_LEN()
+Subject: [PATCH 112/115] netlink: consistently use NLA_POLICY_MIN_LEN()
 
 commit bc0435855041d7fff0b83dd992fc4be34aa11afb upstream.
 
@@ -63376,7 +63257,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/net/wireguard/netlink.c b/drivers/net/wireguard/netlink.c
-index 2a14f564033a..1c69eb8735d5 100644
+index 2a14f564033a4..1c69eb8735d53 100644
 --- a/drivers/net/wireguard/netlink.c
 +++ b/drivers/net/wireguard/netlink.c
 @@ -34,7 +34,7 @@ static const struct nla_policy peer_policy[WGPEER_A_MAX + 1] = {
@@ -63401,10 +63282,10 @@ index 2a14f564033a..1c69eb8735d5 100644
 2.18.4
 
 
-From bd6ee2b1c576a65d4ac641274c36a8e2f9eaa547 Mon Sep 17 00:00:00 2001
+From 70d652fcdfed63b718add26c1a9ba2701e284bb1 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 9 Sep 2020 13:58:14 +0200
-Subject: [PATCH 115/117] wireguard: noise: take lock when removing handshake
+Subject: [PATCH 113/115] wireguard: noise: take lock when removing handshake
  entry from table
 
 commit 9179ba31367bcf481c3c79b5f028c94faad9f30a upstream.
@@ -63510,7 +63391,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 1 insertion(+), 4 deletions(-)
 
 diff --git a/drivers/net/wireguard/noise.c b/drivers/net/wireguard/noise.c
-index 201a22681945..27cb5045bed2 100644
+index 201a22681945f..27cb5045bed2d 100644
 --- a/drivers/net/wireguard/noise.c
 +++ b/drivers/net/wireguard/noise.c
 @@ -87,15 +87,12 @@ static void handshake_zero(struct noise_handshake *handshake)
@@ -63534,10 +63415,10 @@ index 201a22681945..27cb5045bed2 100644
 2.18.4
 
 
-From 5003c5d6a8698bce404a9e68528ec994ba1a0f12 Mon Sep 17 00:00:00 2001
+From db4ade5b7260adf3619652d8b62fe43a6c73e123 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 9 Sep 2020 13:58:15 +0200
-Subject: [PATCH 116/117] wireguard: peerlookup: take lock before checking hash
+Subject: [PATCH 114/115] wireguard: peerlookup: take lock before checking hash
  in replace operation
 
 commit 6147f7b1e90ff09bd52afc8b9206a7fcd133daf7 upstream.
@@ -63568,7 +63449,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  1 file changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/wireguard/peerlookup.c b/drivers/net/wireguard/peerlookup.c
-index e4deb331476b..f2783aa7a88f 100644
+index e4deb331476b3..f2783aa7a88f1 100644
 --- a/drivers/net/wireguard/peerlookup.c
 +++ b/drivers/net/wireguard/peerlookup.c
 @@ -167,9 +167,13 @@ bool wg_index_hashtable_replace(struct index_hashtable *table,
@@ -63602,10 +63483,10 @@ index e4deb331476b..f2783aa7a88f 100644
 2.18.4
 
 
-From 2d4c3892646cdd41486dc4b1aab1fc2942b49f10 Mon Sep 17 00:00:00 2001
+From 3f0fd35bef6cd99bbc1537e497171e52c73e5d28 Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Thu, 29 Oct 2020 03:56:05 +0100
-Subject: [PATCH 117/117] wireguard: selftests: check that route_me_harder
+Subject: [PATCH 115/115] wireguard: selftests: check that route_me_harder
  packets use the right sk
 
 commit af8afcf1fdd5f365f70e2386c2d8c7a1abd853d7 upstream.
@@ -63627,7 +63508,7 @@ Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
  2 files changed, 10 insertions(+)
 
 diff --git a/tools/testing/selftests/wireguard/netns.sh b/tools/testing/selftests/wireguard/netns.sh
-index d77f4829f1e0..74c69b75f6f5 100755
+index d77f4829f1e07..74c69b75f6f5a 100755
 --- a/tools/testing/selftests/wireguard/netns.sh
 +++ b/tools/testing/selftests/wireguard/netns.sh
 @@ -316,6 +316,14 @@ pp sleep 3
@@ -63646,7 +63527,7 @@ index d77f4829f1e0..74c69b75f6f5 100755
  n1 wg set wg0 peer "$pub3" allowed-ips 192.168.242.2/32 endpoint 192.168.241.2:5
  ip1 addr add 192.168.242.1/24 dev wg0
 diff --git a/tools/testing/selftests/wireguard/qemu/kernel.config b/tools/testing/selftests/wireguard/qemu/kernel.config
-index af9323a0b6e0..9864d106e818 100644
+index af9323a0b6e09..9864d106e8189 100644
 --- a/tools/testing/selftests/wireguard/qemu/kernel.config
 +++ b/tools/testing/selftests/wireguard/qemu/kernel.config
 @@ -18,10 +18,12 @@ CONFIG_NF_NAT=y

@@ -15,8 +15,8 @@ index f5b1d0d168e0..5f31107b22d1 100644
  KBUILD_CFLAGS   := -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs \
  		   -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE \
  		   -Werror=implicit-function-declaration -Werror=implicit-int \
--		   -Wno-format-security \
-+		   -Wno-format-security -Wno-address-of-packed-member \
+-		   -Werror=return-type -Wno-format-security \
++		   -Werror=return-type -Wno-format-security -Wno-address-of-packed-member \
  		   -std=gnu89
  KBUILD_CPPFLAGS := -D__KERNEL__
  KBUILD_AFLAGS_KERNEL :=
