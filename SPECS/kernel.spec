@@ -624,6 +624,9 @@ BuildRequires: xmlto
 %if %{with_perf} || %{with_tools}
 BuildRequires: asciidoc
 %endif
+%if %{with_tools}
+BuildRequires: libcap-devel
+%endif
 
 Source0: https://www.kernel.org/pub/linux/kernel/v5.x/linux-%{kversion}.tar.xz
 
