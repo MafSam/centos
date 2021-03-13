@@ -779,7 +779,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch-5.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.%{base_sublevel}.%{stable_base}.xz
 Source5000: %{stable_patch_00}
 %endif
 
