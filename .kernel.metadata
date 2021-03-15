@@ -1,3 +1,5 @@
-61321665b696e409e4be8a60c32bdc5660f372a0 SOURCES/kernel-abi-whitelists-4.18.0-277.tar.bz2
-f203fff825d48bdaedbef10a8acc344e06bd15bf SOURCES/kernel-kabi-dw-4.18.0-277.tar.bz2
-dcd884c2d21306b400e472d1232c5e81ffd5dd71 SOURCES/linux-4.18.0-277.el8.tar.xz
+a2a159b04e9100de59d60b0144bb7e53c374dff2 SOURCES/kernel-abi-stablelists-4.18.0-294.tar.bz2
+86801aaa02b60870f2f935537b292c70e78d2e54 SOURCES/kernel-kabi-dw-4.18.0-294.tar.bz2
+1ac6984d58c2a358216f7e8682f6fd0561e224b3 SOURCES/linux-4.18.0-294.el8.tar.xz
+95b9b811c7b0a6c98b2eafc4e7d6d24f2cb63289 SOURCES/rheldup3.x509
+d90885108d225a234a5a9d054fc80893a5bd54d0 SOURCES/rhelkpatch1.x509
