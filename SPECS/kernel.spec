@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 23
+%define stable_update 29
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3010,6 +3010,10 @@ fi
 #
 #
 %changelog
+* Sun Apr 11 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.29-200
+- Linux v5.10.29
+- Fixes to build in CentOS 7 and CentOS 8
+
 * Thu Mar 11 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.23-200
 - Linux v5.10.23
 
