@@ -149,7 +149,7 @@ Summary: The Linux kernel
 # kernel-zfcpdump (s390 specific kernel for zfcpdump)
 %define with_zfcpdump  %{?_without_zfcpdump:  0} %{?!_without_zfcpdump:  1}
 # kernel-abi-whitelists
-%define with_kernel_abi_whitelists %{?_without_kernel_abi_whitelists: 0} %{?!_without_kernel_abi_whitelists: 1}
+%define with_kernel_abi_whitelists %{?_without_kernel_abi_whitelists: 0} %{?!_without_kernel_abi_whitelists: 0}
 # internal samples and selftests
 %define with_selftests %{?_without_selftests: 0} %{?!_without_selftests: 1}
 #
@@ -162,7 +162,7 @@ Summary: The Linux kernel
 # Only build the debug kernel (--with dbgonly):
 %define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 # Control whether we perform a compat. check against published ABI.
-%define with_kabichk   %{?_without_kabichk:   0} %{?!_without_kabichk:   1}
+%define with_kabichk   %{?_without_kabichk:   0} %{?!_without_kabichk:   0}
 # Temporarily disable kabi checks until RC.
 %define with_kabichk 0
 # Control whether we perform a compat. check against DUP ABI.
@@ -752,8 +752,8 @@ Source211: Module.kabi_dup_ppc64le
 Source212: Module.kabi_dup_s390x
 Source213: Module.kabi_dup_x86_64
 
-# Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
-# Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
+#Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
+#Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
 
 # Sources for kernel-tools
 Source2000: cpupower.service
@@ -2991,6 +2991,9 @@ fi
 #
 #
 %changelog
+* Fri Apr 23 2021 Justin Vreeland <jvreeland@twitter.com> - 5.10.31-200
+- Disable kabi checks
+
 * Thu Apr 22 2021 Justin Vreeland <jvreeland@twitter.com> - 5.10.31-200
 - add files for centos-sig-hyperscale
 - remove changelog to fix errors from mock
