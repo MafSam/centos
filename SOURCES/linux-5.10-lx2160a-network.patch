@@ -2477,13 +2477,12 @@ diff --git a/drivers/net/mdio/Kconfig b/drivers/net/mdio/Kconfig
 index a10cc460d7cf..2d5bf5ccffb5 100644
 --- a/drivers/net/mdio/Kconfig
 +++ b/drivers/net/mdio/Kconfig
-@@ -19,6 +19,15 @@ config MDIO_BUS
+@@ -19,6 +19,14 @@ config MDIO_BUS
  	  reflects whether the mdio_bus/mdio_device code is built as a
  	  loadable module or built-in.
  
 +config FWNODE_MDIO
 +	def_tristate PHYLIB
-+	depends on ACPI
 +	depends on OF
 +	depends on PHYLIB
 +	select FIXED_PHY
