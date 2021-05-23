@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 33
+%define stable_update 38
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3010,6 +3010,9 @@ fi
 #
 #
 %changelog
+* Sat May 22 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.38-200
+- Linux v5.10.38
+
 * Sat May  1 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.33-200
 - Linux v5.10.33
 - Fix ethernet in armhfp devices

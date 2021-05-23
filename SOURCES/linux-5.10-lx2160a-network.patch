@@ -264,7 +264,7 @@ diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
 index 96b2ca1f1b06..7cea676d9c48 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
-@@ -341,22 +341,31 @@ EXPORT_SYMBOL(mmc_of_parse);
+@@ -378,22 +378,31 @@ EXPORT_SYMBOL(mmc_of_parse);
   * found, negative errno if the voltage-range specification is invalid,
   * or one if the voltage-range is specified and successfully parsed.
   */
@@ -305,7 +305,7 @@ index 96b2ca1f1b06..7cea676d9c48 100644
  	for (i = 0; i < num_ranges; i++) {
  		const int j = i * 2;
  		u32 ocr_mask;
-@@ -365,8 +374,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+@@ -402,8 +411,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
  				be32_to_cpu(voltage_ranges[j]),
  				be32_to_cpu(voltage_ranges[j + 1]));
  		if (!ocr_mask) {
@@ -339,7 +339,7 @@ index 5d9b3106d2f7..4b846f5741ad 100644
 -	mmc_of_parse_voltage(np, &host->ocr_mask);
 +	mmc_of_parse_voltage(&pdev->dev, &host->ocr_mask);
  
- 	if (esdhc_is_usdhc(imx_data)) {
+ 	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
 index ab5ab969f711..62a70b39497d 100644
@@ -470,7 +470,7 @@ diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
 index c079b932330f..e26382febc0a 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -484,7 +484,7 @@ int mmc_add_host(struct mmc_host *);
+@@ -481,7 +481,7 @@ int mmc_add_host(struct mmc_host *);
  void mmc_remove_host(struct mmc_host *);
  void mmc_free_host(struct mmc_host *);
  int mmc_of_parse(struct mmc_host *host);
@@ -2011,7 +2011,7 @@ diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
 index dd1f711140c3..aff42e17d441 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
-@@ -2799,6 +2799,29 @@ static bool phy_drv_supports_irq(struct phy_driver *phydrv)
+@@ -2806,6 +2806,29 @@ static bool phy_drv_supports_irq(struct phy_driver *phydrv)
  	return phydrv->config_intr && phydrv->ack_interrupt;
  }
  
@@ -2045,7 +2045,7 @@ diff --git a/include/linux/phy.h b/include/linux/phy.h
 index 56563e5e0dc7..a90b0eb55481 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
-@@ -1348,11 +1348,17 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
+@@ -1350,11 +1350,17 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
  				     bool is_c45,
  				     struct phy_c45_device_ids *c45_ids);
  #if IS_ENABLED(CONFIG_PHYLIB)
@@ -2096,7 +2096,7 @@ index aff42e17d441..662c388a77f5 100644
  #include <linux/bitmap.h>
  #include <linux/delay.h>
  #include <linux/errno.h>
-@@ -2822,6 +2823,67 @@ struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
+@@ -2829,6 +2830,67 @@ struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
  }
  EXPORT_SYMBOL(fwnode_mdio_find_device);
  
@@ -2168,7 +2168,7 @@ diff --git a/include/linux/phy.h b/include/linux/phy.h
 index a90b0eb55481..40b231a12f54 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
-@@ -1349,6 +1349,9 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
+@@ -1351,6 +1351,9 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
  				     struct phy_c45_device_ids *c45_ids);
  #if IS_ENABLED(CONFIG_PHYLIB)
  struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode);
@@ -2178,7 +2178,7 @@ index a90b0eb55481..40b231a12f54 100644
  struct phy_device *get_phy_device(struct mii_bus *bus, int addr, bool is_c45);
  int phy_device_register(struct phy_device *phy);
  void phy_device_free(struct phy_device *phydev);
-@@ -1358,6 +1361,23 @@ struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
+@@ -1360,6 +1363,23 @@ struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
  {
  	return 0;
  }
@@ -2265,7 +2265,7 @@ diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
 index 662c388a77f5..5d0ad64b4673 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
-@@ -818,6 +818,27 @@ static int get_phy_c22_id(struct mii_bus *bus, int addr, u32 *phy_id)
+@@ -817,6 +817,27 @@ static int get_phy_c22_id(struct mii_bus *bus, int addr, u32 *phy_id)
  	return 0;
  }
  
@@ -2297,7 +2297,7 @@ diff --git a/include/linux/phy.h b/include/linux/phy.h
 index 40b231a12f54..d0c5d9034689 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
-@@ -1348,6 +1348,7 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
+@@ -1350,6 +1350,7 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
  				     bool is_c45,
  				     struct phy_c45_device_ids *c45_ids);
  #if IS_ENABLED(CONFIG_PHYLIB)
@@ -2305,7 +2305,7 @@ index 40b231a12f54..d0c5d9034689 100644
  struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode);
  struct phy_device *fwnode_phy_find_device(struct fwnode_handle *phy_fwnode);
  struct phy_device *device_phy_find_device(struct device *dev);
-@@ -1356,6 +1357,10 @@ struct phy_device *get_phy_device(struct mii_bus *bus, int addr, bool is_c45);
+@@ -1358,6 +1359,10 @@ struct phy_device *get_phy_device(struct mii_bus *bus, int addr, bool is_c45);
  int phy_device_register(struct phy_device *phy);
  void phy_device_free(struct phy_device *phydev);
  #else
@@ -2420,7 +2420,7 @@ diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
 index 5d0ad64b4673..9f6b449cf388 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
-@@ -929,8 +929,7 @@ EXPORT_SYMBOL(phy_device_register);
+@@ -928,8 +928,7 @@ EXPORT_SYMBOL(phy_device_register);
   */
  void phy_device_remove(struct phy_device *phydev)
  {
@@ -2784,7 +2784,7 @@ diff --git a/include/linux/acpi.h b/include/linux/acpi.h
 index 5b1dc1ad4fb3..f62724b3849c 100644
 --- a/include/linux/acpi.h
 +++ b/include/linux/acpi.h
-@@ -699,6 +699,8 @@ static inline u64 acpi_arch_get_root_pointer(void)
+@@ -703,6 +703,8 @@ static inline u64 acpi_arch_get_root_pointer(void)
  }
  #endif
  
@@ -2793,7 +2793,7 @@ index 5b1dc1ad4fb3..f62724b3849c 100644
  #else	/* !CONFIG_ACPI */
  
  #define acpi_disabled 1
-@@ -946,6 +948,11 @@ static inline struct acpi_device *acpi_resource_consumer(struct resource *res)
+@@ -953,6 +955,11 @@ static inline struct acpi_device *acpi_resource_consumer(struct resource *res)
  	return NULL;
  }
  
