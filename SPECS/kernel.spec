@@ -83,19 +83,19 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 10
+%define base_sublevel 12
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 31
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -826,15 +826,10 @@ Patch19: 0001-Vulcan-AHCI-PCI-bar-fix-for-Broadcom-Vulcan-early-si.patch
 Patch20: 0001-ahci-thunderx2-Fix-for-errata-that-affects-stop-engi.patch
 Patch24: 0001-scsi-smartpqi-add-inspur-advantech-ids.patch
 Patch26: 0001-ipmi-do-not-configure-ipmi-for-HPE-m400.patch
-Patch28: 0001-iommu-arm-smmu-workaround-DMA-mode-issues.patch
 Patch29: 0001-arm-aarch64-Drop-the-EXPERT-setting-from-ARM64_FORCE.patch
 Patch31: 0001-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
 Patch32: 0001-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
 Patch33: 0001-security-lockdown-expose-a-hook-to-lock-the-kernel-d.patch
-Patch34: 0001-efi-Add-an-EFI_SECURE_BOOT-flag-to-indicate-secure-b.patch
-Patch35: 0001-efi-Lock-down-the-kernel-if-booted-in-secure-boot-mo.patch
-Patch36: 0001-s390-Lock-down-the-kernel-when-the-IPL-secure-flag-i.patch
-Patch37: 0001-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 Patch58: 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
 Patch59: 0001-ARM-tegra-usb-no-reset.patch
 Patch61: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
@@ -856,19 +851,8 @@ Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 # A patch to fix some undocumented things broke a bunch of Allwinner networks due to wrong assumptions
 Patch102: 0001-update-phy-on-pine64-a64-devices.patch
 
-# OMAP Pandaboard fix
-Patch103: arm-pandaboard-fix-add-bluetooth.patch
-
 # Fix for USB on some newer RPi4 / firmware combinations
 Patch104: 0001-brcm-rpi4-fix-usb-numeration.patch
-
-# RPi-4 and wifi issues
-Patch105: arm-dts-rpi-4-disable-wifi-frequencies.patch
-
-# fix python shebangs
-Patch106: switch-some-more-scripts-explicitly-to-python-3.patch
-# fix bad config options
-Patch107: fix-config-option.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1585,16 +1569,14 @@ cp %{SOURCE3001} .
 cp %{SOURCE3002} .
 VERSION=%{version} ./generate_all_configs.sh %{primary_target} %{debugbuildsenabled}
 
-# hyperscale isn't going to use this
-# Merge in any user-provided local config option changes
-# %ifnarch %nobuildarches
-# for i in %{all_arch_configs}
-# do
-#   mv $i $i.tmp
-#   ./merge.pl %{SOURCE1000} $i.tmp > $i
-#   rm $i.tmp
-# done
-# %endif
+%ifnarch %nobuildarches
+for i in %{all_arch_configs}
+do
+  mv $i $i.tmp
+  ./merge.pl %{SOURCE1000} $i.tmp > $i
+  rm $i.tmp
+done
+%endif
 
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
@@ -2991,6 +2973,10 @@ fi
 #
 #
 %changelog
+* Wed May 26 2021 Justin Vreeland <jvreeland@twitter.com> - 5.12.4-1
+- Linux v5.12.4
+- Use new configs
+
 * Fri Apr 23 2021 Justin Vreeland <jvreeland@twitter.com> - 5.10.31-200
 - Disable kabi checks
 
