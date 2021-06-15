@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 39
+%define stable_update 43
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3010,6 +3010,9 @@ fi
 #
 #
 %changelog
+* Tue Jun 15 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.43-200
+- Linux v5.10.43
+
 * Sun May 23 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.39-200
 - Linux v5.10.39
 
