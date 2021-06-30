@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 125
+%define stable_update 129
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3009,6 +3009,9 @@ fi
 #
 #
 %changelog
+* Wed Jun 30 2021 Pablo Greco <pgreco@centosproject.org> - 5.4.129-200
+- Update to version v5.4.129
+
 * Tue Jun 15 2021 Pablo Greco <pgreco@centosproject.org> - 5.4.125-200
 - Update to version v5.4.125
 
