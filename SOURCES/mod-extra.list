@@ -2,6 +2,8 @@
 a3d.ko
 act200l-sir.ko
 actisys-sir.ko
+act_mpls.ko
+act_ct.ko
 adi.ko
 aer_inject.ko
 af_802154.ko
@@ -15,6 +17,7 @@ avm_cs.ko
 avmfritz.ko
 ax25.ko
 b1.ko
+bareudp.ko
 bas_gigaset.ko
 batman-adv.ko
 baycom_par.ko
@@ -69,6 +72,7 @@ iforce.ko
 interact.ko
 ipddp.ko
 ipx.ko
+ip_vs_mh.ko
 isdn.ko
 joydump.ko
 kingsun-sir.ko
@@ -120,9 +124,11 @@ rds_tcp.ko
 rose.ko
 sch_atm.ko
 sch_cbq.ko
+sch_cbs.ko
 sch_choke.ko
 sch_drr.ko
 sch_dsmark.ko
+sch_ets.ko
 sch_gred.ko
 sch_mqprio.ko
 sch_multiq.ko
