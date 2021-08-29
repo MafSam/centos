@@ -7,7 +7,7 @@ kernelver=$1 && shift
 rootfs=$1 && shift
 variant=$1 && shift
 
-output="${rootfs}/lib/modules/${kernelver}/bls.conf"
+output="${rootfs}/lib/modules/${kernelver}/bls_sample.conf"
 date=$(date -u +%Y%m%d%H%M%S)
 
 if [ "${variant:-5}" = "debug" ]; then
