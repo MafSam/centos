@@ -95,7 +95,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 19
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -759,9 +759,6 @@ Source213: Module.kabi_dup_x86_64
 Source2000: cpupower.service
 Source2001: cpupower.config
 
-# CentOS SIG HyperScale config(s)
-Source3001: kernel-x86_64-centos-sig-hyperscale.config
-Source3002: kernel-x86_64-debug-centos-sig-hyperscale.config
 
 Source3003: filter-aarch64.sh.centos-sig-hyperscale
 Source3004: filter-armv7hl.sh.centos-sig-hyperscale
@@ -772,6 +769,12 @@ Source3008: filter-s390x.sh.centos-sig-hyperscale
 Source3009: filter-x86_64.sh.centos-sig-hyperscale
 Source3010: mod-extra.list.centos-sig-hyperscale
 Source3011: x509.genkey.centos-sig-hyperscale
+
+# CentOS SIG HyperScale config(s)
+Source4001: kernel-x86_64-centos-sig-hyperscale.config
+Source4002: kernel-x86_64-debug-centos-sig-hyperscale.config
+Source4003: kernel-aarch64-centos-sig-hyperscale.config
+Source4004: kernel-aarch64-debug-centos-sig-hyperscale.config
 
 ## Patches needed for building this package
 
@@ -831,7 +834,7 @@ Patch31: 0001-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
 Patch32: 0001-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
 Patch33: 0001-security-lockdown-expose-a-hook-to-lock-the-kernel-d.patch
 Patch58: 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
-Patch59: 0001-ARM-tegra-usb-no-reset.patch
+# Patch59: 0001-ARM-tegra-usb-no-reset.patch
 Patch61: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
 Patch62: 0001-Drop-that-for-now.patch
 Patch63: 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
@@ -846,7 +849,7 @@ Patch72: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
 Patch100: arm64-dts-rockchip-disable-USB-type-c-DisplayPort.patch
 
 # Tegra fixes
-Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
+# Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 
 # A patch to fix some undocumented things broke a bunch of Allwinner networks due to wrong assumptions
 Patch102: 0001-update-phy-on-pine64-a64-devices.patch
@@ -1565,8 +1568,10 @@ rm *aarch* *s390x* *ppc*
 cp %{SOURCE1000} .
 cp %{SOURCE55} .
 cp %{SOURCE51} .
-cp %{SOURCE3001} .
-cp %{SOURCE3002} .
+cp %{SOURCE4001} .
+cp %{SOURCE4002} .
+cp %{SOURCE4003} .
+cp %{SOURCE4004} .
 VERSION=%{version} ./generate_all_configs.sh %{primary_target} %{debugbuildsenabled}
 
 %ifnarch %nobuildarches
@@ -2973,6 +2978,10 @@ fi
 #
 #
 %changelog
+* Thu Sep 30 2021 Justin Vreeland <jvreeland@twitter.com> - 5.%{base_sublevel}.%{stable_update}-%{fedora_build}%{?buildid}%{?dist}
+- Linux v5.12.19
+- re sync with fedora configs
+
 * Wed May 26 2021 Justin Vreeland <jvreeland@twitter.com> - 5.12.4-1
 - Linux v5.12.4
 - Use new configs
