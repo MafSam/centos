@@ -1,1 +1,4 @@
 970004f1c0fe199dca63ed7658dff4ca7fd74b55 SOURCES/linux-5.14.0-7.el9.tar.xz
+da39a3ee5e6b4b0d3255bfef95601890afd80709 SOURCES/patch-5.14.0-redhat.patch
+8556b9a3a050db31d566d2438800dd330e38fd09 SOURCES/kernel-kabi-dw-5.14.0-7.tar.bz2
+2a563cc4982a10b2c60d823cf7e4984f9ad81333 SOURCES/kernel-abi-stablelists-5.14.0-7.tar.bz2
