@@ -823,11 +823,8 @@ Source4002: gating.yaml
 # hyperscale
 Source5001: filter-aarch64.sh.centos-sig-hyperscale
 Source5002: filter-modules.sh.centos-sig-hyperscale
-Source5003: filter-ppc64le.sh.centos-sig-hyperscale
-Source5004: filter-s390x.sh.centos-sig-hyperscale
 Source5005: filter-x86_64.sh.centos-sig-hyperscale
 Source5006: mod-extra.list.centos-sig-hyperscale
-Source5007: x509.genkey.centos-sig-hyperscale
 
 # CentOS SIG HyperScale config(s)
 Source5008: kernel-x86_64-centos-sig-hyperscale.config
