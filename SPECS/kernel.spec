@@ -644,13 +644,11 @@ BuildConflicts: dwarves < 1.13
 BuildRequires: kabi-dw
 %endif
 
-%if %{signkernel}%{signmodules}
 BuildRequires: openssl openssl-devel
 %if %{signkernel}
 %ifarch x86_64 aarch64
 BuildRequires: nss-tools
 BuildRequires: pesign >= 0.10-4
-%endif
 %endif
 %endif
 
@@ -2967,6 +2965,7 @@ fi
 %changelog
 * Wed Oct 13 2021 Justin Vreeland <jvreeland@twitter.com> - 5.14.0-%{specrelease}
 - Readd pieces dropped during copy out of upstream format
+- scripts/sign-file needs openssl and doesn't seem to be gated by signkernel
 
 * Tue Oct 12 2021 Justin Vreeland <vreeland.justin@gmail.com> - 5.14.0-%{specrelease}
 - Update for CentOS Hyperscale SIG
