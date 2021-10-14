@@ -85,7 +85,11 @@ Summary: The Linux kernel
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
 %else
+%if 0%{?centos_hs}
+%define secure_boot_arch ''
+%else
 %define secure_boot_arch x86_64 aarch64 s390x ppc64le
+%endif
 %endif
 
 # Signing for secure boot authentication
@@ -96,7 +100,11 @@ Summary: The Linux kernel
 %endif
 
 # Sign modules on all arches
+%if 0%{?centos_hs}
+%global signmodules 0
+%else
 %global signmodules 1
+%endif
 
 # Compress modules only for architectures that build modules
 %ifarch noarch
@@ -2957,6 +2965,9 @@ fi
 #
 #
 %changelog
+* Wed Oct 13 2021 Justin Vreeland <jvreeland@twitter.com> - 5.14.0-%{specrelease}
+- Readd pieces dropped during copy out of upstream format
+
 * Tue Oct 12 2021 Justin Vreeland <vreeland.justin@gmail.com> - 5.14.0-%{specrelease}
 - Update for CentOS Hyperscale SIG
 
