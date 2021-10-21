@@ -2978,6 +2978,9 @@ fi
 #
 #
 %changelog
+* Wed Oct 20 2021 Justin Vreeland <jvreeland@twitter.com> - 5.12.19-1
+- switch to 64K pages
+
 * Thu Sep 30 2021 Justin Vreeland <jvreeland@twitter.com> - 5.%{base_sublevel}.%{stable_update}-%{fedora_build}%{?buildid}%{?dist}
 - Linux v5.12.19
 - re sync with fedora configs
