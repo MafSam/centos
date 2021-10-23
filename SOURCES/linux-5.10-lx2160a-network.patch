@@ -1,4 +1,4 @@
-From e89d20d3574d83dec8642079f92dac3059f24c7d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Laurentiu Tudor <laurentiu.tudor@nxp.com>
 Date: Thu, 5 Nov 2020 17:30:50 +0200
 Subject: [PATCH 01/44] bus: fsl-mc: make sure MC firmware is up and running
@@ -19,7 +19,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  1 file changed, 30 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/bus/fsl-mc/fsl-mc-bus.c b/drivers/bus/fsl-mc/fsl-mc-bus.c
-index 806766b1b45f..b8e6acdf932e 100644
+index e329cdd7156c..a68afc9d1e32 100644
 --- a/drivers/bus/fsl-mc/fsl-mc-bus.c
 +++ b/drivers/bus/fsl-mc/fsl-mc-bus.c
 @@ -60,6 +60,9 @@ struct fsl_mc_addr_translation_range {
@@ -32,7 +32,7 @@ index 806766b1b45f..b8e6acdf932e 100644
  #define FSL_MC_FAPR	0x28
  #define MC_FAPR_PL	BIT(18)
  #define MC_FAPR_BMT	BIT(17)
-@@ -973,21 +976,36 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
+@@ -991,21 +994,36 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
  			return PTR_ERR(mc->fsl_mc_regs);
  	}
  
@@ -85,7 +85,7 @@ index 806766b1b45f..b8e6acdf932e 100644
 2.27.0
 
 
-From f62794c7538c03c7ba8f3e744ff1d562207c2285 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Laurentiu Tudor <laurentiu.tudor@nxp.com>
 Date: Tue, 24 Nov 2020 13:12:00 +0200
 Subject: [PATCH 02/44] bus: fsl-mc: added missing fields to
@@ -142,7 +142,7 @@ index 85ca5fdee581..c932387641fa 100644
 2.27.0
 
 
-From 0f49df78f3c29e954e7ecb1b9428075144b103f3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Makarand Pawagi <makarand.pawagi@nxp.com>
 Date: Tue, 21 Apr 2020 11:25:53 +0530
 Subject: [PATCH 03/44] soc: fsl: enable acpi support for Guts driver
@@ -229,7 +229,7 @@ index 34810f9bb2ee..56b6797c265e 100644
 2.27.0
 
 
-From 243f3dcb60a1ea9bd7e4fa979c2187a169fb069f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
 Date: Wed, 27 May 2020 21:35:11 +0530
 Subject: [PATCH 04/44] mmc: sdhci-of-esdhc: Add ACPI support
@@ -248,7 +248,7 @@ Signed-off-by: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
  7 files changed, 67 insertions(+), 38 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d42037f0f10d..35649b95a860 100644
+index b5f3f160c842..11b0c467acbf 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
 @@ -6,6 +6,8 @@
@@ -261,10 +261,10 @@ index d42037f0f10d..35649b95a860 100644
  #include <linux/module.h>
  #include <linux/init.h>
 diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 96b2ca1f1b06..7cea676d9c48 100644
+index 58112999a69a..20b5d5d56e03 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
-@@ -378,22 +378,31 @@ EXPORT_SYMBOL(mmc_of_parse);
+@@ -379,22 +379,31 @@ EXPORT_SYMBOL(mmc_of_parse);
   * found, negative errno if the voltage-range specification is invalid,
   * or one if the voltage-range is specified and successfully parsed.
   */
@@ -305,7 +305,7 @@ index 96b2ca1f1b06..7cea676d9c48 100644
  	for (i = 0; i < num_ranges; i++) {
  		const int j = i * 2;
  		u32 ocr_mask;
-@@ -402,8 +411,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+@@ -403,8 +412,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
  				be32_to_cpu(voltage_ranges[j]),
  				be32_to_cpu(voltage_ranges[j + 1]));
  		if (!ocr_mask) {
@@ -329,7 +329,7 @@ index 3c4d950a4755..3178554a9efc 100644
  
  	oms->detect_irq = irq_of_parse_and_map(np, 0);
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 5d9b3106d2f7..4b846f5741ad 100644
+index d28809e47962..a5b2bd3cb202 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
 @@ -1502,7 +1502,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
@@ -342,7 +342,7 @@ index 5d9b3106d2f7..4b846f5741ad 100644
  	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index ab5ab969f711..62a70b39497d 100644
+index ab5ab969f711..3ae7fe297b82 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 @@ -10,6 +10,7 @@
@@ -467,7 +467,7 @@ index 328b132bbe57..5053544edf48 100644
   * Authors: Xiaobo Xie <X.Xie@freescale.com>
   *	    Anton Vorontsov <avorontsov@ru.mvista.com>
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c079b932330f..e26382febc0a 100644
+index 40d7e98fc990..e1214995633e 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -481,7 +481,7 @@ int mmc_add_host(struct mmc_host *);
@@ -483,7 +483,7 @@ index c079b932330f..e26382febc0a 100644
 2.27.0
 
 
-From 6e7e988629b1a305e6d5711085952622336e7afe Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Meharbaan <meharbaan.ali@puresoftware.com>
 Date: Tue, 28 Jul 2020 17:41:31 +0530
 Subject: [PATCH 05/44] drivers/mmc/host/sdhci-of-esdhc : Fix DMA coherent
@@ -558,7 +558,7 @@ index 4c43d30145c6..c9d76e55a226 100644
   * fwnode_get_phy_mode - Get phy mode for given firmware node
   * @fwnode:	Pointer to the given node
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 62a70b39497d..bb7e456ad17b 100644
+index 3ae7fe297b82..37f5eb9f64b6 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 @@ -541,8 +541,11 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
@@ -592,7 +592,7 @@ index 2d4542629d80..3e0a1a5655f0 100644
 2.27.0
 
 
-From 287dea1fbd948fd84964d92ca7947245fe5473d8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:43 +0000
 Subject: [PATCH 06/44] ACPICA: IORT: Update for revision E
@@ -682,7 +682,7 @@ index ec66779cb193..274fce7b5c01 100644
 2.27.0
 
 
-From a4225192809e805517c41af17a5cc0073ce7c600 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:44 +0000
 Subject: [PATCH 07/44] ACPI/IORT: Add support for RMR node parsing
@@ -858,7 +858,7 @@ index 2494138a6905..69a20d7e0c84 100644
 2.27.0
 
 
-From dc79d5283e1e9fc0e2d002c06c898f98765d1c4d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:45 +0000
 Subject: [PATCH 08/44] iommu/dma: Introduce generic helper to retrieve RMR
@@ -880,7 +880,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  3 files changed, 60 insertions(+)
 
 diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-index 0cbcd3fc3e7e..d73768ecdd1a 100644
+index d1539b7399a9..bd028bf697ff 100644
 --- a/drivers/iommu/dma-iommu.c
 +++ b/drivers/iommu/dma-iommu.c
 @@ -166,6 +166,42 @@ void iommu_dma_get_resv_regions(struct device *dev, struct list_head *list)
@@ -927,7 +927,7 @@ index 0cbcd3fc3e7e..d73768ecdd1a 100644
  		phys_addr_t start, phys_addr_t end)
  {
 diff --git a/include/linux/dma-iommu.h b/include/linux/dma-iommu.h
-index 2112f21f73d8..f502855e4da0 100644
+index 2112f21f73d8..b801db1b9416 100644
 --- a/include/linux/dma-iommu.h
 +++ b/include/linux/dma-iommu.h
 @@ -37,7 +37,11 @@ void iommu_dma_compose_msi_msg(struct msi_desc *desc,
@@ -953,7 +953,7 @@ index 2112f21f73d8..f502855e4da0 100644
  #endif	/* CONFIG_IOMMU_DMA */
  #endif	/* __DMA_IOMMU_H */
 diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-index f11f5072af5d..d76a6da8df0b 100644
+index e90c267e7f3e..9549eca5925d 100644
 --- a/include/linux/iommu.h
 +++ b/include/linux/iommu.h
 @@ -592,6 +592,22 @@ struct iommu_sva {
@@ -983,7 +983,7 @@ index f11f5072af5d..d76a6da8df0b 100644
 2.27.0
 
 
-From 67844f76ed8feae4d831f191efd3b7a3384b4f16 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:46 +0000
 Subject: [PATCH 09/44] ACPI/IORT: Add RMR memory regions reservation helper
@@ -1088,7 +1088,7 @@ index 69a20d7e0c84..8f86779d283a 100644
  
  static int nc_dma_get_range(struct device *dev, u64 *size)
 diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-index d73768ecdd1a..aa8304e50786 100644
+index bd028bf697ff..fb7774be7467 100644
 --- a/drivers/iommu/dma-iommu.c
 +++ b/drivers/iommu/dma-iommu.c
 @@ -176,6 +176,9 @@ EXPORT_SYMBOL(iommu_dma_get_resv_regions);
@@ -1102,7 +1102,7 @@ index d73768ecdd1a..aa8304e50786 100644
  }
  EXPORT_SYMBOL(iommu_dma_get_rmrs);
 diff --git a/include/linux/acpi_iort.h b/include/linux/acpi_iort.h
-index 1a12baa58e40..c837fc6e95fe 100644
+index 1a12baa58e40..a925cac61573 100644
 --- a/include/linux/acpi_iort.h
 +++ b/include/linux/acpi_iort.h
 @@ -39,6 +39,8 @@ const struct iommu_ops *iort_iommu_configure_id(struct device *dev,
@@ -1129,7 +1129,7 @@ index 1a12baa58e40..c837fc6e95fe 100644
 2.27.0
 
 
-From 9479d764bc71f0a60f7861359f477af08a4082a1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:47 +0000
 Subject: [PATCH 10/44] iommu/arm-smmu-v3: Introduce strtab init helper
@@ -1195,7 +1195,7 @@ index 7067b7c11626..f8f596c5c086 100644
 2.27.0
 
 
-From d7e16ba5576168effd83fa2ba11204492b9b0c2a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:48 +0000
 Subject: [PATCH 11/44] =?UTF-8?q?iommu/arm-smmu-v3:=20Add=20bypass=20flag?=
@@ -1259,7 +1259,7 @@ index f8f596c5c086..8988c63e7c00 100644
 2.27.0
 
 
-From eb04e7b17294dce306a446662f8f3a1b313d27ba Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:49 +0000
 Subject: [PATCH 12/44] iommu/arm-smmu-v3: Get associated RMR info and install
@@ -1338,7 +1338,7 @@ index 8988c63e7c00..00f19d37a3df 100644
  	ret = arm_smmu_device_reset(smmu, bypass);
  	if (ret)
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.h b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.h
-index d4b7f40ccb02..17b517ddecee 100644
+index 57e5d223c467..90fcf8a52234 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.h
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.h
 @@ -636,6 +636,8 @@ struct arm_smmu_device {
@@ -1354,7 +1354,7 @@ index d4b7f40ccb02..17b517ddecee 100644
 2.27.0
 
 
-From c9fa17c72291b8dda67cee25a45de65283391483 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
 Date: Thu, 19 Nov 2020 12:11:50 +0000
 Subject: [PATCH 13/44] =?UTF-8?q?iommu/arm-smmu-v3:=20Reserve=20any=20RMR?=
@@ -1431,7 +1431,7 @@ index 00f19d37a3df..23c0c4d5ad09 100644
 2.27.0
 
 
-From 1a4c374e2cf1ae43fb8638cb9b8ebb918e1794a1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Fri, 18 Dec 2020 05:04:43 -0500
 Subject: [PATCH 14/44] iommu/arm-smmu: Get associated RMR info and install
@@ -1452,10 +1452,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  2 files changed, 46 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu/arm-smmu.c b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-index bcbacf22331d..338850966fe8 100644
+index df24bbe3ea4f..e11a94c96fa1 100644
 --- a/drivers/iommu/arm/arm-smmu/arm-smmu.c
 +++ b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-@@ -2095,6 +2095,45 @@ err_reset_platform_ops: __maybe_unused;
+@@ -2099,6 +2099,45 @@ err_reset_platform_ops: __maybe_unused;
  	return err;
  }
  
@@ -1501,7 +1501,7 @@ index bcbacf22331d..338850966fe8 100644
  static int arm_smmu_device_probe(struct platform_device *pdev)
  {
  	struct resource *res;
-@@ -2224,6 +2263,11 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
+@@ -2228,6 +2267,11 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
  	}
  
  	platform_set_drvdata(pdev, smmu);
@@ -1530,7 +1530,7 @@ index b71647eaa319..a3c3442e7d4c 100644
 2.27.0
 
 
-From 27aae2dfb64e6f5d0263c28bc6001e84cd857253 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jon Nettleton <jon@solid-run.com>
 Date: Fri, 18 Dec 2020 05:06:31 -0500
 Subject: [PATCH 15/44] =?UTF-8?q?iommu/arm-smmu:=20Reserve=20any=20RMR=20r?=
@@ -1548,10 +1548,10 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 43 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu/arm-smmu.c b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-index 338850966fe8..183960395579 100644
+index e11a94c96fa1..34f22b74236b 100644
 --- a/drivers/iommu/arm/arm-smmu/arm-smmu.c
 +++ b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-@@ -1584,6 +1584,48 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
+@@ -1588,6 +1588,48 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
  	return iommu_fwspec_add_ids(dev, &fwid, 1);
  }
  
@@ -1600,7 +1600,7 @@ index 338850966fe8..183960395579 100644
  static void arm_smmu_get_resv_regions(struct device *dev,
  				      struct list_head *head)
  {
-@@ -1598,6 +1640,7 @@ static void arm_smmu_get_resv_regions(struct device *dev,
+@@ -1602,6 +1644,7 @@ static void arm_smmu_get_resv_regions(struct device *dev,
  	list_add_tail(&region->list, head);
  
  	iommu_dma_get_resv_regions(dev, head);
@@ -1612,7 +1612,7 @@ index 338850966fe8..183960395579 100644
 2.27.0
 
 
-From 6b1e54549e8190821f7d85a6eac7d0bdae75613a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Fri, 8 Jan 2021 11:07:22 +0200
 Subject: [PATCH 16/44] dpaa2-mac: split up initializing the MAC object from
@@ -1809,7 +1809,7 @@ index 955a52856210..13d42dd58ec9 100644
 2.27.0
 
 
-From 0f95faffc5d299ede2605a3415ccbaca0b593498 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:49:56 +0530
 Subject: [PATCH 17/44] Documentation: ACPI: DSD: Document MDIO PHY
@@ -1968,7 +1968,7 @@ index 000000000000..7d01ae8b3cc6
 2.27.0
 
 
-From e1f94e1daf554db196203f2430fd0a9532980a53 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:49:57 +0530
 Subject: [PATCH 18/44] net: phy: Introduce fwnode_mdio_find_device()
@@ -2008,7 +2008,7 @@ index 4daf94bb56a5..7bd33b930116 100644
  EXPORT_SYMBOL(of_mdio_find_device);
  
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index dd1f711140c3..aff42e17d441 100644
+index 85f3cde5ffd0..6bd068cf18cd 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -2806,6 +2806,29 @@ static bool phy_drv_supports_irq(struct phy_driver *phydrv)
@@ -2042,7 +2042,7 @@ index dd1f711140c3..aff42e17d441 100644
   * phy_probe - probe and init a PHY device
   * @dev: device to probe and init
 diff --git a/include/linux/phy.h b/include/linux/phy.h
-index 56563e5e0dc7..a90b0eb55481 100644
+index 08725a262f32..4bd26a744c98 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
 @@ -1350,11 +1350,17 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
@@ -2067,7 +2067,7 @@ index 56563e5e0dc7..a90b0eb55481 100644
 2.27.0
 
 
-From ab37ac2fa7c18374312c11b5583cb64b1ad0095c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:49:58 +0530
 Subject: [PATCH 19/44] net: phy: Introduce phy related fwnode functions
@@ -2085,7 +2085,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 82 insertions(+)
 
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index aff42e17d441..662c388a77f5 100644
+index 6bd068cf18cd..ca6b86c6794c 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -9,6 +9,7 @@
@@ -2165,7 +2165,7 @@ index aff42e17d441..662c388a77f5 100644
   * phy_probe - probe and init a PHY device
   * @dev: device to probe and init
 diff --git a/include/linux/phy.h b/include/linux/phy.h
-index a90b0eb55481..40b231a12f54 100644
+index 4bd26a744c98..4e911cc926f0 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
 @@ -1351,6 +1351,9 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
@@ -2206,7 +2206,7 @@ index a90b0eb55481..40b231a12f54 100644
 2.27.0
 
 
-From b58a8a23b8c692adfb1f264f0555052e618fad44 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:49:59 +0530
 Subject: [PATCH 20/44] of: mdio: Refactor of_phy_find_device()
@@ -2246,7 +2246,7 @@ index 7bd33b930116..94ec421dd91b 100644
 2.27.0
 
 
-From efdd10e3f8be334e77592201bba65ff4395d75ef Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:00 +0530
 Subject: [PATCH 21/44] net: phy: Introduce fwnode_get_phy_id()
@@ -2262,7 +2262,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 26 insertions(+)
 
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index 662c388a77f5..5d0ad64b4673 100644
+index ca6b86c6794c..459858aa0c95 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -817,6 +817,27 @@ static int get_phy_c22_id(struct mii_bus *bus, int addr, u32 *phy_id)
@@ -2294,7 +2294,7 @@ index 662c388a77f5..5d0ad64b4673 100644
   * get_phy_device - reads the specified PHY device and returns its @phy_device
   *		    struct
 diff --git a/include/linux/phy.h b/include/linux/phy.h
-index 40b231a12f54..d0c5d9034689 100644
+index 4e911cc926f0..a79f8ab3baf8 100644
 --- a/include/linux/phy.h
 +++ b/include/linux/phy.h
 @@ -1350,6 +1350,7 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, u32 phy_id,
@@ -2320,7 +2320,7 @@ index 40b231a12f54..d0c5d9034689 100644
 2.27.0
 
 
-From 2a11e8cb084e0db52b971e1e0076b0f832163b8b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:01 +0530
 Subject: [PATCH 22/44] of: mdio: Refactor of_get_phy_id()
@@ -2360,7 +2360,7 @@ index 94ec421dd91b..d4cc293358f7 100644
 2.27.0
 
 
-From ee93bf13699df3eeee369d403166708bc2a9a775 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:02 +0530
 Subject: [PATCH 23/44] net: mii_timestamper: check NULL in
@@ -2417,7 +2417,7 @@ index b71b7456462d..51ae0593a04f 100644
  	 * register_mii_timestamper() and thus don't have ->device set. Don't
  	 * try to unregister these.
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index 5d0ad64b4673..9f6b449cf388 100644
+index 459858aa0c95..e75e856fc6fd 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -928,8 +928,7 @@ EXPORT_SYMBOL(phy_device_register);
@@ -2434,7 +2434,7 @@ index 5d0ad64b4673..9f6b449cf388 100644
 2.27.0
 
 
-From 19cd8ebabe432b4d49438403a25532cdf2f21e3b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:03 +0530
 Subject: [PATCH 24/44] net: mdiobus: Introduce fwnode_mdiobus_register_phy()
@@ -2451,18 +2451,18 @@ Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
 Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
 ---
  MAINTAINERS                    |  1 +
- drivers/net/mdio/Kconfig       |  9 ++++
+ drivers/net/mdio/Kconfig       |  7 ++++
  drivers/net/mdio/Makefile      |  3 +-
  drivers/net/mdio/fwnode_mdio.c | 77 ++++++++++++++++++++++++++++++++++
  drivers/net/mdio/of_mdio.c     |  3 +-
  include/linux/fwnode_mdio.h    | 24 +++++++++++
  include/linux/of_mdio.h        |  6 ++-
- 7 files changed, 120 insertions(+), 3 deletions(-)
+ 7 files changed, 118 insertions(+), 3 deletions(-)
  create mode 100644 drivers/net/mdio/fwnode_mdio.c
  create mode 100644 include/linux/fwnode_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 281de213ef47..821adf657115 100644
+index 4fef10dd2975..213c3a72a74a 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -2474,17 +2474,16 @@ index 281de213ef47..821adf657115 100644
  F:	drivers/net/pcs/
  F:	drivers/net/phy/
 diff --git a/drivers/net/mdio/Kconfig b/drivers/net/mdio/Kconfig
-index a10cc460d7cf..2d5bf5ccffb5 100644
+index a10cc460d7cf..d808a2a0a376 100644
 --- a/drivers/net/mdio/Kconfig
 +++ b/drivers/net/mdio/Kconfig
-@@ -19,6 +19,14 @@ config MDIO_BUS
+@@ -19,6 +19,13 @@ config MDIO_BUS
  	  reflects whether the mdio_bus/mdio_device code is built as a
  	  loadable module or built-in.
  
 +config FWNODE_MDIO
 +	def_tristate PHYLIB
-+	depends on OF
-+	depends on PHYLIB
++	depends on (ACPI || OF) || COMPILE_TEST
 +	select FIXED_PHY
 +	help
 +	  FWNODE MDIO bus (Ethernet PHY) accessors
@@ -2641,7 +2640,7 @@ index 000000000000..8c0392845916
 +
 +#endif /* __LINUX_FWNODE_MDIO_H */
 diff --git a/include/linux/of_mdio.h b/include/linux/of_mdio.h
-index cfe8c607a628..3b66016f18aa 100644
+index f56c6a9230ac..a60bf3d74207 100644
 --- a/include/linux/of_mdio.h
 +++ b/include/linux/of_mdio.h
 @@ -34,6 +34,7 @@ struct mii_bus *of_mdio_find_bus(struct device_node *mdio_np);
@@ -2652,7 +2651,7 @@ index cfe8c607a628..3b66016f18aa 100644
  int of_mdiobus_phy_device_register(struct mii_bus *mdio, struct phy_device *phy,
  				   struct device_node *child, u32 addr);
  
-@@ -128,7 +129,10 @@ static inline bool of_phy_is_fixed_link(struct device_node *np)
+@@ -135,7 +136,10 @@ static inline bool of_phy_is_fixed_link(struct device_node *np)
  {
  	return false;
  }
@@ -2668,7 +2667,7 @@ index cfe8c607a628..3b66016f18aa 100644
 2.27.0
 
 
-From 91d4b9891111f2cdab14930a44c43ee91c70ecc0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:04 +0530
 Subject: [PATCH 25/44] of: mdio: Refactor of_mdiobus_register_phy()
@@ -2741,7 +2740,7 @@ index 932912c585c0..513afdd5e0ab 100644
 2.27.0
 
 
-From 80efa126324583a3f0117e93f6bc9fea8871518e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:05 +0530
 Subject: [PATCH 26/44] ACPI: utils: Introduce acpi_get_local_address()
@@ -2781,7 +2780,7 @@ index d5411a166685..0d3a2b111c0f 100644
  acpi_evaluate_reference(acpi_handle handle,
  			acpi_string pathname,
 diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 5b1dc1ad4fb3..f62724b3849c 100644
+index fdb1d5262ce8..3effd73dd265 100644
 --- a/include/linux/acpi.h
 +++ b/include/linux/acpi.h
 @@ -703,6 +703,8 @@ static inline u64 acpi_arch_get_root_pointer(void)
@@ -2809,7 +2808,7 @@ index 5b1dc1ad4fb3..f62724b3849c 100644
 2.27.0
 
 
-From d0808b96b36584f5358fd466d87cfa5924161674 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:06 +0530
 Subject: [PATCH 27/44] net: mdio: Add ACPI support code for mdio
@@ -2829,7 +2828,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  create mode 100644 include/linux/acpi_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 821adf657115..79be0e518f45 100644
+index 213c3a72a74a..869f3acadaec 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -2841,10 +2840,10 @@ index 821adf657115..79be0e518f45 100644
  F:	drivers/net/mdio/of_mdio.c
  F:	drivers/net/pcs/
 diff --git a/drivers/net/mdio/Kconfig b/drivers/net/mdio/Kconfig
-index 2d5bf5ccffb5..fc8c787b448f 100644
+index d808a2a0a376..879154d68ed3 100644
 --- a/drivers/net/mdio/Kconfig
 +++ b/drivers/net/mdio/Kconfig
-@@ -36,6 +36,13 @@ config OF_MDIO
+@@ -34,6 +34,13 @@ config OF_MDIO
  	help
  	  OpenFirmware MDIO bus (Ethernet PHY) accessors
  
@@ -2967,7 +2966,7 @@ index 000000000000..748d261fe2f9
 2.27.0
 
 
-From 24beb04f83e410fbb746f7a69f1f0911dc22cc8b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:07 +0530
 Subject: [PATCH 28/44] net: mdiobus: Introduce fwnode_mdiobus_register()
@@ -3045,7 +3044,7 @@ index 8c0392845916..20f22211260b 100644
 2.27.0
 
 
-From c5597d49b769cf06689afd2266d109c94c6a46d9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:08 +0530
 Subject: [PATCH 29/44] net/fsl: Use fwnode_mdiobus_register()
@@ -3131,7 +3130,7 @@ index bfa2826c5545..6daf1fb2e9ea 100644
 2.27.0
 
 
-From 13745fcb80857b1402c788e1d16e39f622c36866 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:09 +0530
 Subject: [PATCH 30/44] net: phylink: introduce phylink_fwnode_phy_connect()
@@ -3146,7 +3145,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 57 insertions(+)
 
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index fe2296fdda19..479ffbf335a3 100644
+index 025c3246f339..e663dc91e1f8 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
 @@ -5,6 +5,7 @@
@@ -3235,7 +3234,7 @@ index d81a714cfbbd..75d4f99090fd 100644
 2.27.0
 
 
-From d34f59033bb4e370047886e26463246cc9e64ec3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:10 +0530
 Subject: [PATCH 31/44] net: phylink: Refactor phylink_of_phy_connect()
@@ -3248,7 +3247,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 38 deletions(-)
 
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index 479ffbf335a3..2aa31ff60d9b 100644
+index e663dc91e1f8..79bef3234ec3 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
 @@ -1080,44 +1080,7 @@ EXPORT_SYMBOL_GPL(phylink_connect_phy);
@@ -3301,7 +3300,7 @@ index 479ffbf335a3..2aa31ff60d9b 100644
 2.27.0
 
 
-From 15b6e2fbb96d2be7517c229b2dba386ddb79ca72 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Calvin Johnson <calvin.johnson@oss.nxp.com>
 Date: Thu, 11 Mar 2021 11:50:11 +0530
 Subject: [PATCH 32/44] net: dpaa2-mac: Add ACPI support for DPAA2 MAC driver
@@ -3505,7 +3504,7 @@ index 50dd302abcf4..efd804d4a1bf 100644
 2.27.0
 
 
-From a523b29f4a96892a4747ed68b08194a6c8061508 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 14 Jan 2021 19:07:48 +0200
 Subject: [PATCH 33/44] bus: fsl-mc: move fsl_mc_command struct in a uapi
@@ -3523,7 +3522,7 @@ Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
  create mode 100644 include/uapi/linux/fsl_mc.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 79be0e518f45..e0a8bdb3567c 100644
+index 869f3acadaec..70347007e870 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -14425,6 +14425,7 @@ S:	Maintained
@@ -3602,7 +3601,7 @@ index 000000000000..cf56d46f052e
 2.27.0
 
 
-From a60453c68943570d705d78a1ffe0581154dca0c1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 14 Jan 2021 19:07:49 +0200
 Subject: [PATCH 34/44] bus: fsl-mc: export mc_cmd_hdr_read_cmdid() to the
@@ -3645,7 +3644,7 @@ index 85a0225db522..b291b35e3884 100644
 2.27.0
 
 
-From 4e2a5dcbaba4070b3920865836c2f597762a6b30 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 14 Jan 2021 19:07:50 +0200
 Subject: [PATCH 35/44] bus: fsl-mc: add fsl-mc userspace support
@@ -4424,7 +4423,7 @@ index cf56d46f052e..e57451570033 100644
 2.27.0
 
 
-From e4c686ebcbba8431f97eb044e3b6c70dda36bd91 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 14 Jan 2021 19:07:51 +0200
 Subject: [PATCH 36/44] bus: fsl-mc: add bus rescan attribute
@@ -4461,7 +4460,7 @@ index 000000000000..a4d384df9ba8
 +		Management Complex firmware.
 +Users:		Userspace drivers and management tools
 diff --git a/MAINTAINERS b/MAINTAINERS
-index e0a8bdb3567c..590779774dd2 100644
+index 70347007e870..28fc517875b4 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -14422,6 +14422,7 @@ M:	Stuart Yoder <stuyoder@gmail.com>
@@ -4488,10 +4487,10 @@ index ca2ce38a5d51..57a59f7f9802 100644
  	int num_child_objects;
  	int dprc_get_obj_failures;
 diff --git a/drivers/bus/fsl-mc/fsl-mc-bus.c b/drivers/bus/fsl-mc/fsl-mc-bus.c
-index b8e6acdf932e..cb031287b190 100644
+index a68afc9d1e32..7cdc65686c98 100644
 --- a/drivers/bus/fsl-mc/fsl-mc-bus.c
 +++ b/drivers/bus/fsl-mc/fsl-mc-bus.c
-@@ -208,12 +208,53 @@ static struct attribute *fsl_mc_dev_attrs[] = {
+@@ -210,12 +210,53 @@ static struct attribute *fsl_mc_dev_attrs[] = {
  
  ATTRIBUTE_GROUPS(fsl_mc_dev);
  
@@ -4563,7 +4562,7 @@ index 6293a24de456..42bdb8679a36 100644
 2.27.0
 
 
-From 7c1ac9e45f0b634e0cde8106c49b21fb65961b60 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 14 Jan 2021 19:07:52 +0200
 Subject: [PATCH 37/44] bus: fsl-mc: add autorescan sysfs
@@ -4654,10 +4653,10 @@ index 57a59f7f9802..df71c16f8a73 100644
  }
  
 diff --git a/drivers/bus/fsl-mc/fsl-mc-bus.c b/drivers/bus/fsl-mc/fsl-mc-bus.c
-index cb031287b190..34811db074b7 100644
+index 7cdc65686c98..d0d6c903412e 100644
 --- a/drivers/bus/fsl-mc/fsl-mc-bus.c
 +++ b/drivers/bus/fsl-mc/fsl-mc-bus.c
-@@ -241,8 +241,63 @@ static ssize_t rescan_store(struct bus_type *bus,
+@@ -243,8 +243,63 @@ static ssize_t rescan_store(struct bus_type *bus,
  }
  static BUS_ATTR_WO(rescan);
  
@@ -4746,7 +4745,7 @@ index 42bdb8679a36..1958fa065360 100644
 2.27.0
 
 
-From e8fc84bfe4ba6372d55ed9f64410b0b93b32b91e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Tue, 24 Dec 2019 14:46:48 +0000
 Subject: [PATCH 38/44] bus: fsl-mc: fix dprc object reading race
@@ -4862,7 +4861,7 @@ index df71c16f8a73..787844f0b636 100644
 2.27.0
 
 
-From ee4993484ed04fad479529d9c8f2df012df66f23 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Fri, 24 Jan 2020 17:59:49 +0000
 Subject: [PATCH 39/44] iommu: silence iommu group prints
@@ -4877,7 +4876,7 @@ Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index 0d9adce6d812..a3b968fd0db0 100644
+index bcf060b5cf85..25beb493e822 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -845,7 +845,7 @@ int iommu_group_add_device(struct iommu_group *group, struct device *dev)
@@ -4889,9 +4888,9 @@ index 0d9adce6d812..a3b968fd0db0 100644
  
  	return 0;
  
-@@ -879,7 +879,7 @@ void iommu_group_remove_device(struct device *dev)
- 	struct iommu_group *group = dev->iommu_group;
- 	struct group_device *tmp_device, *device = NULL;
+@@ -882,7 +882,7 @@ void iommu_group_remove_device(struct device *dev)
+ 	if (!group)
+ 		return;
  
 -	dev_info(dev, "Removing from iommu group %d\n", group->id);
 +	dev_dbg(dev, "Removing from iommu group %d\n", group->id);
@@ -4902,7 +4901,7 @@ index 0d9adce6d812..a3b968fd0db0 100644
 2.27.0
 
 
-From 98c61f7a421af20214a5aec5a28885cac0eef605 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Fri, 8 Jan 2021 17:28:23 +0000
 Subject: [PATCH 40/44] net: pcs: add pcs-lynx 1000BASE-X support
@@ -5003,7 +5002,7 @@ index 62bb9272dcb2..af36cd647bf5 100644
 2.27.0
 
 
-From 97f4006a98bc3fccad8318f3a728fd270db3aff6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Thu, 30 Jan 2020 22:42:38 +0000
 Subject: [PATCH 41/44] net: dpaa2-mac: add 1000BASE-X support
@@ -5071,7 +5070,7 @@ index efd804d4a1bf..1b347dbced9f 100644
 2.27.0
 
 
-From a6e20163eca58246419e02a26e0c4a6b163cbb2f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Thu, 30 Jan 2020 22:42:38 +0000
 Subject: [PATCH 42/44] net: dpaa2-mac: add backplane link mode support
@@ -5108,7 +5107,7 @@ index 1b347dbced9f..272b4b4aac92 100644
 2.27.0
 
 
-From cf1521adcf9e9cdfe76709896f15328e4a573c49 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@armlinux.org.uk>
 Date: Thu, 30 Jan 2020 22:42:38 +0000
 Subject: [PATCH 43/44] net: dpaa2-mac: add support for more 10G modes
@@ -5148,7 +5147,7 @@ index 272b4b4aac92..708aced0ed47 100644
 2.27.0
 
 
-From 4c71505dce5df9254daacb96c7a869741289a461 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Ioana Ciornei <ioana.ciornei@nxp.com>
 Date: Thu, 21 Nov 2019 21:15:25 +0200
 Subject: [PATCH 44/44] dpaa2-eth: do not hold rtnl_lock on phylink_create() or
