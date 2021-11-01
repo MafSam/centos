@@ -878,6 +878,11 @@ Patch105: arm-dts-rpi-4-disable-wifi-frequencies.patch
 # END OF PATCH DEFINITIONS
 
 Patch10000: linux-5.10-lx2160a-network.patch
+%ifarch aarch64
+Patch10001: azure.patch
+%else
+Source10001: azure.patch
+%endif
 %endif
 
 
@@ -3012,6 +3017,7 @@ fi
 %changelog
 * Sat Oct 23 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.75-200
 - Linux v5.10.75
+- Add patches for azure
 
 * Sat Aug 21 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.60-200
 - Linux v5.10.60
