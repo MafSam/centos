@@ -2942,9 +2942,6 @@ fi
 #
 #
 %changelog
-* Wed Nov 03 2021 CentOS Sources <bugs@centos.org> - 5.14.0-1.7.1.el9.centos
-- Apply debranding changes
-
 * Mon Oct 25 2021 Jan Stancek <jstancek@redhat.com> [5.14.0-1.7.1.el9]
 - Revert "clocksource: Retry clock read if long delays detected" (Waiman Long) [2013286]
 - Revert "clocksource: Check per-CPU clock synchronization when marked unstable" (Waiman Long) [2013286]
