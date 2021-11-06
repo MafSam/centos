@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 75
+%define stable_update 78
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -851,7 +851,6 @@ Patch61: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
 Patch62: 0001-Drop-that-for-now.patch
 Patch63: 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
 Patch64: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
-Patch65: 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
 Patch66: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
 Patch67: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
 Patch68: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
@@ -3015,6 +3014,9 @@ fi
 #
 #
 %changelog
+* Sat Nov  6 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.78-200
+- Linux v5.10.78
+
 * Sat Oct 23 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.75-200
 - Linux v5.10.75
 - Add patches for azure
