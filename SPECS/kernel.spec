@@ -2951,6 +2951,9 @@ fi
 #
 #
 %changelog
+* Tue Dec 07 2021 CentOS Sources <bugs@centos.org> - 5.14.0-21.el9.centos
+- Apply debranding changes
+
 * Thu Nov 25 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-21.el9]
 - clocksource: Increase WATCHDOG_MAX_SKEW (Waiman Long) [2017164]
 - x86/hpet: Use another crystalball to evaluate HPET usability (Waiman Long) [2017164]
