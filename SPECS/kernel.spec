@@ -103,6 +103,14 @@ Summary: The Linux kernel
 # Sign modules on all arches
 %global signmodules 1
 
+%if 0%{?centos_hs}
+# We cannot do signing for secure boot yet...
+# Cf. https://pagure.io/centos-infra/issue/307
+# Cf. https://git.centos.org/centos/board/issue/67
+%global signkernel 0
+%global signmodules 0
+%endif
+
 # Compress modules only for architectures that build modules
 %ifarch noarch
 %global zipmodules 0
@@ -637,8 +645,8 @@ BuildConflicts: dwarves < 1.13
 BuildRequires: kabi-dw
 %endif
 
-%if %{signkernel}%{signmodules}
 BuildRequires: openssl openssl-devel
+%if %{signkernel}%{signmodules}
 %if %{signkernel}
 %ifarch x86_64 aarch64
 BuildRequires: nss-tools
