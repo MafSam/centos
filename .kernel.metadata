@@ -1,4 +1,5 @@
-970004f1c0fe199dca63ed7658dff4ca7fd74b55 SOURCES/linux-5.14.0-7.el9.tar.xz
-da39a3ee5e6b4b0d3255bfef95601890afd80709 SOURCES/patch-5.14.0-redhat.patch
-8556b9a3a050db31d566d2438800dd330e38fd09 SOURCES/kernel-kabi-dw-5.14.0-7.tar.bz2
-2a563cc4982a10b2c60d823cf7e4984f9ad81333 SOURCES/kernel-abi-stablelists-5.14.0-7.tar.bz2
+0494cace7515a00b00fe287a7a3a0f7bbc8e0118 SOURCES/kernel-abi-stablelists-5.14.0-29.tar.bz2
+d5e0f8b4d29c2626022c38a87c4dded0e13852df SOURCES/kernel-kabi-dw-5.14.0-29.tar.bz2
+a19017a2f4492057988f2159c1c794463cb3d2ef SOURCES/linux-5.14.0-29.hs1.el9.tar.xz
+95b9b811c7b0a6c98b2eafc4e7d6d24f2cb63289 SOURCES/rheldup3.x509
+d90885108d225a234a5a9d054fc80893a5bd54d0 SOURCES/rhelkpatch1.x509

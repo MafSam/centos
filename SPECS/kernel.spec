@@ -3,6 +3,11 @@
 # environment changes that affect %%install need to go
 # here before the %%install macro is pre-built.
 
+# Include Fedora files
+%global include_fedora 0
+# Include RHEL files
+%global include_rhel 1
+
 # Disable LTO in userspace packages.
 %global _lto_cflags %{nil}
 
@@ -80,16 +85,12 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 7
+%global distro_build 29
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
 %else
-%if 0%{?centos_hs}
-%define secure_boot_arch ''
-%else
 %define secure_boot_arch x86_64 aarch64 s390x ppc64le
-%endif
 %endif
 
 # Signing for secure boot authentication
@@ -100,11 +101,7 @@ Summary: The Linux kernel
 %endif
 
 # Sign modules on all arches
-%if 0%{?centos_hs}
-%global signmodules 0
-%else
 %global signmodules 1
-%endif
 
 # Compress modules only for architectures that build modules
 %ifarch noarch
@@ -125,24 +122,20 @@ Summary: The Linux kernel
 %if 0%{?fedora}
 %define primary_target fedora
 %else
-%if 0%{?centos_hs}
-%define primary_target centos-sig-hyperscale
-%else
 %define primary_target rhel
-%endif
 %endif
 
 # The kernel tarball/base version
 %define kversion 5.14
 
 %define rpmversion 5.14.0
-%define pkgrelease 7.el9
+%define pkgrelease 29.hs1.el9
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 7%{?buildid}%{?dist}
+%define specrelease 29.hs1%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -644,11 +637,13 @@ BuildConflicts: dwarves < 1.13
 BuildRequires: kabi-dw
 %endif
 
+%if %{signkernel}%{signmodules}
 BuildRequires: openssl openssl-devel
 %if %{signkernel}
 %ifarch x86_64 aarch64
 BuildRequires: nss-tools
 BuildRequires: pesign >= 0.10-4
+%endif
 %endif
 %endif
 
@@ -681,7 +676,7 @@ BuildRequires: lld
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: linux-5.14.0-7.el9.tar.xz
+Source0: linux-5.14.0-29.hs1.el9.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -693,9 +688,6 @@ Source1: Makefile.rhelver
 %ifarch s390x
 %define signing_key_filename kernel-signing-s390.cer
 %endif
-
-Source8: x509.genkey.rhel
-Source9: x509.genkey.fedora
 
 %if %{?released_kernel}
 
@@ -735,63 +727,72 @@ Source11: redhatsecureboot401.cer
 # released_kernel
 %endif
 
-Source22: mod-extra.list.rhel
-Source16: mod-extra.list.fedora
-Source17: mod-denylist.sh
-Source18: mod-sign.sh
-Source79: parallel_xz.sh
+Source20: mod-denylist.sh
+Source21: mod-sign.sh
+Source22: parallel_xz.sh
 
-Source80: filter-x86_64.sh.fedora
-Source81: filter-armv7hl.sh.fedora
-Source82: filter-i686.sh.fedora
-Source83: filter-aarch64.sh.fedora
-Source86: filter-ppc64le.sh.fedora
-Source87: filter-s390x.sh.fedora
-Source89: filter-modules.sh.fedora
+%define modsign_cmd %{SOURCE21}
 
-Source90: filter-x86_64.sh.rhel
-Source91: filter-armv7hl.sh.rhel
-Source92: filter-i686.sh.rhel
-Source93: filter-aarch64.sh.rhel
-Source96: filter-ppc64le.sh.rhel
-Source97: filter-s390x.sh.rhel
-Source99: filter-modules.sh.rhel
-%define modsign_cmd %{SOURCE18}
+%if 0%{?include_rhel}
+Source23: x509.genkey.rhel
 
-Source20: kernel-aarch64-rhel.config
-Source21: kernel-aarch64-debug-rhel.config
-Source30: kernel-ppc64le-rhel.config
-Source31: kernel-ppc64le-debug-rhel.config
-Source32: kernel-s390x-rhel.config
-Source33: kernel-s390x-debug-rhel.config
-Source34: kernel-s390x-zfcpdump-rhel.config
-Source35: kernel-x86_64-rhel.config
-Source36: kernel-x86_64-debug-rhel.config
+Source24: kernel-aarch64-rhel.config
+Source25: kernel-aarch64-debug-rhel.config
+Source26: mod-extra.list.rhel
 
-Source37: kernel-aarch64-fedora.config
-Source38: kernel-aarch64-debug-fedora.config
-Source39: kernel-armv7hl-fedora.config
-Source40: kernel-armv7hl-debug-fedora.config
-Source41: kernel-armv7hl-lpae-fedora.config
-Source42: kernel-armv7hl-lpae-debug-fedora.config
-Source43: kernel-i686-fedora.config
-Source44: kernel-i686-debug-fedora.config
-Source45: kernel-ppc64le-fedora.config
-Source46: kernel-ppc64le-debug-fedora.config
-Source47: kernel-s390x-fedora.config
-Source48: kernel-s390x-debug-fedora.config
-Source49: kernel-x86_64-fedora.config
-Source50: kernel-x86_64-debug-fedora.config
+Source27: kernel-ppc64le-rhel.config
+Source28: kernel-ppc64le-debug-rhel.config
+Source29: kernel-s390x-rhel.config
+Source30: kernel-s390x-debug-rhel.config
+Source31: kernel-s390x-zfcpdump-rhel.config
+Source32: kernel-x86_64-rhel.config
+Source33: kernel-x86_64-debug-rhel.config
 
+Source34: filter-x86_64.sh.rhel
+Source35: filter-armv7hl.sh.rhel
+Source36: filter-i686.sh.rhel
+Source37: filter-aarch64.sh.rhel
+Source38: filter-ppc64le.sh.rhel
+Source39: filter-s390x.sh.rhel
+Source40: filter-modules.sh.rhel
+%endif
 
+%if 0%{?include_fedora}
+Source50: x509.genkey.fedora
+Source51: mod-extra.list.fedora
 
-Source51: generate_all_configs.sh
+Source52: kernel-aarch64-fedora.config
+Source53: kernel-aarch64-debug-fedora.config
+Source54: kernel-armv7hl-fedora.config
+Source55: kernel-armv7hl-debug-fedora.config
+Source56: kernel-armv7hl-lpae-fedora.config
+Source57: kernel-armv7hl-lpae-debug-fedora.config
+Source58: kernel-i686-fedora.config
+Source59: kernel-i686-debug-fedora.config
+Source60: kernel-ppc64le-fedora.config
+Source61: kernel-ppc64le-debug-fedora.config
+Source62: kernel-s390x-fedora.config
+Source63: kernel-s390x-debug-fedora.config
+Source64: kernel-x86_64-fedora.config
+Source65: kernel-x86_64-debug-fedora.config
 
-Source52: process_configs.sh
-Source56: update_scripts.sh
-Source57: generate_crashkernel_default.sh
+Source67: filter-x86_64.sh.fedora
+Source68: filter-armv7hl.sh.fedora
+Source69: filter-i686.sh.fedora
+Source70: filter-aarch64.sh.fedora
+Source71: filter-ppc64le.sh.fedora
+Source72: filter-s390x.sh.fedora
+Source73: filter-modules.sh.fedora
+%endif
 
-Source54: mod-internal.list
+Source75: partial-kgcov-snip.config
+Source80: generate_all_configs.sh
+Source81: process_configs.sh
+
+Source82: update_scripts.sh
+Source83: generate_crashkernel_default.sh
+
+Source84: mod-internal.list
 
 Source100: rheldup3.x509
 Source101: rhelkpatch1.x509
@@ -826,17 +827,6 @@ Source4000: README.rst
 Source4001: rpminspect.yaml
 Source4002: gating.yaml
 
-# hyperscale
-Source5001: filter-aarch64.sh.centos-sig-hyperscale
-Source5002: filter-modules.sh.centos-sig-hyperscale
-Source5005: filter-x86_64.sh.centos-sig-hyperscale
-Source5006: mod-extra.list.centos-sig-hyperscale
-
-# CentOS SIG HyperScale config(s)
-Source5008: kernel-x86_64-centos-sig-hyperscale.config
-Source5009: kernel-x86_64-debug-centos-sig-hyperscale.config
-Source5010: kernel-aarch64-centos-sig-hyperscale.config
-Source5011: kernel-aarch64-debug-centos-sig-hyperscale.config
 ## Patches needed for building this package
 
 %if !%{nopatches}
@@ -1371,8 +1361,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.14.0-7.el9 -c
-mv linux-5.14.0-7.el9 linux-%{KVERREL}
+%setup -q -n kernel-5.14.0-29.hs1.el9 -c
+mv linux-5.14.0-29.hs1.el9 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -1423,7 +1413,7 @@ cd configs
 
 # Drop some necessary files from the source dir into the buildroot
 cp $RPM_SOURCE_DIR/kernel-*.config .
-cp %{SOURCE51} .
+cp %{SOURCE80} .
 # merge.pl
 cp %{SOURCE3000} .
 # kernel-local
@@ -1436,15 +1426,13 @@ for i in %{all_arch_configs}
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE3001} $i.tmp > $i
-  rm $i.tmp
-done
-%endif
-
-# enable GCOV kernel config options if gcov is on
 %if %{with_gcov}
-for i in *.config
-do
-  sed -i 's/# CONFIG_GCOV_KERNEL is not set/CONFIG_GCOV_KERNEL=y\nCONFIG_GCOV_PROFILE_ALL=y\n/' $i
+  echo "Merging with gcov options"
+  cat %{SOURCE75}
+  mv $i $i.tmp
+  ./merge.pl %{SOURCE75} $i.tmp > $i
+%endif
+  rm $i.tmp
 done
 %endif
 
@@ -1471,7 +1459,7 @@ done
 %endif
 %endif
 
-cp %{SOURCE52} .
+cp %{SOURCE81} .
 OPTS=""
 %if %{with_configchecks}
 	OPTS="$OPTS -w -n -c"
@@ -1483,7 +1471,7 @@ done
 %endif
 ./process_configs.sh $OPTS kernel %{rpmversion}
 
-cp %{SOURCE56} .
+cp %{SOURCE82} .
 RPM_SOURCE_DIR=$RPM_SOURCE_DIR ./update_scripts.sh %{primary_target}
 
 # end of kernel config
@@ -2002,9 +1990,9 @@ BuildKernel() {
     remove_depmod_files
 
     # Identify modules in the kernel-modules-extras package
-    %{SOURCE17} $RPM_BUILD_ROOT lib/modules/$KernelVer $RPM_SOURCE_DIR/mod-extra.list
+    %{SOURCE20} $RPM_BUILD_ROOT lib/modules/$KernelVer $RPM_SOURCE_DIR/mod-extra.list
     # Identify modules in the kernel-modules-extras package
-    %{SOURCE17} $RPM_BUILD_ROOT lib/modules/$KernelVer %{SOURCE54} internal
+    %{SOURCE20} $RPM_BUILD_ROOT lib/modules/$KernelVer %{SOURCE84} internal
 
     #
     # Generate the kernel-core and kernel-modules files lists
@@ -2105,7 +2093,7 @@ BuildKernel() {
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -delete
 
     # Generate crashkernel default config
-    %{SOURCE57} "$KernelVer" "$Arch" "$RPM_BUILD_ROOT"
+    %{SOURCE83} "$KernelVer" "$Arch" "$RPM_BUILD_ROOT"
 
     # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
@@ -2175,7 +2163,7 @@ InitBuildVars
 %global perf_build_extra_opts CORESIGHT=1
 %endif
 %global perf_make \
-  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
+  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 LIBBPF_DYNAMIC=1 LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
 %if %{with_perf}
 # perf
 # make sure check-headers.sh is executable
@@ -2261,7 +2249,7 @@ for dir in bpf bpf/no_alu32 bpf/progs; do
 	test -d $dir || continue
 	mkdir -p %{buildroot}%{_libexecdir}/kselftests/$dir
 	find $dir -maxdepth 1 -type f \( -executable -o -name '*.py' -o -name settings -o \
-		-name 'btf_dump_test_case_*.c' -o \
+		-name 'btf_dump_test_case_*.c' -o -name '*.ko' -o \
 		-name '*.o' -exec sh -c 'readelf -h "{}" | grep -q "^  Machine:.*BPF"' \; \) -print0 | \
 	xargs -0 cp -t %{buildroot}%{_libexecdir}/kselftests/$dir || true
 done
@@ -2477,7 +2465,7 @@ pushd tools/thermal/tmon
 %{tools_make} INSTALL_ROOT=%{buildroot} install
 popd
 pushd tools/iio
-%{tools_make} CFLAGS+="-D_GNU_SOURCE -Iinclude" DESTDIR=%{buildroot} install
+%{tools_make} DESTDIR=%{buildroot} install
 popd
 pushd tools/gpio
 %{tools_make} DESTDIR=%{buildroot} install
@@ -2865,7 +2853,7 @@ fi
 %endif
 
 %if %{with_gcov}
-%ifarch x86_64 s390x ppc64le aarch64
+%ifnarch %nobuildarches noarch
 %files gcov
 %{_builddir}
 %endif
@@ -2963,12 +2951,866 @@ fi
 #
 #
 %changelog
-* Wed Oct 13 2021 Justin Vreeland <jvreeland@twitter.com> - 5.14.0-%{specrelease}
-- Readd pieces dropped during copy out of upstream format
-- scripts/sign-file needs openssl and doesn't seem to be gated by signkernel
+* Sun Dec 12 2021 Neal Gompa <ngompa@centosproject.org> [5.14.0-29.hs1.el9]
+- redhat/configs: Enable the Btrfs file system (Neal Gompa)
+- redhat/configs: Enable CONFIG_CRYPTO_BLAKE2B (Neal Gompa) [2031547]
 
-* Tue Oct 12 2021 Justin Vreeland <vreeland.justin@gmail.com> - 5.14.0-%{specrelease}
-- Update for CentOS Hyperscale SIG
+* Thu Dec 09 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-29.el9]
+- posix-cpu-timers: Prevent spuriously armed 0-value itimer (Phil Auld) [2022896]
+- hrtimer: Unbreak hrtimer_force_reprogram() (Phil Auld) [2022896]
+- hrtimer: Use raw_cpu_ptr() in clock_was_set() (Phil Auld) [2022896]
+- clocksource: Make clocksource watchdog test safe for slow-HZ systems (Phil Auld) [2022896]
+- posix-cpu-timers: Recalc next expiration when timer_settime() ends up not queueing (Phil Auld) [2022896]
+- posix-cpu-timers: Consolidate timer base accessor (Phil Auld) [2022896]
+- posix-cpu-timers: Remove confusing return value override (Phil Auld) [2022896]
+- posix-cpu-timers: Force next expiration recalc after itimer reset (Phil Auld) [2022896]
+- posix-cpu-timers: Force next_expiration recalc after timer deletion (Phil Auld) [2022896]
+- posix-cpu-timers: Assert task sighand is locked while starting cputime counter (Phil Auld) [2022896]
+- posix-timers: Remove redundant initialization of variable ret (Phil Auld) [2022896]
+- hrtimer: Avoid more SMP function calls in clock_was_set() (Phil Auld) [2022896]
+- hrtimer: Avoid unnecessary SMP function calls in clock_was_set() (Phil Auld) [2022896]
+- hrtimer: Add bases argument to clock_was_set() (Phil Auld) [2022896]
+- time/timekeeping: Avoid invoking clock_was_set() twice (Phil Auld) [2022896]
+- timekeeping: Distangle resume and clock-was-set events (Phil Auld) [2022896]
+- timerfd: Provide timerfd_resume() (Phil Auld) [2022896]
+- hrtimer: Force clock_was_set() handling for the HIGHRES=n, NOHZ=y case (Phil Auld) [2022896]
+- hrtimer: Ensure timerfd notification for HIGHRES=n (Phil Auld) [2022896]
+- hrtimer: Consolidate reprogramming code (Phil Auld) [2022896]
+- hrtimer: Avoid double reprogramming in __hrtimer_start_range_ns() (Phil Auld) [2022896]
+
+* Wed Dec 08 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-28.el9]
+- rcu: Fix rcu_dynticks_curr_cpu_in_eqs() vs noinstr (Waiman Long) [2022806]
+- efi: Change down_interruptible() in virt_efi_reset_system() to down_trylock() (Waiman Long) [2022806]
+- Documentation: core-api/cpuhotplug: Rewrite the API section (Waiman Long) [2022806]
+- docs/core-api: Modify document layout (Waiman Long) [2022806]
+- futex: Avoid redundant task lookup (Waiman Long) [2022806]
+- futex: Clarify comment for requeue_pi_wake_futex() (Waiman Long) [2022806]
+- cgroup: Avoid compiler warnings with no subsystems (Waiman Long) [2022806]
+- media/atomisp: Use lockdep instead of *mutex_is_locked() (Waiman Long) [2022806]
+- debugobjects: Make them PREEMPT_RT aware (Waiman Long) [2022806]
+- cgroup/cpuset: Enable event notification when partition state changes (Waiman Long) [2022806]
+- cgroup: cgroup-v1: clean up kernel-doc notation (Waiman Long) [2022806]
+- locking/semaphore: Add might_sleep() to down_*() family (Waiman Long) [2022806]
+- static_call: Update API documentation (Waiman Long) [2022806]
+- torture: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- clocksource: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- smpboot: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- rcu: Replace deprecated CPU-hotplug functions (Waiman Long) [2022806]
+- genirq/affinity: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- cgroup: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- mm: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- thermal: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- md/raid5: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- perf/hw_breakpoint: Replace deprecated CPU-hotplug functions (Waiman Long) [2022806]
+- perf/x86/intel: Replace deprecated CPU-hotplug functions (Waiman Long) [2022806]
+- Documentation: Replace deprecated CPU-hotplug functions. (Waiman Long) [2022806]
+- Documentation/atomic_t: Document forward progress expectations (Waiman Long) [2022806]
+- eventfd: Make signal recursion protection a task bit (Waiman Long) [2022806]
+- locking/atomic: simplify non-atomic wrappers (Waiman Long) [2022806]
+- cgroup/cpuset: Fix violation of cpuset locking rule (Waiman Long) [2022806]
+- cgroup/cpuset: Fix a partition bug with hotplug (Waiman Long) [2022806]
+- cgroup/cpuset: Miscellaneous code cleanup (Waiman Long) [2022806]
+- rcu: Mark accesses to rcu_state.n_force_qs (Waiman Long) [2022806]
+- rcu: Print human-readable message for schedule() in RCU reader (Waiman Long) [2022806]
+- cgroup: remove cgroup_mount from comments (Waiman Long) [2022806]
+- doc: Update stallwarn.rst with recent changes (Waiman Long) [2022806]
+- locking/atomic: add generic arch_*() bitops (Waiman Long) [2022806]
+- locking/atomic: add arch_atomic_long*() (Waiman Long) [2022806]
+- locking/atomic: centralize generated headers (Waiman Long) [2022806]
+- locking/atomic: remove ARCH_ATOMIC remanants (Waiman Long) [2022806]
+- locking/atomic: simplify ifdef generation (Waiman Long) [2022806]
+- rcu: Fix macro name CONFIG_TASKS_RCU_TRACE (Waiman Long) [2022806]
+- scftorture: Avoid NULL pointer exception on early exit (Waiman Long) [2022806]
+- torture: Make kvm-test-1-run-qemu.sh check for reboot loops (Waiman Long) [2022806]
+- torture: Add timestamps to kvm-test-1-run-qemu.sh output (Waiman Long) [2022806]
+- torture: Don't use "test" command's "-a" argument (Waiman Long) [2022806]
+- torture: Make kvm-test-1-run-batch.sh select per-scenario affinity masks (Waiman Long) [2022806]
+- torture: Consistently name "qemu*" test output files (Waiman Long) [2022806]
+- torture: Use numeric taskset argument in jitter.sh (Waiman Long) [2022806]
+- rcutorture: Upgrade two-CPU scenarios to four CPUs (Waiman Long) [2022806]
+- torture: Make kvm-test-1-run-qemu.sh apply affinity (Waiman Long) [2022806]
+- torture: Don't redirect qemu-cmd comment lines (Waiman Long) [2022806]
+- torture: Make kvm.sh select per-scenario affinity masks (Waiman Long) [2022806]
+- torture: Put kvm.sh batch-creation awk script into a temp file (Waiman Long) [2022806]
+- locking/rwsem: Remove an unused parameter of rwsem_wake() (Waiman Long) [2022806]
+- rcu: Explain why rcu_all_qs() is a stub in preemptible TREE RCU (Waiman Long) [2022806]
+- Documentation/atomic_t: Document cmpxchg() vs try_cmpxchg() (Waiman Long) [2022806]
+- rcu: Use per_cpu_ptr to get the pointer of per_cpu variable (Waiman Long) [2022806]
+- rcu: Remove useless "ret" update in rcu_gp_fqs_loop() (Waiman Long) [2022806]
+- scftorture: Add RPC-like IPI tests (Waiman Long) [2022806]
+- tools/nolibc: Implement msleep() (Waiman Long) [2022806]
+- tools: include: nolibc: Fix a typo occured to occurred in the file nolibc.h (Waiman Long) [2022806]
+- torture: Move parse-console.sh call to PATH-aware scripts (Waiman Long) [2022806]
+- torture: Make kvm-recheck.sh skip kcsan.sum for build-only runs (Waiman Long) [2022806]
+- rcu-tasks: Fix synchronize_rcu_rude() typo in comment (Waiman Long) [2022806]
+- rcuscale: Console output claims too few grace periods (Waiman Long) [2022806]
+- torture: Protect kvm-remote.sh directory trees from /tmp reaping (Waiman Long) [2022806]
+- torture: Log more kvm-remote.sh information (Waiman Long) [2022806]
+- torture: Make kvm-recheck-lock.sh tolerate qemu-cmd comments (Waiman Long) [2022806]
+- torture: Make kvm-recheck-scf.sh tolerate qemu-cmd comments (Waiman Long) [2022806]
+- rcu/doc: Add a quick quiz to explain further why we need smp_mb__after_unlock_lock() (Waiman Long) [2022806]
+- rcu: Make rcu_gp_init() and rcu_gp_fqs_loop noinline to conserve stack (Waiman Long) [2022806]
+- torture: Create KCSAN summaries for torture.sh runs (Waiman Long) [2022806]
+- torture: Enable KCSAN summaries over groups of torture-test runs (Waiman Long) [2022806]
+- rcu: Mark lockless ->qsmask read in rcu_check_boost_fail() (Waiman Long) [2022806]
+- srcutiny: Mark read-side data races (Waiman Long) [2022806]
+- locktorture: Count lock readers (Waiman Long) [2022806]
+- locktorture: Mark statistics data races (Waiman Long) [2022806]
+- docs: Fix a typo in Documentation/RCU/stallwarn.rst (Waiman Long) [2022806]
+- rcu-tasks: Mark ->trc_reader_special.b.need_qs data races (Waiman Long) [2022806]
+- rcu-tasks: Mark ->trc_reader_nesting data races (Waiman Long) [2022806]
+- rcu-tasks: Add comments explaining task_struct strategy (Waiman Long) [2022806]
+- rcu: Start timing stall repetitions after warning complete (Waiman Long) [2022806]
+- rcu: Do not disable GP stall detection in rcu_cpu_stall_reset() (Waiman Long) [2022806]
+- rcu/tree: Handle VM stoppage in stall detection (Waiman Long) [2022806]
+- rculist: Unify documentation about missing list_empty_rcu() (Waiman Long) [2022806]
+- rcu: Mark accesses in tree_stall.h (Waiman Long) [2022806]
+- Documentation/RCU: Fix nested inline markup (Waiman Long) [2022806]
+- rcu: Mark accesses to ->rcu_read_lock_nesting (Waiman Long) [2022806]
+- Documentation/RCU: Fix emphasis markers (Waiman Long) [2022806]
+- rcu: Weaken ->dynticks accesses and updates (Waiman Long) [2022806]
+- rcu: Remove special bit at the bottom of the ->dynticks counter (Waiman Long) [2022806]
+- rcu/nocb: Remove NOCB deferred wakeup from rcutree_dead_cpu() (Waiman Long) [2022806]
+- rcu/nocb: Start moving nocb code to its own plugin file (Waiman Long) [2022806]
+- rcutorture: Preempt rather than block when testing task stalls (Waiman Long) [2022806]
+- rcu: Fix stall-warning deadlock due to non-release of rcu_node ->lock (Waiman Long) [2022806]
+- rcu: Fix to include first blocked task in stall warning (Waiman Long) [2022806]
+- torture: Make torture.sh accept --do-all and --donone (Waiman Long) [2022806]
+- torture: Add clocksource-watchdog testing to torture.sh (Waiman Long) [2022806]
+- refscale: Add measurement of clock readout (Waiman Long) [2022806]
+
+* Tue Dec 07 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-27.el9]
+- x86: change default to spec_store_bypass_disable=prctl spectre_v2_user=prctl (Wander Lairson Costa) [2002637]
+- Enable PREEMPT_DYNAMIC for all but s390x (Phil Auld) [2019472]
+- preempt: Restore preemption model selection configs (Phil Auld) [2019472]
+- sched: Provide Kconfig support for default dynamic preempt mode (Phil Auld) [2019472]
+- x86/sgx: Add TAINT_TECH_PREVIEW for virtual EPC (Wander Lairson Costa) [2025959]
+- x86/sgx: mark tech preview (Wander Lairson Costa) [2025959]
+- ipv6: When forwarding count rx stats on the orig netdev (Hangbin Liu) [2025457]
+- ipv6: make exception cache less predictible (Hangbin Liu) [2025457]
+- icmp: fix icmp_ext_echo_iio parsing in icmp_build_probe (Guillaume Nault) [2024572]
+- net: prefer socket bound to interface when not in VRF (Guillaume Nault) [2024572]
+- net: ipv4: Fix rtnexthop len when RTA_FLOW is present (Guillaume Nault) [2024572]
+- nexthop: Fix memory leaks in nexthop notification chain listeners (Guillaume Nault) [2024572]
+- nexthop: Fix division by zero while replacing a resilient group (Guillaume Nault) [2024572]
+- ipv4: fix endianness issue in inet_rtm_getroute_build_skb() (Guillaume Nault) [2024572]
+- crypto: ccp - Make use of the helper macro kthread_run() (Vladis Dronov) [1997595]
+- crypto: ccp - Fix whitespace in sev_cmd_buffer_len() (Vladis Dronov) [1997595]
+- crypto: ccp - fix resource leaks in ccp_run_aes_gcm_cmd() (Vladis Dronov) [1997595] {CVE-2021-3744 CVE-2021-3764}
+- net/l2tp: Fix reference count leak in l2tp_udp_recv_core (Guillaume Nault) [2023271]
+- scsi: megaraid: Clean up some inconsistent indenting (Tomas Henzl) [1879402]
+- scsi: megaraid: Fix Coccinelle warning (Tomas Henzl) [1879402]
+- scsi: megaraid_sas: Driver version update to 07.719.03.00-rc1 (Tomas Henzl) [1879402]
+- scsi: megaraid_sas: Add helper functions for irq_context (Tomas Henzl) [1879402]
+- scsi: megaraid_sas: Fix concurrent access to ISR between IRQ polling and real interrupt (Tomas Henzl) [1879402]
+- tpm: ibmvtpm: Avoid error message when process gets signal while waiting (Štěpán Horáček) [1983089]
+- char: tpm: cr50_i2c: convert to new probe interface (Štěpán Horáček) [1983089]
+- char: tpm: Kconfig: remove bad i2c cr50 select (Štěpán Horáček) [1983089]
+
+* Mon Dec 06 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-26.el9]
+- redhat/configs: enable CONFIG_CEPH_FSCACHE (Jeffrey Layton) [2017798]
+- ceph: add a new metric to keep track of remote object copies (Jeffrey Layton) [2017798]
+- libceph, ceph: move ceph_osdc_copy_from() into cephfs code (Jeffrey Layton) [2017798]
+- ceph: clean-up metrics data structures to reduce code duplication (Jeffrey Layton) [2017798]
+- ceph: split 'metric' debugfs file into several files (Jeffrey Layton) [2017798]
+- ceph: return the real size read when it hits EOF (Jeffrey Layton) [2017798]
+- ceph: properly handle statfs on multifs setups (Jeffrey Layton) [2017798]
+- ceph: shut down mount on bad mdsmap or fsmap decode (Jeffrey Layton) [2017798]
+- ceph: fix mdsmap decode when there are MDS's beyond max_mds (Jeffrey Layton) [2017798]
+- ceph: ignore the truncate when size won't change with Fx caps issued (Jeffrey Layton) [2017798]
+- ceph: don't rely on error_string to validate blocklisted session. (Jeffrey Layton) [2017798]
+- ceph: just use ci->i_version for fscache aux info (Jeffrey Layton) [2017798]
+- ceph: shut down access to inode when async create fails (Jeffrey Layton) [2017798]
+- ceph: refactor remove_session_caps_cb (Jeffrey Layton) [2017798]
+- ceph: fix auth cap handling logic in remove_session_caps_cb (Jeffrey Layton) [2017798]
+- ceph: drop private list from remove_session_caps_cb (Jeffrey Layton) [2017798]
+- ceph: don't use -ESTALE as special return code in try_get_cap_refs (Jeffrey Layton) [2017798]
+- ceph: print inode numbers instead of pointer values (Jeffrey Layton) [2017798]
+- ceph: enable async dirops by default (Jeffrey Layton) [2017798]
+- libceph: drop ->monmap and err initialization (Jeffrey Layton) [2017798]
+- ceph: convert to noop_direct_IO (Jeffrey Layton) [2017798]
+- ceph: fix handling of "meta" errors (Jeffrey Layton) [2017798]
+- ceph: skip existing superblocks that are blocklisted or shut down when mounting (Jeffrey Layton) [2017798]
+- ceph: fix off by one bugs in unsafe_request_wait() (Jeffrey Layton) [2017798]
+- ceph: fix dereference of null pointer cf (Jeffrey Layton) [2017798]
+- ceph: drop the mdsc_get_session/put_session dout messages (Jeffrey Layton) [2017798]
+- ceph: lockdep annotations for try_nonblocking_invalidate (Jeffrey Layton) [2017798]
+- ceph: don't WARN if we're forcibly removing the session caps (Jeffrey Layton) [2017798]
+- ceph: don't WARN if we're force umounting (Jeffrey Layton) [2017798]
+- ceph: remove the capsnaps when removing caps (Jeffrey Layton) [2017798]
+- ceph: request Fw caps before updating the mtime in ceph_write_iter (Jeffrey Layton) [2017798]
+- ceph: reconnect to the export targets on new mdsmaps (Jeffrey Layton) [2017798]
+- ceph: print more information when we can't find snaprealm (Jeffrey Layton) [2017798]
+- ceph: add ceph_change_snap_realm() helper (Jeffrey Layton) [2017798]
+- ceph: remove redundant initializations from mdsc and session (Jeffrey Layton) [2017798]
+- ceph: cancel delayed work instead of flushing on mdsc teardown (Jeffrey Layton) [2017798]
+- ceph: add a new vxattr to return auth mds for an inode (Jeffrey Layton) [2017798]
+- ceph: remove some defunct forward declarations (Jeffrey Layton) [2017798]
+- ceph: flush the mdlog before waiting on unsafe reqs (Jeffrey Layton) [2017798]
+- ceph: flush mdlog before umounting (Jeffrey Layton) [2017798]
+- ceph: make iterate_sessions a global symbol (Jeffrey Layton) [2017798]
+- ceph: make ceph_create_session_msg a global symbol (Jeffrey Layton) [2017798]
+- ceph: fix comment about short copies in ceph_write_end (Jeffrey Layton) [2017798]
+- ceph: fix memory leak on decode error in ceph_handle_caps (Jeffrey Layton) [2017798]
+
+* Fri Dec 03 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-25.el9]
+- x86: Pin task-stack in __get_wchan() (Chris von Recklinghausen) [2022169]
+- x86: Fix __get_wchan() for !STACKTRACE (Chris von Recklinghausen) [2022169]
+- sched: Add wrapper for get_wchan() to keep task blocked (Chris von Recklinghausen) [2022169]
+- x86: Fix get_wchan() to support the ORC unwinder (Chris von Recklinghausen) [2022169]
+- proc: Use task_is_running() for wchan in /proc/$pid/stat (Chris von Recklinghausen) [2022169]
+- leaking_addresses: Always print a trailing newline (Chris von Recklinghausen) [2022169]
+- Revert "proc/wchan: use printk format instead of lookup_symbol_name()" (Chris von Recklinghausen) [2022169]
+- sched: Fill unconditional hole induced by sched_entity (Chris von Recklinghausen) [2022169]
+- powerpc/bpf: Fix write protecting JIT code (Jiri Olsa) [2023618]
+- vfs: check fd has read access in kernel_read_file_from_fd() (Carlos Maiolino) [2022893]
+- Disable idmapped mounts (Alexey Gladkov) [2018141]
+- KVM: s390: Fix handle_sske page fault handling (Thomas Huth) [1870686]
+- KVM: s390: Simplify SIGP Set Arch handling (Thomas Huth) [1870686]
+- KVM: s390: pv: avoid stalls when making pages secure (Thomas Huth) [1870686]
+- KVM: s390: pv: avoid stalls for kvm_s390_pv_init_vm (Thomas Huth) [1870686]
+- KVM: s390: pv: avoid double free of sida page (Thomas Huth) [1870686]
+- KVM: s390: pv: add macros for UVC CC values (Thomas Huth) [1870686]
+- s390/uv: fully validate the VMA before calling follow_page() (Thomas Huth) [1870686]
+- s390/gmap: don't unconditionally call pte_unmap_unlock() in __gmap_zap() (Thomas Huth) [1870686]
+- s390/gmap: validate VMA in __gmap_zap() (Thomas Huth) [1870686]
+- KVM: s390: preserve deliverable_mask in __airqs_kick_single_vcpu (Thomas Huth) [1870686]
+- KVM: s390: index kvm->arch.idle_mask by vcpu_idx (Thomas Huth) [1870686]
+- KVM: s390: clear kicked_mask before sleeping again (Thomas Huth) [1870686]
+- KVM: s390: Function documentation fixes (Thomas Huth) [1870686]
+- s390/mm: fix kernel doc comments (Thomas Huth) [1870686]
+- KVM: s390: generate kvm hypercall functions (Thomas Huth) [1870686]
+- s390/vfio-ap: replace open coded locks for VFIO_GROUP_NOTIFY_SET_KVM notification (Thomas Huth) [1870686]
+- s390/vfio-ap: r/w lock for PQAP interception handler function pointer (Thomas Huth) [1870686]
+- KVM: Rename lru_slot to last_used_slot (Thomas Huth) [1870686]
+- s390/uv: de-duplicate checks for Protected Host Virtualization (Thomas Huth) [1870686]
+- s390/boot: disable Secure Execution in dump mode (Thomas Huth) [1870686]
+- s390/boot: move uv function declarations to boot/uv.h (Thomas Huth) [1870686]
+- s390/boot: move all linker symbol declarations from c to h files (Thomas Huth) [1870686]
+- redhat/configs: Remove CONFIG_INFINIBAND_I40IW (Kamal Heib) [1920720]
+
+* Wed Dec 01 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-24.el9]
+- perf test: Handle fd gaps in test__dso_data_reopen (Michael Petlan) [1937209]
+- perf tests vmlinux-kallsyms: Ignore hidden symbols (Michael Petlan) [1975103]
+- perf script: Fix PERF_SAMPLE_WEIGHT_STRUCT support (Michael Petlan) [2009378]
+- redhat/kernel.spec.template: Link perf with --export-dynamic (Michael Petlan) [2006775]
+- xfs: fix I_DONTCACHE (Carlos Maiolino) [2022435]
+- virtio: write back F_VERSION_1 before validate (Thomas Huth) [2008401]
+- net/tls: Fix flipped sign in tls_err_abort() calls (Sabrina Dubroca) [2022006]
+- net/tls: Fix flipped sign in async_wait.err assignment (Sabrina Dubroca) [2022006]
+- hyper-v: Replace uuid.h with types.h (Mohammed Gamal) [2008572]
+- Drivers: hv: vmbus: Remove unused code to check for subchannels (Mohammed Gamal) [2008572]
+- hv: hyperv.h: Remove unused inline functions (Mohammed Gamal) [2008572]
+- asm-generic/hyperv: provide cpumask_to_vpset_noself (Mohammed Gamal) [2008572]
+- asm-generic/hyperv: Add missing #include of nmi.h (Mohammed Gamal) [2008572]
+- x86/hyperv: Avoid erroneously sending IPI to 'self' (Mohammed Gamal) [2008572]
+- x86/hyperv: remove on-stack cpumask from hv_send_ipi_mask_allbutself (Mohammed Gamal) [2008572]
+- [s390] net/smc: improved fix wait on already cleared link (Mete Durlu) [1869652]
+- [s390] net/smc: fix 'workqueue leaked lock' in smc_conn_abort_work (Mete Durlu) [1869652]
+- [s390] net/smc: add missing error check in smc_clc_prfx_set() (Mete Durlu) [1869652]
+- cifs: enable SMB_DIRECT in RHEL9 (Ronnie Sahlberg) [1965209]
+- scsi: mpt3sas: Clean up some inconsistent indenting (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Call cpu_relax() before calling udelay() (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Introduce sas_ncq_prio_supported sysfs sttribute (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Update driver version to 39.100.00.00 (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Use firmware recommended queue depth (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Bump driver version to 38.100.00.00 (Tomas Henzl) [1876119]
+- scsi: mpt3sas: Add io_uring iopoll support (Tomas Henzl) [1876119]
+- serial: 8250_lpss: Extract dw8250_do_set_termios() for common use (David Arcari) [1880032]
+- serial: 8250_lpss: Enable DMA on Intel Elkhart Lake (David Arcari) [1880032]
+- dmaengine: dw: Convert members to u32 in platform data (David Arcari) [1880032]
+- dmaengine: dw: Simplify DT property parser (David Arcari) [1880032]
+- dmaengine: dw: Remove error message from DT parsing code (David Arcari) [1880032]
+- dmaengine: dw: Program xBAR hardware for Elkhart Lake (David Arcari) [1880032]
+- vmxnet3: switch from 'pci_' to 'dma_' API (Kamal Heib) [2003297]
+- vmxnet3: update to version 6 (Kamal Heib) [2003297]
+- vmxnet3: increase maximum configurable mtu to 9190 (Kamal Heib) [2003297]
+- vmxnet3: set correct hash type based on rss information (Kamal Heib) [2003297]
+- vmxnet3: add support for ESP IPv6 RSS (Kamal Heib) [2003297]
+- vmxnet3: remove power of 2 limitation on the queues (Kamal Heib) [2003297]
+- vmxnet3: add support for 32 Tx/Rx queues (Kamal Heib) [2003297]
+- vmxnet3: prepare for version 6 changes (Kamal Heib) [2003297]
+
+* Mon Nov 29 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-23.el9]
+- PCI/VPD: Defer VPD sizing until first access (Myron Stowe) [2021298]
+- PCI/VPD: Use unaligned access helpers (Myron Stowe) [2021298]
+- PCI/VPD: Clean up public VPD defines and inline functions (Myron Stowe) [2021298]
+- cxgb4: Use pci_vpd_find_id_string() to find VPD ID string (Myron Stowe) [2021298]
+- PCI/VPD: Add pci_vpd_find_id_string() (Myron Stowe) [2021298]
+- PCI/VPD: Include post-processing in pci_vpd_find_tag() (Myron Stowe) [2021298]
+- PCI/VPD: Stop exporting pci_vpd_find_info_keyword() (Myron Stowe) [2021298]
+- PCI/VPD: Stop exporting pci_vpd_find_tag() (Myron Stowe) [2021298]
+- scsi: cxlflash: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- cxgb4: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- cxgb4: Remove unused vpd_param member ec (Myron Stowe) [2021298]
+- cxgb4: Validate VPD checksum with pci_vpd_check_csum() (Myron Stowe) [2021298]
+- bnxt: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- bnxt: Read VPD with pci_vpd_alloc() (Myron Stowe) [2021298]
+- bnx2x: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- bnx2x: Read VPD with pci_vpd_alloc() (Myron Stowe) [2021298]
+- bnx2: Replace open-coded byte swapping with swab32s() (Myron Stowe) [2021298]
+- bnx2: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- sfc: falcon: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- sfc: falcon: Read VPD with pci_vpd_alloc() (Myron Stowe) [2021298]
+- tg3: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- tg3: Validate VPD checksum with pci_vpd_check_csum() (Myron Stowe) [2021298]
+- tg3: Read VPD with pci_vpd_alloc() (Myron Stowe) [2021298]
+- sfc: Search VPD with pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- sfc: Read VPD with pci_vpd_alloc() (Myron Stowe) [2021298]
+- PCI/VPD: Add pci_vpd_check_csum() (Myron Stowe) [2021298]
+- PCI/VPD: Add pci_vpd_find_ro_info_keyword() (Myron Stowe) [2021298]
+- PCI/VPD: Add pci_vpd_alloc() (Myron Stowe) [2021298]
+- PCI/VPD: Treat invalid VPD like missing VPD capability (Myron Stowe) [2021298]
+- PCI/VPD: Determine VPD size in pci_vpd_init() (Myron Stowe) [2021298]
+- PCI/VPD: Embed struct pci_vpd in struct pci_dev (Myron Stowe) [2021298]
+- PCI/VPD: Remove struct pci_vpd.valid member (Myron Stowe) [2021298]
+- PCI/VPD: Remove struct pci_vpd_ops (Myron Stowe) [2021298]
+- PCI/VPD: Reorder pci_read_vpd(), pci_write_vpd() (Myron Stowe) [2021298]
+- PCI/VPD: Remove struct pci_vpd.flag (Myron Stowe) [2021298]
+- PCI/VPD: Make pci_vpd_wait() uninterruptible (Myron Stowe) [2021298]
+- PCI/VPD: Remove pci_vpd_size() old_size argument (Myron Stowe) [2021298]
+- PCI/VPD: Allow access to valid parts of VPD if some is invalid (Myron Stowe) [2021298]
+- PCI/VPD: Don't check Large Resource Item Names for validity (Myron Stowe) [2021298]
+- PCI/VPD: Reject resource tags with invalid size (Myron Stowe) [2021298]
+- PCI/VPD: Treat initial 0xff as missing EEPROM (Myron Stowe) [2021298]
+- PCI/VPD: Check Resource Item Names against those valid for type (Myron Stowe) [2021298]
+- PCI/VPD: Correct diagnostic for VPD read failure (Myron Stowe) [2021298]
+
+* Fri Nov 26 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-22.el9]
+- Add automotive CI jobs (Michael Hofmann)
+- sched/scs: Reset the shadow stack when idle_task_exit (Phil Auld) [1992256]
+- sched/fair: Null terminate buffer when updating tunable_scaling (Phil Auld) [1992256]
+- sched/fair: Add ancestors of unthrottled undecayed cfs_rq (Phil Auld) [1981743 1992256]
+- cpufreq: schedutil: Destroy mutex before kobject_put() frees the memory (Phil Auld) [1992256]
+- sched/idle: Make the idle timer expire in hard interrupt context (Phil Auld) [1992256]
+- sched: Prevent balance_push() on remote runqueues (Phil Auld) [1992256]
+- sched/fair: Mark tg_is_idle() an inline in the !CONFIG_FAIR_GROUP_SCHED case (Phil Auld) [1992256]
+- sched/topology: Skip updating masks for non-online nodes (Phil Auld) [1992256]
+- sched: Skip priority checks with SCHED_FLAG_KEEP_PARAMS (Phil Auld) [1992256]
+- sched: Fix UCLAMP_FLAG_IDLE setting (Phil Auld) [1992256]
+- cpufreq: schedutil: Use kobject release() method to free sugov_tunables (Phil Auld) [1992256]
+- sched/deadline: Fix missing clock update in migrate_task_rq_dl() (Phil Auld) [1992256]
+- sched/fair: Avoid a second scan of target in select_idle_cpu (Phil Auld) [1992256]
+- sched/fair: Use prev instead of new target as recent_used_cpu (Phil Auld) [1992256]
+- sched: Replace deprecated CPU-hotplug functions. (Phil Auld) [1992256]
+- sched: Introduce dl_task_check_affinity() to check proposed affinity (Phil Auld) [1992256]
+- sched: Allow task CPU affinity to be restricted on asymmetric systems (Phil Auld) [1992256]
+- sched: Split the guts of sched_setaffinity() into a helper function (Phil Auld) [1992256]
+- sched: Introduce task_struct::user_cpus_ptr to track requested affinity (Phil Auld) [1992256]
+- sched: Reject CPU affinity changes based on task_cpu_possible_mask() (Phil Auld) [1992256]
+- cpuset: Cleanup cpuset_cpus_allowed_fallback() use in select_fallback_rq() (Phil Auld) [1992256]
+- cpuset: Honour task_cpu_possible_mask() in guarantee_online_cpus() (Phil Auld) [1992256]
+- cpuset: Don't use the cpu_possible_mask as a last resort for cgroup v1 (Phil Auld) [1992256]
+- sched: Introduce task_cpu_possible_mask() to limit fallback rq selection (Phil Auld) [1992256]
+- sched: Cgroup SCHED_IDLE support (Phil Auld) [1992256]
+- sched: Don't report SCHED_FLAG_SUGOV in sched_getattr() (Phil Auld) [1992256]
+- sched/deadline: Fix reset_on_fork reporting of DL tasks (Phil Auld) [1992256]
+- sched/numa: Fix is_core_idle() (Phil Auld) [1992256]
+- sched: remove redundant on_rq status change (Phil Auld) [1992256]
+- sched: Optimize housekeeping_cpumask() in for_each_cpu_and() (Phil Auld) [1992256]
+- sched/sysctl: Move extern sysctl declarations to sched.h (Phil Auld) [1992256]
+- sched/debug: Don't update sched_domain debug directories before sched_debug_init() (Phil Auld) [1992256]
+
+* Thu Nov 25 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-21.el9]
+- clocksource: Increase WATCHDOG_MAX_SKEW (Waiman Long) [2017164]
+- x86/hpet: Use another crystalball to evaluate HPET usability (Waiman Long) [2017164]
+- scsi: target: Fix the pgr/alua_support_store functions (Maurizio Lombardi) [2023439]
+- redhat: fix typo and make the output more silent for dist-git sync (Herton R. Krzesinski)
+- x86: ACPI: cstate: Optimize C3 entry on AMD CPUs (David Arcari) [1998526]
+- scsi: lpfc: Update lpfc version to 14.0.0.3 (Dick Kennedy) [2021327]
+- scsi: lpfc: Allow fabric node recovery if recovery is in progress before devloss (Dick Kennedy) [2021327]
+- scsi: lpfc: Fix link down processing to address NULL pointer dereference (Dick Kennedy) [2021327]
+- scsi: lpfc: Allow PLOGI retry if previous PLOGI was aborted (Dick Kennedy) [2021327]
+- scsi: lpfc: Fix use-after-free in lpfc_unreg_rpi() routine (Dick Kennedy) [2021327]
+- scsi: lpfc: Correct sysfs reporting of loop support after SFP status change (Dick Kennedy) [2021327]
+- scsi: lpfc: Wait for successful restart of SLI3 adapter during host sg_reset (Dick Kennedy) [2021327]
+- scsi: lpfc: Revert LOG_TRACE_EVENT back to LOG_INIT prior to driver_resource_setup() (Dick Kennedy) [2021327]
+- x86/Kconfig: Do not enable AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT automatically (Prarit Bhargava) [2021200]
+- ucounts: Move get_ucounts from cred_alloc_blank to key_change_session_keyring (Alexey Gladkov) [2018142]
+- ucounts: Proper error handling in set_cred_ucounts (Alexey Gladkov) [2018142]
+- ucounts: Pair inc_rlimit_ucounts with dec_rlimit_ucoutns in commit_creds (Alexey Gladkov) [2018142]
+- ucounts: Fix signal ucount refcounting (Alexey Gladkov) [2018142]
+- x86/cpu: Fix migration safety with X86_BUG_NULL_SEL (Vitaly Kuznetsov) [2016959]
+- ip6_gre: Revert "ip6_gre: add validation for csum_start" (Guillaume Nault) [2014993]
+- ip_gre: validate csum_start only on pull (Guillaume Nault) [2014993]
+- redhat/configs: enable KEXEC_IMAGE_VERIFY_SIG for RHEL (Coiby Xu) [1994858]
+- redhat/configs: enable KEXEC_SIG for aarch64 RHEL (Coiby Xu) [1994858]
+- kernel.spec: add bpf_testmod.ko to kselftests/bpf (Viktor Malik) [2006318 2006319]
+- netfilter: Add deprecation notices for xtables (Phil Sutter) [1945179]
+- redhat: Add mark_driver_deprecated() (Phil Sutter) [1945179]
+
+* Tue Nov 23 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-20.el9]
+- powerpc/svm: Don't issue ultracalls if !mem_encrypt_active() (Herton R. Krzesinski) [2025186]
+
+* Fri Nov 19 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-19.el9]
+- net: core: don't call SIOCBRADD/DELIF for non-bridge devices (Ivan Vecera) [2008927]
+- net: bridge: fix ioctl old_deviceless bridge argument (Ivan Vecera) [2008927]
+- net: bridge: fix ioctl locking (Ivan Vecera) [2008927]
+- ethtool: Fix rxnfc copy to user buffer overflow (Ivan Vecera) [2008927]
+- net: bonding: move ioctl handling to private ndo operation (Ivan Vecera) [2008927]
+- net: bridge: move bridge ioctls out of .ndo_do_ioctl (Ivan Vecera) [2008927]
+- net: socket: return changed ifreq from SIOCDEVPRIVATE (Ivan Vecera) [2008927]
+- net: split out ndo_siowandev ioctl (Ivan Vecera) [2008927]
+- dev_ioctl: split out ndo_eth_ioctl (Ivan Vecera) [2008927]
+- dev_ioctl: pass SIOCDEVPRIVATE data separately (Ivan Vecera) [2008927]
+- wan: cosa: remove dead cosa_net_ioctl() function (Ivan Vecera) [2008927]
+- wan: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- ppp: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- sb1000: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- hippi: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- ip_tunnel: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- airo: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- hamradio: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- cxgb3: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- qeth: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- slip/plip: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- net: usb: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- fddi: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- eql: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- tehuti: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- hamachi: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- appletalk: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- bonding: use siocdevprivate (Ivan Vecera) [2008927]
+- tulip: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- phonet: use siocdevprivate (Ivan Vecera) [2008927]
+- bridge: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- hostap: use ndo_siocdevprivate (Ivan Vecera) [2008927]
+- staging: wlan-ng: use siocdevprivate (Ivan Vecera) [2008927]
+- staging: rtlwifi: use siocdevprivate (Ivan Vecera) [2008927]
+- net: split out SIOCDEVPRIVATE handling from dev_ioctl (Ivan Vecera) [2008927]
+- net: socket: rework compat_ifreq_ioctl() (Ivan Vecera) [2008927]
+- net: socket: simplify dev_ifconf handling (Ivan Vecera) [2008927]
+- net: socket: remove register_gifconf (Ivan Vecera) [2008927]
+- net: socket: rework SIOC?IFMAP ioctls (Ivan Vecera) [2008927]
+- ethtool: improve compat ioctl handling (Ivan Vecera) [2008927]
+- compat: make linux/compat.h available everywhere (Ivan Vecera) [2008927]
+
+* Thu Nov 18 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-18.el9]
+- CI: Add template for baseline gcov build (c9s repos) (Michael Hofmann)
+- PCI: vmd: depend on !UML (Myron Stowe) [1994932]
+- PCI: vmd: Do not disable MSI-X remapping if interrupt remapping is enabled by IOMMU (Myron Stowe) [1994932]
+- PCI: vmd: Assign a number to each VMD controller (Myron Stowe) [1994932]
+- PCI: VMD: ACPI: Make ACPI companion lookup work for VMD bus (Myron Stowe) [1994932]
+- swiotlb-xen: drop DEFAULT_NSLABS (Jerry Snitselaar) [2004348]
+- swiotlb-xen: arrange to have buffer info logged (Jerry Snitselaar) [2004348]
+- swiotlb-xen: drop leftover __ref (Jerry Snitselaar) [2004348]
+- swiotlb-xen: limit init retries (Jerry Snitselaar) [2004348]
+- swiotlb-xen: suppress certain init retries (Jerry Snitselaar) [2004348]
+- swiotlb-xen: maintain slab count properly (Jerry Snitselaar) [2004348]
+- swiotlb-xen: fix late init retry (Jerry Snitselaar) [2004348]
+- swiotlb-xen: avoid double free (Jerry Snitselaar) [2004348]
+- dma-debug: teach add_dma_entry() about DMA_ATTR_SKIP_CPU_SYNC (Jerry Snitselaar) [2004348]
+- dma-debug: fix sg checks in debug_dma_map_sg() (Jerry Snitselaar) [2004348]
+- dma-mapping: fix the kerneldoc for dma_map_sgtable() (Jerry Snitselaar) [2004348]
+- dma-debug: prevent an error message from causing runtime problems (Jerry Snitselaar) [2004348]
+- dma-mapping: fix the kerneldoc for dma_map_sg_attrs (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Drop "0x" prefix from PCI bus & device addresses (Jerry Snitselaar) [2004348]
+- iommu: Clarify default domain Kconfig (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Fix a deadlock in intel_svm_drain_prq() (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Fix PASID leak in intel_svm_unbind_mm() (Jerry Snitselaar) [2004348]
+- iommu/amd: Remove iommu_init_ga() (Jerry Snitselaar) [2004348]
+- iommu/amd: Relocate GAMSup check to early_enable_iommus (Jerry Snitselaar) [2004348]
+- iommu/io-pgtable: Abstract iommu_iotlb_gather access (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Add present bit check in pasid entry setup helpers (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Use pasid_pte_is_present() helper function (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Drop the kernel doc annotation (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Allow devices to have more than 32 outstanding PRs (Jerry Snitselaar) [1921363]
+- iommu/vt-d: Preset A/D bits for user space DMA usage (Jerry Snitselaar) [2004348]
+- iomm/vt-d: Enable Intel IOMMU scalable mode by default (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Refactor Kconfig a bit (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Remove unnecessary oom message (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Update the virtual command related registers (Jerry Snitselaar) [2004348]
+- iommu: Allow enabling non-strict mode dynamically (Jerry Snitselaar) [2004348]
+- iommu: Merge strictness and domain type configs (Jerry Snitselaar) [2004348]
+- iommu: Only log strictness for DMA domains (Jerry Snitselaar) [2004348]
+- iommu: Expose DMA domain strictness via sysfs (Jerry Snitselaar) [2004348]
+- iommu: Express DMA strictness via the domain type (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Prepare for multiple DMA domain types (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Prepare for multiple DMA domain types (Jerry Snitselaar) [2004348]
+- iommu/amd: Prepare for multiple DMA domain types (Jerry Snitselaar) [2004348]
+- iommu: Introduce explicit type for non-strict DMA domains (Jerry Snitselaar) [2004348]
+- iommu/io-pgtable: Remove non-strict quirk (Jerry Snitselaar) [2004348]
+- iommu: Indicate queued flushes via gather data (Jerry Snitselaar) [2004348]
+- iommu/dma: Remove redundant "!dev" checks (Jerry Snitselaar) [2004348]
+- iommu/virtio: Drop IOVA cookie management (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Drop IOVA cookie management (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Drop IOVA cookie management (Jerry Snitselaar) [2004348]
+- iommu/amd: Drop IOVA cookie management (Jerry Snitselaar) [2004348]
+- iommu: Pull IOVA cookie management into the core (Jerry Snitselaar) [2004348]
+- iommu/amd: Remove stale amd_iommu_unmap_flush usage (Jerry Snitselaar) [2004348]
+- iommu/amd: Use only natural aligned flushes in a VM (Jerry Snitselaar) [2004348]
+- iommu/amd: Sync once for scatter-gather operations (Jerry Snitselaar) [2004348]
+- iommu/amd: Tailored gather logic for AMD (Jerry Snitselaar) [2004348]
+- iommu: Factor iommu_iotlb_gather_is_disjoint() out (Jerry Snitselaar) [2004348]
+- iommu: Improve iommu_iotlb_gather helpers (Jerry Snitselaar) [2004348]
+- iommu/amd: Do not use flush-queue when NpCache is on (Jerry Snitselaar) [2004348]
+- iommu/amd: Selective flush on unmap (Jerry Snitselaar) [2004348]
+- iommu/amd: Fix printing of IOMMU events when rate limiting kicks in (Jerry Snitselaar) [2004348]
+- iommu/amd: Convert from atomic_t to refcount_t on pasid_state->count (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Fix missing unlock on error in arm_smmu_device_group() (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Stop pre-zeroing batch commands (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Extract reusable function __arm_smmu_cmdq_skip_err() (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Add and use static helper function arm_smmu_get_cmdq() (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Add and use static helper function arm_smmu_cmdq_issue_cmd_with_sync() (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Use command queue batching helpers to improve performance (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Optimize ->tlb_flush_walk() for qcom implementation (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Fix race condition during iommu_group creation (Jerry Snitselaar) [2004348]
+- iommu: Fix race condition during default domain allocation (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Add clk_bulk_{prepare/unprepare} to system pm callbacks (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Remove some unneeded init in arm_smmu_cmdq_issue_cmdlist() (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu-v3: Implement the map_pages() IOMMU driver callback (Jerry Snitselaar) [1971978]
+- iommu/arm-smmu-v3: Implement the unmap_pages() IOMMU driver callback (Jerry Snitselaar) [1971978]
+- iommu/vt-d: Move clflush'es from iotlb_sync_map() to map_pages() (Jerry Snitselaar) [1971978]
+- iommu/vt-d: Implement map/unmap_pages() iommu_ops callback (Jerry Snitselaar) [1971978]
+- iommu/vt-d: Report real pgsize bitmap to iommu core (Jerry Snitselaar) [1971978]
+- iommu: Streamline iommu_iova_to_phys() (Jerry Snitselaar) [2004348]
+- iommu: Remove mode argument from iommu_set_dma_strict() (Jerry Snitselaar) [2004348]
+- redhat/configs: Use new iommu default dma config options (Jerry Snitselaar) [2004348]
+- iommu/amd: Add support for IOMMU default DMA mode build options (Jerry Snitselaar) [2004348]
+- iommu/vt-d: Add support for IOMMU default DMA mode build options (Jerry Snitselaar) [2004348]
+- iommu: Enhance IOMMU default DMA mode build options (Jerry Snitselaar) [2004348]
+- iommu: Print strict or lazy mode at init time (Jerry Snitselaar) [2004348]
+- iommu: Deprecate Intel and AMD cmdline methods to enable strict mode (Jerry Snitselaar) [2004348]
+- iommu/arm-smmu: Implement the map_pages() IOMMU driver callback (Jerry Snitselaar) [1971978]
+- iommu/arm-smmu: Implement the unmap_pages() IOMMU driver callback (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable-arm-v7s: Implement arm_v7s_map_pages() (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable-arm-v7s: Implement arm_v7s_unmap_pages() (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable-arm: Implement arm_lpae_map_pages() (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable-arm: Implement arm_lpae_unmap_pages() (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable-arm: Prepare PTE methods for handling multiple entries (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable: Introduce map_pages() as a page table op (Jerry Snitselaar) [1971978]
+- iommu/io-pgtable: Introduce unmap_pages() as a page table op (Jerry Snitselaar) [1971978]
+- iommu: Add support for the map_pages() callback (Jerry Snitselaar) [1971978]
+- iommu: Hook up '->unmap_pages' driver callback (Jerry Snitselaar) [1971978]
+- iommu: Split 'addr_merge' argument to iommu_pgsize() into separate parts (Jerry Snitselaar) [1971978]
+- iommu: Use bitmap to calculate page size in iommu_pgsize() (Jerry Snitselaar) [1971978]
+- iommu: Add a map_pages() op for IOMMU drivers (Jerry Snitselaar) [1971978]
+- iommu: Add an unmap_pages() op for IOMMU drivers (Jerry Snitselaar) [1971978]
+- swiotlb: use depends on for DMA_RESTRICTED_POOL (Jerry Snitselaar) [2004348]
+- swiotlb: Free tbl memory in swiotlb_exit() (Jerry Snitselaar) [2004348]
+- swiotlb: Emit diagnostic in swiotlb_exit() (Jerry Snitselaar) [2004348]
+- swiotlb: Convert io_default_tlb_mem to static allocation (Jerry Snitselaar) [2004348]
+- swiotlb: add overflow checks to swiotlb_bounce (Jerry Snitselaar) [2004348]
+- swiotlb: fix implicit debugfs declarations (Jerry Snitselaar) [2004348]
+- swiotlb: Add restricted DMA pool initialization (Jerry Snitselaar) [2004348]
+- redhat/configs: Add CONFIG_DMA_RESTRICTED_POOL (Jerry Snitselaar) [2004348]
+- swiotlb: Add restricted DMA alloc/free support (Jerry Snitselaar) [2004348]
+- swiotlb: Refactor swiotlb_tbl_unmap_single (Jerry Snitselaar) [2004348]
+- swiotlb: Move alloc_size to swiotlb_find_slots (Jerry Snitselaar) [2004348]
+- swiotlb: Use is_swiotlb_force_bounce for swiotlb data bouncing (Jerry Snitselaar) [2004348]
+- swiotlb: Update is_swiotlb_active to add a struct device argument (Jerry Snitselaar) [2004348]
+- swiotlb: Update is_swiotlb_buffer to add a struct device argument (Jerry Snitselaar) [2004348]
+- swiotlb: Set dev->dma_io_tlb_mem to the swiotlb pool used (Jerry Snitselaar) [2004348]
+- swiotlb: Refactor swiotlb_create_debugfs (Jerry Snitselaar) [2004348]
+- swiotlb: Refactor swiotlb init functions (Jerry Snitselaar) [2004348]
+- dma-mapping: make the global coherent pool conditional (Jerry Snitselaar) [2004348]
+- dma-mapping: add a dma_init_global_coherent helper (Jerry Snitselaar) [2004348]
+- dma-mapping: simplify dma_init_coherent_memory (Jerry Snitselaar) [2004348]
+- dma-mapping: allow using the global coherent pool for !ARM (Jerry Snitselaar) [2004348]
+- dma-direct: add support for dma_coherent_default_memory (Jerry Snitselaar) [2004348]
+- dma-mapping: return an unsigned int from dma_map_sg{,_attrs} (Jerry Snitselaar) [2004348]
+- dma-mapping: disallow .map_sg operations from returning zero on error (Jerry Snitselaar) [2004348]
+- dma-mapping: return error code from dma_dummy_map_sg() (Jerry Snitselaar) [2004348]
+- xen: swiotlb: return error code from xen_swiotlb_map_sg() (Jerry Snitselaar) [2004348]
+- s390/pci: don't set failed sg dma_address to DMA_MAPPING_ERROR (Jerry Snitselaar) [2004348]
+- s390/pci: return error code from s390_dma_map_sg() (Jerry Snitselaar) [2004348]
+- powerpc/iommu: don't set failed sg dma_address to DMA_MAPPING_ERROR (Jerry Snitselaar) [2004348]
+- powerpc/iommu: return error code from .map_sg() ops (Jerry Snitselaar) [2004348]
+- iommu/dma: return error code from iommu_dma_map_sg() (Jerry Snitselaar) [2004348]
+- iommu: return full error code from iommu_map_sg[_atomic]() (Jerry Snitselaar) [2004348]
+- dma-direct: return appropriate error code from dma_direct_map_sg() (Jerry Snitselaar) [2004348]
+- dma-mapping: allow map_sg() ops to return negative error codes (Jerry Snitselaar) [2004348]
+- dma-debug: fix debugfs initialization order (Jerry Snitselaar) [2004348]
+- dma-debug: use memory_intersects() directly (Jerry Snitselaar) [2004348]
+
+* Tue Nov 16 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-17.el9]
+- net: mana: Support hibernation and kexec (Mohammed Gamal) [2011883]
+- net: mana: Improve the HWC error handling (Mohammed Gamal) [2011883]
+- net: mana: Report OS info to the PF driver (Mohammed Gamal) [2011883]
+- net: mana: Fix the netdev_err()'s vPort argument in mana_init_port() (Mohammed Gamal) [2011883]
+- net: mana: Allow setting the number of queues while the NIC is down (Mohammed Gamal) [2011883]
+- net: mana: Fix error handling in mana_create_rxq() (Mohammed Gamal) [2011883]
+- net: mana: Use kcalloc() instead of kzalloc() (Mohammed Gamal) [2011883]
+- net: mana: Prefer struct_size over open coded arithmetic (Mohammed Gamal) [2011883]
+- net: mana: Add WARN_ON_ONCE in case of CQE read overflow (Mohammed Gamal) [2011883]
+- net: mana: Add support for EQ sharing (Mohammed Gamal) [2011883]
+- net: mana: Move NAPI from EQ to CQ (Mohammed Gamal) [2011883]
+- PCI: hv: Fix sleep while in non-sleep context when removing child devices from the bus (Mohammed Gamal) [2008571]
+- objtool: Remove redundant 'len' field from struct section (C. Erastus Toe) [2002440]
+- objtool: Make .altinstructions section entry size consistent (C. Erastus Toe) [2002440]
+- s390/topology: fix topology information when calling cpu hotplug notifiers (Phil Auld) [2003998]
+- fs: remove leftover comments from mandatory locking removal (Jeffrey Layton) [2017438]
+- locks: remove changelog comments (Jeffrey Layton) [2017438]
+- docs: fs: locks.rst: update comment about mandatory file locking (Jeffrey Layton) [2017438]
+- Documentation: remove reference to now removed mandatory-locking doc (Jeffrey Layton) [2017438]
+- locks: remove LOCK_MAND flock lock support (Jeffrey Layton) [2017438]
+- fs: clean up after mandatory file locking support removal (Jeffrey Layton) [2017438]
+- fs: remove mandatory file locking support (Jeffrey Layton) [2017438]
+- fcntl: fix potential deadlock for &fasync_struct.fa_lock (Jeffrey Layton) [2017438]
+- fcntl: fix potential deadlocks for &fown_struct.lock (Jeffrey Layton) [2017438]
+- KVM: s390: Enable specification exception interpretation (Thomas Huth) [2001770]
+- redhat/configs: enable CONFIG_BCMGENET as module (Joel Savitz) [2011025]
+
+* Fri Nov 12 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-16.el9]
+- CI: Add template for baseline gcov build for RHEL (Israel Santana Aleman)
+- redhat/configs: Enable Nitro Enclaves on Aarch64 (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Add fixes for checkpatch blank line reports (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Add fixes for checkpatch spell check reports (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Add fixes for checkpatch match open parenthesis reports (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Update copyright statement to include 2021 (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Add fix for the kernel-doc report (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Update documentation for Arm64 support (Vitaly Kuznetsov) [2001582]
+- nitro_enclaves: Enable Arm64 support (Vitaly Kuznetsov) [2001582]
+- redhat/configs: Enable Hyper-V support on ARM (Vitaly Kuznetsov) [1949613]
+- redhat/configs: enable CONFIG_INPUT_KEYBOARD for AARCH64 (Vitaly Kuznetsov) [1949613]
+- Drivers: hv: Enable Hyper-V code to be built on ARM64 (Vitaly Kuznetsov) [1949613]
+- arm64: efi: Export screen_info (Vitaly Kuznetsov) [1949613]
+- arm64: hyperv: Initialize hypervisor on boot (Vitaly Kuznetsov) [1949613]
+- arm64: hyperv: Add panic handler (Vitaly Kuznetsov) [1949613]
+- arm64: hyperv: Add Hyper-V hypercall and register access utilities (Vitaly Kuznetsov) [1949613]
+- PCI: hv: Turn on the host bridge probing on ARM64 (Vitaly Kuznetsov) [1949613]
+- PCI: hv: Set up MSI domain at bridge probing time (Vitaly Kuznetsov) [1949613]
+- PCI: hv: Set ->domain_nr of pci_host_bridge at probing time (Vitaly Kuznetsov) [1949613]
+- PCI: hv: Generify PCI probing (Vitaly Kuznetsov) [1949613]
+- arm64: PCI: Support root bridge preparation for Hyper-V (Vitaly Kuznetsov) [1949613]
+- arm64: PCI: Restructure pcibios_root_bridge_prepare() (Vitaly Kuznetsov) [1949613]
+- PCI: Support populating MSI domains of root buses via bridges (Vitaly Kuznetsov) [1949613]
+- PCI: Introduce domain_nr in pci_host_bridge (Vitaly Kuznetsov) [1949613]
+- drivers: hv: Decouple Hyper-V clock/timer code from VMbus drivers (Vitaly Kuznetsov) [1949613]
+- Drivers: hv: Move Hyper-V misc functionality to arch-neutral code (Vitaly Kuznetsov) [1949613]
+- Drivers: hv: Add arch independent default functions for some Hyper-V handlers (Vitaly Kuznetsov) [1949613]
+- Drivers: hv: Make portions of Hyper-V init code be arch neutral (Vitaly Kuznetsov) [1949613]
+- asm-generic/hyperv: Add missing #include of nmi.h (Vitaly Kuznetsov) [1949613]
+- PCI: hv: Support for create interrupt v3 (Vitaly Kuznetsov) [1949613]
+- x86_64: Enable Elkhart Lake Quadrature Encoder Peripheral support (Prarit Bhargava) [1874997]
+
+* Thu Nov 11 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-15.el9]
+- scsi: lpfc: Fix memory overwrite during FC-GS I/O abort handling (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix gcc -Wstringop-overread warning, again (Dick Kennedy) [1879528]
+- scsi: lpfc: Use correct scnprintf() limit (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix sprintf() overflow in lpfc_display_fpin_wwpn() (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix compilation errors on kernels with no CONFIG_DEBUG_FS (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix CPU to/from endian warnings introduced by ELS processing (Dick Kennedy) [1879528]
+- scsi: lpfc: Update lpfc version to 14.0.0.2 (Dick Kennedy) [1879528]
+- scsi: lpfc: Improve PBDE checks during SGL processing (Dick Kennedy) [1879528]
+- scsi: lpfc: Zero CGN stats only during initial driver load and stat reset (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix I/O block after enabling managed congestion mode (Dick Kennedy) [1879528]
+- scsi: lpfc: Adjust bytes received vales during cmf timer interval (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix EEH support for NVMe I/O (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix FCP I/O flush functionality for TMF routines (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix NVMe I/O failover to non-optimized path (Dick Kennedy) [1879528]
+- scsi: lpfc: Don't remove ndlp on PRLI errors in P2P mode (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix rediscovery of tape device after LIP (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix hang on unload due to stuck fport node (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix premature rpi release for unsolicited TPLS and LS_RJT (Dick Kennedy) [1879528]
+- scsi: lpfc: Don't release final kref on Fport node while ABTS outstanding (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix list_add() corruption in lpfc_drain_txq() (Dick Kennedy) [1879528]
+- scsi: fc: Add EDC ELS definition (Dick Kennedy) [1879528]
+- scsi: lpfc: Copyright updates for 14.0.0.1 patches (Dick Kennedy) [1879528]
+- scsi: lpfc: Update lpfc version to 14.0.0.1 (Dick Kennedy) [1879528]
+- scsi: lpfc: Add bsg support for retrieving adapter cmf data (Dick Kennedy) [1879528]
+- scsi: lpfc: Add cmf_info sysfs entry (Dick Kennedy) [1879528]
+- scsi: lpfc: Add debugfs support for cm framework buffers (Dick Kennedy) [1879528]
+- scsi: lpfc: Add support for maintaining the cm statistics buffer (Dick Kennedy) [1879528]
+- scsi: lpfc: Add rx monitoring statistics (Dick Kennedy) [1879528]
+- scsi: lpfc: Add support for the CM framework (Dick Kennedy) [1879528]
+- scsi: lpfc: Add cmfsync WQE support (Dick Kennedy) [1879528]
+- scsi: lpfc: Add support for cm enablement buffer (Dick Kennedy) [1879528]
+- scsi: lpfc: Add cm statistics buffer support (Dick Kennedy) [1879528]
+- scsi: lpfc: Add EDC ELS support (Dick Kennedy) [1879528]
+- scsi: lpfc: Expand FPIN and RDF receive logging (Dick Kennedy) [1879528]
+- scsi: lpfc: Add MIB feature enablement support (Dick Kennedy) [1879528]
+- scsi: lpfc: Add SET_HOST_DATA mbox cmd to pass date/time info to firmware (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix possible ABBA deadlock in nvmet_xri_aborted() (Dick Kennedy) [1879528]
+- scsi: lpfc: Remove redundant assignment to pointer pcmd (Dick Kennedy) [1879528]
+- scsi: lpfc: Copyright updates for 14.0.0.0 patches (Dick Kennedy) [1879528]
+- scsi: lpfc: Update lpfc version to 14.0.0.0 (Dick Kennedy) [1879528]
+- scsi: lpfc: Add 256 Gb link speed support (Dick Kennedy) [1879528]
+- scsi: lpfc: Revise Topology and RAS support checks for new adapters (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix cq_id truncation in rq create (Dick Kennedy) [1879528]
+- scsi: lpfc: Add PCI ID support for LPe37000/LPe38000 series adapters (Dick Kennedy) [1879528]
+- scsi: lpfc: Copyright updates for 12.8.0.11 patches (Dick Kennedy) [1879528]
+- scsi: lpfc: Update lpfc version to 12.8.0.11 (Dick Kennedy) [1879528]
+- scsi: lpfc: Skip issuing ADISC when node is in NPR state (Dick Kennedy) [1879528]
+- scsi: lpfc: Skip reg_vpi when link is down for SLI3 in ADISC cmpl path (Dick Kennedy) [1879528]
+- scsi: lpfc: Call discovery state machine when handling PLOGI/ADISC completions (Dick Kennedy) [1879528]
+- scsi: lpfc: Delay unregistering from transport until GIDFT or ADISC completes (Dick Kennedy) [1879528]
+- scsi: lpfc: Enable adisc discovery after RSCN by default (Dick Kennedy) [1879528]
+- scsi: lpfc: Use PBDE feature enabled bit to determine PBDE support (Dick Kennedy) [1879528]
+- scsi: lpfc: Clear outstanding active mailbox during PCI function reset (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix KASAN slab-out-of-bounds in lpfc_unreg_rpi() routine (Dick Kennedy) [1879528]
+- scsi: lpfc: Remove REG_LOGIN check requirement to issue an ELS RDF (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix memory leaks in error paths while issuing ELS RDF/SCR request (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix NULL ptr dereference with NPIV ports for RDF handling (Dick Kennedy) [1879528]
+- scsi: lpfc: Keep NDLP reference until after freeing the IOCB after ELS handling (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix target reset handler from falsely returning FAILURE (Dick Kennedy) [1879528]
+- scsi: lpfc: Discovery state machine fixes for LOGO handling (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix function description comments for vmid routines (Dick Kennedy) [1879528]
+- scsi: lpfc: Improve firmware download logging (Dick Kennedy) [1879528]
+- scsi: lpfc: Remove use of kmalloc() in trace event logging (Dick Kennedy) [1879528]
+- scsi: lpfc: Fix NVMe support reporting in log message (Dick Kennedy) [1879528]
+
+* Wed Nov 10 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-14.el9]
+- evm: mark evm_fixmode as __ro_after_init (Bruno Meneguele) [2017160]
+- IMA: remove -Wmissing-prototypes warning (Bruno Meneguele) [2017160]
+- perf flamegraph: flamegraph.py script improvements (Michael Petlan) [2010271]
+- redhat/configs/evaluate_configs: insert EMPTY tags at correct place (Jan Stancek) [2015082]
+- redhat/configs/evaluate_configs: walk cfgvariants line by line (Jan Stancek) [2015082]
+- redhat/configs: create a separate config for gcov options (Jan Stancek) [2015082]
+- redhat/kernel.spec.template: don't hardcode gcov arches (Jan Stancek) [2015082]
+- i40e: fix endless loop under rtnl (Stefan Assmann) [1992939]
+- selftests/bpf: Use nanosleep tracepoint in perf buffer test (Jiri Olsa) [2006310]
+- selftests/bpf: Fix possible/online index mismatch in perf_buffer test (Jiri Olsa) [2006310]
+- selftests/bpf: Fix perf_buffer test on system with offline cpus (Jiri Olsa) [2006310]
+- KVM: x86: Fix stack-out-of-bounds memory access from ioapic_write_indirect() (Vitaly Kuznetsov) [1965145]
+- selftest/bpf: Switch recursion test to use htab_map_delete_elem (Jiri Olsa) [2006313]
+
+* Mon Nov 08 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-13.el9]
+- futex: Remove unused variable 'vpid' in futex_proxy_trylock_atomic() (Waiman Long) [2007032]
+- futex: Prevent inconsistent state and exit race (Waiman Long) [2007032]
+- locking/ww_mutex: Initialize waiter.ww_ctx properly (Waiman Long) [2007032]
+- futex: Return error code instead of assigning it without effect (Waiman Long) [2007032]
+- locking/rwbase: Take care of ordering guarantee for fastpath reader (Waiman Long) [2007032]
+- locking/rwbase: Extract __rwbase_write_trylock() (Waiman Long) [2007032]
+- locking/rwbase: Properly match set_and_save_state() to restore_state() (Waiman Long) [2007032]
+- locking/rtmutex: Fix ww_mutex deadlock check (Waiman Long) [2007032]
+- locking/rwsem: Add missing __init_rwsem() for PREEMPT_RT (Waiman Long) [2007032]
+- locking/rtmutex: Return success on deadlock for ww_mutex waiters (Waiman Long) [2007032]
+- locking/rtmutex: Prevent spurious EDEADLK return caused by ww_mutexes (Waiman Long) [2007032]
+- locking/rtmutex: Dequeue waiter on ww_mutex deadlock (Waiman Long) [2007032]
+- locking/rtmutex: Dont dereference waiter lockless (Waiman Long) [2007032]
+- locking/local_lock: Add PREEMPT_RT support (Waiman Long) [2007032]
+- locking/spinlock/rt: Prepare for RT local_lock (Waiman Long) [2007032]
+- locking/rtmutex: Add adaptive spinwait mechanism (Waiman Long) [2007032]
+- locking/rtmutex: Implement equal priority lock stealing (Waiman Long) [2007032]
+- preempt: Adjust PREEMPT_LOCK_OFFSET for RT (Waiman Long) [2007032]
+- locking/rtmutex: Prevent lockdep false positive with PI futexes (Waiman Long) [2007032]
+- futex: Prevent requeue_pi() lock nesting issue on RT (Waiman Long) [2007032]
+- futex: Simplify handle_early_requeue_pi_wakeup() (Waiman Long) [2007032]
+- futex: Reorder sanity checks in futex_requeue() (Waiman Long) [2007032]
+- futex: Clarify comment in futex_requeue() (Waiman Long) [2007032]
+- futex: Restructure futex_requeue() (Waiman Long) [2007032]
+- futex: Correct the number of requeued waiters for PI (Waiman Long) [2007032]
+- futex: Remove bogus condition for requeue PI (Waiman Long) [2007032]
+- futex: Clarify futex_requeue() PI handling (Waiman Long) [2007032]
+- futex: Clean up stale comments (Waiman Long) [2007032]
+- futex: Validate waiter correctly in futex_proxy_trylock_atomic() (Waiman Long) [2007032]
+- lib/test_lockup: Adapt to changed variables (Waiman Long) [2007032]
+- locking/rtmutex: Add mutex variant for RT (Waiman Long) [2007032]
+- locking/ww_mutex: Implement rtmutex based ww_mutex API functions (Waiman Long) [2007032]
+- locking/rtmutex: Extend the rtmutex core to support ww_mutex (Waiman Long) [2007032]
+- locking/ww_mutex: Add rt_mutex based lock type and accessors (Waiman Long) [2007032]
+- locking/ww_mutex: Add RT priority to W/W order (Waiman Long) [2007032]
+- locking/ww_mutex: Implement rt_mutex accessors (Waiman Long) [2007032]
+- locking/ww_mutex: Abstract out internal lock accesses (Waiman Long) [2007032]
+- locking/ww_mutex: Abstract out mutex types (Waiman Long) [2007032]
+- locking/ww_mutex: Abstract out mutex accessors (Waiman Long) [2007032]
+- locking/ww_mutex: Abstract out waiter enqueueing (Waiman Long) [2007032]
+- locking/ww_mutex: Abstract out the waiter iteration (Waiman Long) [2007032]
+- locking/ww_mutex: Remove the __sched annotation from ww_mutex APIs (Waiman Long) [2007032]
+- locking/ww_mutex: Split out the W/W implementation logic into kernel/locking/ww_mutex.h (Waiman Long) [2007032]
+- locking/ww_mutex: Split up ww_mutex_unlock() (Waiman Long) [2007032]
+- locking/ww_mutex: Gather mutex_waiter initialization (Waiman Long) [2007032]
+- locking/ww_mutex: Simplify lockdep annotations (Waiman Long) [2007032]
+- locking/mutex: Make mutex::wait_lock raw (Waiman Long) [2007032]
+- locking/ww_mutex: Move the ww_mutex definitions from <linux/mutex.h> into <linux/ww_mutex.h> (Waiman Long) [2007032]
+- locking/mutex: Move the 'struct mutex_waiter' definition from <linux/mutex.h> to the internal header (Waiman Long) [2007032]
+- locking/mutex: Consolidate core headers, remove kernel/locking/mutex-debug.h (Waiman Long) [2007032]
+- locking/rtmutex: Squash !RT tasks to DEFAULT_PRIO (Waiman Long) [2007032]
+- locking/rwlock: Provide RT variant (Waiman Long) [2007032]
+- locking/spinlock: Provide RT variant (Waiman Long) [2007032]
+- locking/rtmutex: Provide the spin/rwlock core lock function (Waiman Long) [2007032]
+- locking/spinlock: Provide RT variant header: <linux/spinlock_rt.h> (Waiman Long) [2007032]
+- locking/spinlock: Provide RT specific spinlock_t (Waiman Long) [2007032]
+- locking/rtmutex: Reduce <linux/rtmutex.h> header dependencies, only include <linux/rbtree_types.h> (Waiman Long) [2007032]
+- rbtree: Split out the rbtree type definitions into <linux/rbtree_types.h> (Waiman Long) [2007032]
+- locking/lockdep: Reduce header dependencies in <linux/debug_locks.h> (Waiman Long) [2007032]
+- locking/rtmutex: Prevent future include recursion hell (Waiman Long) [2007032]
+- locking/spinlock: Split the lock types header, and move the raw types into <linux/spinlock_types_raw.h> (Waiman Long) [2007032]
+- locking/rtmutex: Guard regular sleeping locks specific functions (Waiman Long) [2007032]
+- locking/rtmutex: Prepare RT rt_mutex_wake_q for RT locks (Waiman Long) [2007032]
+- locking/rtmutex: Use rt_mutex_wake_q_head (Waiman Long) [2007032]
+- locking/rtmutex: Provide rt_wake_q_head and helpers (Waiman Long) [2007032]
+- locking/rtmutex: Add wake_state to rt_mutex_waiter (Waiman Long) [2007032]
+- locking/rwsem: Add rtmutex based R/W semaphore implementation (Waiman Long) [2007032]
+- locking/rt: Add base code for RT rw_semaphore and rwlock (Waiman Long) [2007032]
+- locking/rtmutex: Provide rt_mutex_base_is_locked() (Waiman Long) [2007032]
+- locking/rtmutex: Provide rt_mutex_slowlock_locked() (Waiman Long) [2007032]
+- locking/rtmutex: Split out the inner parts of 'struct rtmutex' (Waiman Long) [2007032]
+- locking/rtmutex: Split API from implementation (Waiman Long) [2007032]
+- locking/rtmutex: Switch to from cmpxchg_*() to try_cmpxchg_*() (Waiman Long) [2007032]
+- locking/rtmutex: Convert macros to inlines (Waiman Long) [2007032]
+- locking/rtmutex: Remove rt_mutex_is_locked() (Waiman Long) [2007032]
+- sched/wake_q: Provide WAKE_Q_HEAD_INITIALIZER() (Waiman Long) [2007032]
+- sched/core: Provide a scheduling point for RT locks (Waiman Long) [2007032]
+- sched/core: Rework the __schedule() preempt argument (Waiman Long) [2007032]
+- sched/wakeup: Prepare for RT sleeping spin/rwlocks (Waiman Long) [2007032]
+- sched/wakeup: Reorganize the current::__state helpers (Waiman Long) [2007032]
+- sched/wakeup: Introduce the TASK_RTLOCK_WAIT state bit (Waiman Long) [2007032]
+- sched/wakeup: Split out the wakeup ->__state check (Waiman Long) [2007032]
+- locking/rtmutex: Set proper wait context for lockdep (Waiman Long) [2007032]
+- locking/local_lock: Add missing owner initialization (Waiman Long) [2007032]
+- locking/mutex: Add MUTEX_WARN_ON (Waiman Long) [2007032]
+- locking/mutex: Introduce __mutex_trylock_or_handoff() (Waiman Long) [2007032]
+- locking/mutex: Fix HANDOFF condition (Waiman Long) [2007032]
+- locking/mutex: Use try_cmpxchg() (Waiman Long) [2007032]
+
+* Thu Nov 04 2021 Jarod Wilson <jarod@redhat.com> [5.14.0-12.el9]
+- redhat: make dist-srpm-gcov add to BUILDOPTS (Jan Stancek) [2017628]
+- redhat: Fix dist-srpm-gcov (Jan Stancek) [2017628]
+- s390: report more CPU capabilities (Robin Dapp) [2012095]
+- s390/disassembler: add instructions (Robin Dapp) [2012095]
+- audit: move put_tree() to avoid trim_trees refcount underflow and UAF (Richard Guy Briggs) [1985904]
+- libbpf: Properly ignore STT_SECTION symbols in legacy map definitions (Jiri Olsa) [1998266]
+- libbpf: Ignore STT_SECTION symbols in 'maps' section (Jiri Olsa) [1998266]
+- selftests, bpf: test_lwt_ip_encap: Really disable rp_filter (Jiri Benc) [2006328]
+
+* Thu Oct 28 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-11.el9]
+- selinux: remove the SELinux lockdown implementation (Ondrej Mosnacek) [1940843 1945581]
+- bpf: Fix integer overflow in prealloc_elems_and_freelist() (Yauheni Kaliuta) [2010494] {CVE-2021-41864}
+- seltests: bpf: test_tunnel: Use ip neigh (Jiri Benc) [2006326]
+
+* Tue Oct 26 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-10.el9]
+- block: return ELEVATOR_DISCARD_MERGE if possible (Ming Lei) [1991958]
+- blk-mq: avoid to iterate over stale request (Ming Lei) [2009110]
+- redhat/configs: enable CONFIG_IMA_WRITE_POLICY (Bruno Meneguele) [2006320]
+- CI: Update deprecated configs (Veronika Kabatova)
+
+* Wed Oct 20 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-9.el9]
+- powerpc/pseries: Prevent free CPU ids being reused on another node (Desnes A. Nunes do Rosario) [2004809]
+- pseries/drmem: update LMBs after LPM (Desnes A. Nunes do Rosario) [2004809]
+- powerpc/numa: Consider the max NUMA node for migratable LPAR (Desnes A. Nunes do Rosario) [2004809]
+- selftests: bpf: disable test_lirc_mode2 (Jiri Benc) [2006359]
+- selftests: bpf: disable test_doc_build.sh (Jiri Benc) [2006359]
+- selftests: bpf: define SO_RCVTIMEO and SO_SNDTIMEO properly for ppc64le (Jiri Benc) [2006359]
+- selftests: bpf: skip FOU tests in test_tc_tunnel (Jiri Benc) [2006359]
+- selftests: bpf: disable test_seg6_loop test (Jiri Benc) [2006359]
+- selftests: bpf: disable test_lwt_seg6local (Jiri Benc) [2006359]
+- selftests: bpf: disable test_bpftool_build.sh (Jiri Benc) [2006359]
+- selftests: add option to skip specific tests in RHEL (Jiri Benc) [2006359]
+
+* Fri Oct 15 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-8.el9]
+- selftests/powerpc: Add scv versions of the basic TM syscall tests (Desnes A. Nunes do Rosario) [1986651]
+- powerpc/64s: system call scv tabort fix for corrupt irq soft-mask state (Desnes A. Nunes do Rosario) [1986651]
+- mm/swap: consider max pages in iomap_swapfile_add_extent (Carlos Maiolino) [2005191]
+- platform/x86/intel: pmc/core: Add GBE Package C10 fix for Alder Lake PCH (David Arcari) [2007707]
+- platform/x86/intel: pmc/core: Add Alder Lake low power mode support for pmc core (David Arcari) [2007707]
+- platform/x86/intel: pmc/core: Add Latency Tolerance Reporting (LTR) support to Alder Lake (David Arcari) [2007707]
+- platform/x86/intel: pmc/core: Add Alderlake support to pmc core driver (David Arcari) [2007707]
+- platform/x86: intel_pmc_core: Move to intel sub-directory (David Arcari) [2007707]
+- platform/x86: intel_pmc_core: Prevent possibile overflow (David Arcari) [2007707]
+- Clean-up CONFIG_X86_PLATFORM_DRIVERS_INTEL (David Arcari) [2007707]
+- KVM: nVMX: Filter out all unsupported controls when eVMCS was activated (Vitaly Kuznetsov) [2001912]
+- ipc: remove memcg accounting for sops objects in do_semtimedop() (Rafael Aquini) [1999707] {CVE-2021-3759}
+- memcg: enable accounting of ipc resources (Rafael Aquini) [1999707] {CVE-2021-3759}
+- redhat: BUILDID parameter must come last in genspec.sh (Herton R. Krzesinski)
+- redhat/Makefile.variables: Set INCLUDE_FEDORA_FILES to 0 (Prarit Bhargava) [2009545]
+- redhat: Remove fedora configs directories and files. (Prarit Bhargava) [2009545]
+- redhat/kernel.spec.template: Cleanup source numbering (Prarit Bhargava) [2009545]
+- redhat/kernel.spec.template: Reorganize RHEL and Fedora specific files (Prarit Bhargava) [2009545]
+- redhat/kernel.spec.template: Add include_fedora and include_rhel variables (Prarit Bhargava) [2009545]
+- redhat/Makefile: Make kernel-local global (Prarit Bhargava) [2009545]
+- redhat/Makefile: Use flavors file (Prarit Bhargava) [2009545]
 
 * Mon Oct 11 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-7.el9]
 - redhat: Enable Nitro Enclaves driver on x86 for real (Vitaly Kuznetsov) [2011739]
