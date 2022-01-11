@@ -2952,6 +2952,9 @@ fi
 #
 #
 %changelog
+* Tue Jan 11 2022 CentOS Sources <bugs@centos.org> - 5.14.0-39.el9.centos
+- Apply debranding changes
+
 * Fri Dec 24 2021 Herton R. Krzesinski <herton@redhat.com> [5.14.0-39.el9]
 - cpuidle: pseries: Do not cap the CEDE0 latency in fixup_cede0_latency() (Gustavo Walbon) [2029870]
 - cpuidle: pseries: Fixup CEDE0 latency only for POWER10 onwards (Gustavo Walbon) [2029870]
