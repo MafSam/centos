@@ -1,0 +1,26 @@
+patch-i686-amd_c.patch
+
+Fix the build error that started with kernel-3.10.0-1160.53.1.el7:
+
+arch/x86/kernel/cpu/amd.c:644:13: error: 'init_amd_zn' defined but not used [-Werror=unused-function]
+ static void init_amd_zn(struct cpuinfo_x86 *c)
+             ^
+
+--- a/arch/x86/kernel/cpu/amd.c	2021-12-16 00:34:31.000000000 -0800
++++ b/arch/x86/kernel/cpu/amd.c	2022-01-11 15:11:46.300919942 -0800
+@@ -641,6 +641,7 @@ static const int amd_erratum_383[];
+ static const int amd_erratum_400[];
+ static bool cpu_has_amd_erratum(struct cpuinfo_x86 *cpu, const int *erratum);
+ 
++#ifdef CONFIG_X86_64
+ static void init_amd_zn(struct cpuinfo_x86 *c)
+ {
+ 	set_cpu_cap(c, X86_FEATURE_ZEN);
+@@ -656,6 +657,7 @@ static void init_amd_zn(struct cpuinfo_x
+ 	if (c->x86_model <= 1 && c->x86_mask <= 1)
+ 		set_cpu_cap(c, X86_FEATURE_CPB);
+ }
++#endif
+ 
+ static void init_amd(struct cpuinfo_x86 *c)
+ {
