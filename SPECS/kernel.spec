@@ -2959,6 +2959,9 @@ fi
 #
 #
 %changelog
+* Tue Feb 01 2022 CentOS Sources <bugs@centos.org> - 5.14.0-42.el9.centos
+- Apply debranding changes
+
 * Thu Jan 13 2022 Herton R. Krzesinski <herton@redhat.com> [5.14.0-42.el9]
 - scsi: smartpqi: Update version to 2.1.12-055 (Don Brace) [1869853]
 - scsi: smartpqi: Add 3252-8i PCI id (Don Brace) [1869853]
