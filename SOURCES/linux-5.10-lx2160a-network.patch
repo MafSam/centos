@@ -2792,9 +2792,9 @@ index fdb1d5262ce8..3effd73dd265 100644
  #else	/* !CONFIG_ACPI */
  
  #define acpi_disabled 1
-@@ -953,6 +955,11 @@ static inline struct acpi_device *acpi_resource_consumer(struct resource *res)
- 	return NULL;
- }
+@@ -962,6 +964,11 @@ static inline int acpi_register_wakeup_handler(int wake_irq,
+ static inline void acpi_unregister_wakeup_handler(
+ 	bool (*wakeup)(void *context), void *context) { }
  
 +static inline int acpi_get_local_address(acpi_handle handle, u32 *addr)
 +{
@@ -3063,8 +3063,6 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
 
 diff --git a/drivers/net/ethernet/freescale/xgmac_mdio.c b/drivers/net/ethernet/freescale/xgmac_mdio.c
 index bfa2826c5545..6daf1fb2e9ea 100644
---- a/drivers/net/ethernet/freescale/xgmac_mdio.c
-+++ b/drivers/net/ethernet/freescale/xgmac_mdio.c
 @@ -2,6 +2,7 @@
   * QorIQ 10G MDIO Controller
   *
@@ -3095,7 +3093,7 @@ index bfa2826c5545..6daf1fb2e9ea 100644
  
  /* Number of microseconds to wait for a register to respond */
  #define TIMEOUT	1000
-@@ -243,10 +245,9 @@ static int xgmac_mdio_read(struct mii_bus *bus, int phy_id, int regnum)
+@@ -254,10 +256,9 @@ static int xgmac_mdio_read(struct mii_bus *bus, int phy_id, int regnum)
  
  static int xgmac_mdio_probe(struct platform_device *pdev)
  {
@@ -3108,7 +3106,7 @@ index bfa2826c5545..6daf1fb2e9ea 100644
  	int ret;
  
  	/* In DPAA-1, MDIO is one of the many FMan sub-devices. The FMan
-@@ -279,13 +280,16 @@ static int xgmac_mdio_probe(struct platform_device *pdev)
+@@ -290,6 +291,9 @@ static int xgmac_mdio_probe(struct platform_device *pdev)
  		goto err_ioremap;
  	}
  
@@ -3118,6 +3116,7 @@ index bfa2826c5545..6daf1fb2e9ea 100644
  	priv->is_little_endian = device_property_read_bool(&pdev->dev,
  							   "little-endian");
  
+@@ -298,7 +302,7 @@ static int xgmac_mdio_probe(struct platform_device *pdev)
  	priv->has_a011043 = device_property_read_bool(&pdev->dev,
  						      "fsl,erratum-a011043");
  

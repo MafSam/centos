@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 78
+%define stable_update 100
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -855,9 +855,6 @@ Patch66: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
 Patch67: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
 Patch68: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
 Patch72: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
-
-# https://patchwork.kernel.org/patch/11796255/
-Patch100: arm64-dts-rockchip-disable-USB-type-c-DisplayPort.patch
 
 # Tegra fixes
 Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
@@ -3014,6 +3011,9 @@ fi
 #
 #
 %changelog
+* Sat Feb 12 2022 Pablo Greco <pgreco@centosproject.org> - 5.10.100-200
+- Linux v5.10.100
+
 * Sat Nov  6 2021 Pablo Greco <pgreco@centosproject.org> - 5.10.78-200
 - Linux v5.10.78
 

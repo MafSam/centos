@@ -31,10 +31,10 @@ diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
 index 2142f1554761..f5fdf6f3650c 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1574,6 +1574,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
- 	if (!acpi_match_device_ids(device, i2c_multi_instantiate_ids))
+@@ -1614,6 +1614,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+ 	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
-
+ 
 +	/*
 +	 * Firmware on some arm64 X-Gene platforms will make the UART
 +	 * device appear as both a UART and a slave of that UART. Just
