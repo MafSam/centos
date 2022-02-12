@@ -1,3 +1,3 @@
-9b75c0385cc8f95eb362e0f0e255a8994f617259 SOURCES/linux-5.14.0-45.hs1.el8.tar.xz
-6824577182e638180527e0947a7dceb6908ed6c5 SOURCES/kernel-abi-stablelists-5.14.0-45.tar.bz2
-1cbaa2bb7764f2a2b258add80715f18d769f8632 SOURCES/kernel-kabi-dw-5.14.0-45.tar.bz2
+7e093a67077c3cfe724a614ce39a477a29c660db SOURCES/linux-5.14.0-59.hs1.hs.tar.xz
+170ed7cc51d03f2a9ad4c88303dceea370a69771 SOURCES/kernel-abi-stablelists-5.14.0-59.tar.bz2
+35395373eabaab1c5dda0b343b8320b9d3035f61 SOURCES/kernel-kabi-dw-5.14.0-59.tar.bz2

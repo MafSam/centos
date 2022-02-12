@@ -66,7 +66,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 45
+%global distro_build 59
 
 # hyperscale
 # %if 0%{?fedora}
@@ -104,18 +104,18 @@ Summary: The Linux kernel
 %if 0%{?fedora}
 %define primary_target fedora
 %else
-%define primary_target centos-sig-hyperscale
+%define primary_target rhel
 %endif
 
 %define rpmversion 5.14.0
 %define stableversion 5.14
-%define pkgrelease 45.hs1.el8
+%define pkgrelease 59.hs1.hs
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 45.hs1%{?buildid}%{?dist}
+%define specrelease 59.hs1%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -624,7 +624,7 @@ BuildRequires: clang
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: linux-5.14.0-45.hs1.el8.tar.xz
+Source0: linux-5.14.0-59.hs1.hs.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -638,7 +638,7 @@ Source1: Makefile.rhelver
 %endif
 
 Source8: x509.genkey.rhel
-Source9: x509.genkey.fedora
+# Source9: x509.genkey.fedora
 
 %if %{?released_kernel}
 
@@ -685,7 +685,7 @@ Source13: redhatsecureboot003.cer
 %endif
 
 Source22: mod-extra.list.rhel
-Source16: mod-extra.list.fedora
+# Source16: mod-extra.list.fedora
 Source17: mod-blacklist.sh
 Source18: mod-sign.sh
 Source79: parallel_xz.sh
@@ -732,16 +732,16 @@ Source36: kernel-x86_64-debug-rhel.config
 # Source49: kernel-x86_64-fedora.config
 # Source50: kernel-x86_64-debug-fedora.config
 
-Source5000: kernel-x86_64-centos-sig-hyperscale.config
-Source5001: kernel-x86_64-debug-centos-sig-hyperscale.config
-Source5002: filter-x86_64.sh.centos-sig-hyperscale
-Source5003: filter-modules.sh.centos-sig-hyperscale
-Source5004: mod-extra.list.centos-sig-hyperscale
-Source5005: kernel-aarch64-centos-sig-hyperscale.config
-Source5006: kernel-aarch64-debug-centos-sig-hyperscale.config
-Source5007: filter-aarch64.sh.centos-sig-hyperscale
-Source5008: filter-modules.sh.centos-sig-hyperscale
-Source5009: mod-extra.list.centos-sig-hyperscale
+# Source5000: kernel-x86_64-centos-sig-hyperscale.config
+# Source5001: kernel-x86_64-debug-centos-sig-hyperscale.config
+# Source5002: filter-x86_64.sh.centos-sig-hyperscale
+# Source5003: filter-modules.sh.centos-sig-hyperscale
+# Source5004: mod-extra.list.centos-sig-hyperscale
+# Source5005: kernel-aarch64-centos-sig-hyperscale.config
+# Source5006: kernel-aarch64-debug-centos-sig-hyperscale.config
+# Source5007: filter-aarch64.sh.centos-sig-hyperscale
+# Source5008: filter-modules.sh.centos-sig-hyperscale
+# Source5009: mod-extra.list.centos-sig-hyperscale
 
 Source51: generate_all_configs.sh
 
@@ -1287,8 +1287,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q  -n kernel-5.14.0-45.hs1.el8 -c
-mv linux-5.14.0-45.hs1.el8 linux-%{KVERREL}
+%setup -q  -n kernel-5.14.0-59.hs1.hs -c
+mv linux-5.14.0-59.hs1.hs linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -2804,8 +2804,8 @@ fi
 #
 #
 %changelog
-* Mon Feb 07 2022 test <justin@local> [5.14.0-45.hs1.el8]
-- v5.14 rebase
+* Sat Feb 12 2022 Justin Vreeland <jvreeland@twitter.com> [5.14.0-59.hs1.el9]
+- redhat/: cherry pick build artifacts needed for CentOS 8 ark-style builds (Justin Vreeland)
 
 * Thu Jan 20 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-45.hs1.el9]
 - redhat/configs: Disable fbdev drivers and use simpledrm instead (Javier Martinez Canillas) [1986223]
