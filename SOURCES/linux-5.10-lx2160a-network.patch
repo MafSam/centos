@@ -82,7 +82,7 @@ index e329cdd7156c..a68afc9d1e32 100644
  
  	/*
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -139,7 +139,7 @@ index 85ca5fdee581..c932387641fa 100644
  	__le32 flags;
  	__le32 pad3;
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -226,7 +226,7 @@ index 34810f9bb2ee..56b6797c265e 100644
  	.probe = fsl_guts_probe,
  	.remove = fsl_guts_remove,
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -248,7 +248,7 @@ Signed-off-by: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
  7 files changed, 67 insertions(+), 38 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b5f3f160c842..11b0c467acbf 100644
+index eb82f6aac951..43d494603192 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
 @@ -6,6 +6,8 @@
@@ -261,10 +261,10 @@ index b5f3f160c842..11b0c467acbf 100644
  #include <linux/module.h>
  #include <linux/init.h>
 diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 58112999a69a..20b5d5d56e03 100644
+index 864c8c205ff7..bcc81fd0371f 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
-@@ -379,22 +379,31 @@ EXPORT_SYMBOL(mmc_of_parse);
+@@ -388,22 +388,31 @@ EXPORT_SYMBOL(mmc_of_parse);
   * found, negative errno if the voltage-range specification is invalid,
   * or one if the voltage-range is specified and successfully parsed.
   */
@@ -305,7 +305,7 @@ index 58112999a69a..20b5d5d56e03 100644
  	for (i = 0; i < num_ranges; i++) {
  		const int j = i * 2;
  		u32 ocr_mask;
-@@ -403,8 +412,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+@@ -412,8 +421,7 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
  				be32_to_cpu(voltage_ranges[j]),
  				be32_to_cpu(voltage_ranges[j + 1]));
  		if (!ocr_mask) {
@@ -329,10 +329,10 @@ index 3c4d950a4755..3178554a9efc 100644
  
  	oms->detect_irq = irq_of_parse_and_map(np, 0);
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index d28809e47962..a5b2bd3cb202 100644
+index a4bd85b200a3..7a12885c7ad1 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1502,7 +1502,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+@@ -1516,7 +1516,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
  	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
  		boarddata->delay_line = 0;
  
@@ -342,7 +342,7 @@ index d28809e47962..a5b2bd3cb202 100644
  	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index ab5ab969f711..3ae7fe297b82 100644
+index 343648fcbc31..ef8e6e7cb27d 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 @@ -10,6 +10,7 @@
@@ -368,7 +368,7 @@ index ab5ab969f711..3ae7fe297b82 100644
  struct sdhci_esdhc {
  	u8 vendor_ver;
  	u8 spec_ver;
-@@ -1366,29 +1375,35 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+@@ -1370,29 +1379,35 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
  		esdhc->clk_fixup = match->data;
  	np = pdev->dev.of_node;
  
@@ -426,7 +426,7 @@ index ab5ab969f711..3ae7fe297b82 100644
  
  	esdhc_clock_enable(host, false);
  	val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-@@ -1421,7 +1436,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -1425,7 +1440,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  
  	np = pdev->dev.of_node;
  
@@ -435,7 +435,7 @@ index ab5ab969f711..3ae7fe297b82 100644
  		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
  					sizeof(struct sdhci_esdhc));
  	else
-@@ -1489,7 +1504,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -1493,7 +1508,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  	if (ret)
  		goto err;
  
@@ -444,7 +444,7 @@ index ab5ab969f711..3ae7fe297b82 100644
  
  	ret = sdhci_add_host(host);
  	if (ret)
-@@ -1506,6 +1521,9 @@ static struct platform_driver sdhci_esdhc_driver = {
+@@ -1510,6 +1525,9 @@ static struct platform_driver sdhci_esdhc_driver = {
  		.name = "sdhci-esdhc",
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
  		.of_match_table = sdhci_esdhc_of_match,
@@ -480,7 +480,7 @@ index 40d7e98fc990..e1214995633e 100644
  static inline void *mmc_priv(struct mmc_host *host)
  {
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -502,7 +502,7 @@ Signed-off-by: Meharbaan <meharbaan.ali@puresoftware.com>
  3 files changed, 45 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/base/property.c b/drivers/base/property.c
-index 4c43d30145c6..c9d76e55a226 100644
+index cf88a5554d9c..9774db79fa87 100644
 --- a/drivers/base/property.c
 +++ b/drivers/base/property.c
 @@ -17,6 +17,7 @@
@@ -558,11 +558,11 @@ index 4c43d30145c6..c9d76e55a226 100644
   * fwnode_get_phy_mode - Get phy mode for given firmware node
   * @fwnode:	Pointer to the given node
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 3ae7fe297b82..37f5eb9f64b6 100644
+index ef8e6e7cb27d..b28bf79f0d54 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -541,8 +541,11 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
- 		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+@@ -545,8 +545,11 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ 	}
  
  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
 -
@@ -589,7 +589,7 @@ index 2d4542629d80..3e0a1a5655f0 100644
  
  int device_get_phy_mode(struct device *dev);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -679,7 +679,7 @@ index ec66779cb193..274fce7b5c01 100644
   *
   * IVRS - I/O Virtualization Reporting Structure
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -701,7 +701,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 121 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/acpi/arm64/iort.c b/drivers/acpi/arm64/iort.c
-index 2494138a6905..69a20d7e0c84 100644
+index 50ed949dc144..017c311b89ca 100644
 --- a/drivers/acpi/arm64/iort.c
 +++ b/drivers/acpi/arm64/iort.c
 @@ -40,6 +40,25 @@ struct iort_fwnode {
@@ -740,7 +740,7 @@ index 2494138a6905..69a20d7e0c84 100644
  			*id_out = map->output_base;
  			return parent;
  		}
-@@ -1659,6 +1679,103 @@ static void __init iort_enable_acs(struct acpi_iort_node *iort_node)
+@@ -1667,6 +1687,103 @@ static void __init iort_enable_acs(struct acpi_iort_node *iort_node)
  #else
  static inline void iort_enable_acs(struct acpi_iort_node *iort_node) { }
  #endif
@@ -844,7 +844,7 @@ index 2494138a6905..69a20d7e0c84 100644
  
  static void __init iort_init_platform_devices(void)
  {
-@@ -1688,6 +1805,9 @@ static void __init iort_init_platform_devices(void)
+@@ -1696,6 +1813,9 @@ static void __init iort_init_platform_devices(void)
  
  		iort_enable_acs(iort_node);
  
@@ -855,7 +855,7 @@ index 2494138a6905..69a20d7e0c84 100644
  		if (ops) {
  			fwnode = acpi_alloc_fwnode_static();
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -980,7 +980,7 @@ index e90c267e7f3e..9549eca5925d 100644
  		      const struct iommu_ops *ops);
  void iommu_fwspec_free(struct device *dev);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1003,7 +1003,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  3 files changed, 69 insertions(+)
 
 diff --git a/drivers/acpi/arm64/iort.c b/drivers/acpi/arm64/iort.c
-index 69a20d7e0c84..8f86779d283a 100644
+index 017c311b89ca..87797ae90406 100644
 --- a/drivers/acpi/arm64/iort.c
 +++ b/drivers/acpi/arm64/iort.c
 @@ -12,6 +12,7 @@
@@ -1126,7 +1126,7 @@ index 1a12baa58e40..a925cac61573 100644
  
  #endif /* __ACPI_IORT_H__ */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1192,7 +1192,7 @@ index 7067b7c11626..f8f596c5c086 100644
  
  	master->ssid_bits = min(smmu->ssid_bits, fwspec->num_pasid_bits);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1256,7 +1256,7 @@ index f8f596c5c086..8988c63e7c00 100644
  }
  
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1351,7 +1351,7 @@ index 57e5d223c467..90fcf8a52234 100644
  
  /* SMMU private data for each master */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1428,7 +1428,7 @@ index 00f19d37a3df..23c0c4d5ad09 100644
  
  static bool arm_smmu_dev_has_feature(struct device *dev,
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1527,7 +1527,7 @@ index b71647eaa319..a3c3442e7d4c 100644
  
  enum arm_smmu_context_fmt {
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1609,7 +1609,7 @@ index e11a94c96fa1..34f22b74236b 100644
  
  static int arm_smmu_def_domain_type(struct device *dev)
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1633,7 +1633,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  3 files changed, 59 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
-index f91c67489e62..0351b2b65bff 100644
+index d89ddc165ec2..cc83ec2c525b 100644
 --- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 +++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 @@ -4066,15 +4066,24 @@ static int dpaa2_eth_connect_mac(struct dpaa2_eth_priv *priv)
@@ -1806,7 +1806,7 @@ index 955a52856210..13d42dd58ec9 100644
  
  void dpaa2_mac_disconnect(struct dpaa2_mac *mac);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1965,7 +1965,7 @@ index 000000000000..7d01ae8b3cc6
 +
 +[4] Documentation/devicetree/bindings/net/ethernet-controller.yaml
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2008,7 +2008,7 @@ index 4daf94bb56a5..7bd33b930116 100644
  EXPORT_SYMBOL(of_mdio_find_device);
  
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index 85f3cde5ffd0..6bd068cf18cd 100644
+index d2f6d8107595..4e6dae5cccd2 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -2806,6 +2806,29 @@ static bool phy_drv_supports_irq(struct phy_driver *phydrv)
@@ -2064,7 +2064,7 @@ index 08725a262f32..4bd26a744c98 100644
  {
  	return NULL;
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2085,7 +2085,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 82 insertions(+)
 
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index 6bd068cf18cd..ca6b86c6794c 100644
+index 4e6dae5cccd2..a0f7ec22a9fa 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -9,6 +9,7 @@
@@ -2203,7 +2203,7 @@ index 4bd26a744c98..4e911cc926f0 100644
  struct phy_device *get_phy_device(struct mii_bus *bus, int addr, bool is_c45)
  {
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2243,7 +2243,7 @@ index 7bd33b930116..94ec421dd91b 100644
  EXPORT_SYMBOL(of_phy_find_device);
  
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2262,7 +2262,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 26 insertions(+)
 
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index ca6b86c6794c..459858aa0c95 100644
+index a0f7ec22a9fa..0fa369c6eaa1 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -817,6 +817,27 @@ static int get_phy_c22_id(struct mii_bus *bus, int addr, u32 *phy_id)
@@ -2317,7 +2317,7 @@ index 4e911cc926f0..a79f8ab3baf8 100644
  struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
  {
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2357,7 +2357,7 @@ index 94ec421dd91b..d4cc293358f7 100644
  
  static struct mii_timestamper *of_find_mii_timestamper(struct device_node *node)
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2417,7 +2417,7 @@ index b71b7456462d..51ae0593a04f 100644
  	 * register_mii_timestamper() and thus don't have ->device set. Don't
  	 * try to unregister these.
 diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
-index 459858aa0c95..e75e856fc6fd 100644
+index 0fa369c6eaa1..077c76a1e9a6 100644
 --- a/drivers/net/phy/phy_device.c
 +++ b/drivers/net/phy/phy_device.c
 @@ -928,8 +928,7 @@ EXPORT_SYMBOL(phy_device_register);
@@ -2431,7 +2431,7 @@ index 459858aa0c95..e75e856fc6fd 100644
  	device_del(&phydev->mdio.dev);
  
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2462,7 +2462,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  create mode 100644 include/linux/fwnode_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4fef10dd2975..213c3a72a74a 100644
+index c64c9354c287..44c5a241a609 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -2664,7 +2664,7 @@ index f56c6a9230ac..a60bf3d74207 100644
  					    struct phy_device *phy,
  					    struct device_node *child, u32 addr)
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2737,7 +2737,7 @@ index 932912c585c0..513afdd5e0ab 100644
  
  static int of_mdiobus_register_device(struct mii_bus *mdio,
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2780,7 +2780,7 @@ index d5411a166685..0d3a2b111c0f 100644
  acpi_evaluate_reference(acpi_handle handle,
  			acpi_string pathname,
 diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index fdb1d5262ce8..3effd73dd265 100644
+index 96d69404a54f..dabc52a9d23e 100644
 --- a/include/linux/acpi.h
 +++ b/include/linux/acpi.h
 @@ -703,6 +703,8 @@ static inline u64 acpi_arch_get_root_pointer(void)
@@ -2805,7 +2805,7 @@ index fdb1d5262ce8..3effd73dd265 100644
  
  #ifdef CONFIG_ACPI_HOTPLUG_IOAPIC
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2828,7 +2828,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  create mode 100644 include/linux/acpi_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 213c3a72a74a..869f3acadaec 100644
+index 44c5a241a609..69e8546622c2 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -2963,7 +2963,7 @@ index 000000000000..748d261fe2f9
 +
 +#endif /* __LINUX_ACPI_MDIO_H */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3041,7 +3041,7 @@ index 8c0392845916..20f22211260b 100644
  
  #endif /* __LINUX_FWNODE_MDIO_H */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3062,7 +3062,9 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 13 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/xgmac_mdio.c b/drivers/net/ethernet/freescale/xgmac_mdio.c
-index bfa2826c5545..6daf1fb2e9ea 100644
+index b7984a772e12..19f64d329f7c 100644
+--- a/drivers/net/ethernet/freescale/xgmac_mdio.c
++++ b/drivers/net/ethernet/freescale/xgmac_mdio.c
 @@ -2,6 +2,7 @@
   * QorIQ 10G MDIO Controller
   *
@@ -3126,7 +3128,7 @@ index bfa2826c5545..6daf1fb2e9ea 100644
  		dev_err(&pdev->dev, "cannot register MDIO bus\n");
  		goto err_registration;
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3144,7 +3146,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  2 files changed, 57 insertions(+)
 
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index 025c3246f339..e663dc91e1f8 100644
+index 57b1b138522e..a2910b4e5e0a 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
 @@ -5,6 +5,7 @@
@@ -3155,7 +3157,7 @@ index 025c3246f339..e663dc91e1f8 100644
  #include <linux/ethtool.h>
  #include <linux/export.h>
  #include <linux/gpio/consumer.h>
-@@ -1120,6 +1121,59 @@ int phylink_of_phy_connect(struct phylink *pl, struct device_node *dn,
+@@ -1144,6 +1145,59 @@ int phylink_of_phy_connect(struct phylink *pl, struct device_node *dn,
  }
  EXPORT_SYMBOL_GPL(phylink_of_phy_connect);
  
@@ -3230,7 +3232,7 @@ index d81a714cfbbd..75d4f99090fd 100644
  
  void phylink_mac_change(struct phylink *, bool up);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3246,10 +3248,10 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 38 deletions(-)
 
 diff --git a/drivers/net/phy/phylink.c b/drivers/net/phy/phylink.c
-index e663dc91e1f8..79bef3234ec3 100644
+index a2910b4e5e0a..f1150e835cf4 100644
 --- a/drivers/net/phy/phylink.c
 +++ b/drivers/net/phy/phylink.c
-@@ -1080,44 +1080,7 @@ EXPORT_SYMBOL_GPL(phylink_connect_phy);
+@@ -1104,44 +1104,7 @@ EXPORT_SYMBOL_GPL(phylink_connect_phy);
  int phylink_of_phy_connect(struct phylink *pl, struct device_node *dn,
  			   u32 flags)
  {
@@ -3296,7 +3298,7 @@ index e663dc91e1f8..79bef3234ec3 100644
  EXPORT_SYMBOL_GPL(phylink_of_phy_connect);
  
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3500,7 +3502,7 @@ index 50dd302abcf4..efd804d4a1bf 100644
  	return err;
  }
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3521,10 +3523,10 @@ Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
  create mode 100644 include/uapi/linux/fsl_mc.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 869f3acadaec..70347007e870 100644
+index 69e8546622c2..d4c41af043b5 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -14425,6 +14425,7 @@ S:	Maintained
+@@ -14424,6 +14424,7 @@ S:	Maintained
  F:	Documentation/devicetree/bindings/misc/fsl,qoriq-mc.txt
  F:	Documentation/networking/device_drivers/ethernet/freescale/dpaa2/overview.rst
  F:	drivers/bus/fsl-mc/
@@ -3597,7 +3599,7 @@ index 000000000000..cf56d46f052e
 +
 +#endif /* _UAPI_FSL_MC_H_ */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3640,7 +3642,7 @@ index 85a0225db522..b291b35e3884 100644
  	struct mc_cmd_header *hdr = (struct mc_cmd_header *)&cmd->header;
  	u16 cmd_id = le16_to_cpu(hdr->cmd_id);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4419,7 +4421,7 @@ index cf56d46f052e..e57451570033 100644
 +
  #endif /* _UAPI_FSL_MC_H_ */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4459,10 +4461,10 @@ index 000000000000..a4d384df9ba8
 +		Management Complex firmware.
 +Users:		Userspace drivers and management tools
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 70347007e870..28fc517875b4 100644
+index d4c41af043b5..2e7ba07bf49b 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -14422,6 +14422,7 @@ M:	Stuart Yoder <stuyoder@gmail.com>
+@@ -14421,6 +14421,7 @@ M:	Stuart Yoder <stuyoder@gmail.com>
  M:	Laurentiu Tudor <laurentiu.tudor@nxp.com>
  L:	linux-kernel@vger.kernel.org
  S:	Maintained
@@ -4558,7 +4560,7 @@ index 6293a24de456..42bdb8679a36 100644
  
  void fsl_mc_allocator_driver_exit(void);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4741,7 +4743,7 @@ index 42bdb8679a36..1958fa065360 100644
 +
  #endif /* _FSL_MC_PRIVATE_H_ */
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4857,7 +4859,7 @@ index df71c16f8a73..787844f0b636 100644
  	 * Allocate IRQ's before binding the scanned devices with their
  	 * respective drivers.
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4875,10 +4877,10 @@ Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index bcf060b5cf85..25beb493e822 100644
+index 9d65557dfb2c..3c3c1cb7df37 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
-@@ -845,7 +845,7 @@ int iommu_group_add_device(struct iommu_group *group, struct device *dev)
+@@ -850,7 +850,7 @@ int iommu_group_add_device(struct iommu_group *group, struct device *dev)
  
  	trace_add_device_to_group(group->id, dev);
  
@@ -4887,7 +4889,7 @@ index bcf060b5cf85..25beb493e822 100644
  
  	return 0;
  
-@@ -882,7 +882,7 @@ void iommu_group_remove_device(struct device *dev)
+@@ -887,7 +887,7 @@ void iommu_group_remove_device(struct device *dev)
  	if (!group)
  		return;
  
@@ -4897,7 +4899,7 @@ index bcf060b5cf85..25beb493e822 100644
  	/* Pre-notify listeners that a device is being removed. */
  	blocking_notifier_call_chain(&group->notifier,
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4998,7 +5000,7 @@ index 62bb9272dcb2..af36cd647bf5 100644
  };
  
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5066,7 +5068,7 @@ index efd804d4a1bf..1b347dbced9f 100644
  	default:
  		goto empty_set;
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5103,7 +5105,7 @@ index 1b347dbced9f..272b4b4aac92 100644
  		if (err)
  			goto err_put_node;
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5143,7 +5145,7 @@ index 272b4b4aac92..708aced0ed47 100644
  			break;
  		phylink_set(mask, 5000baseT_Full);
 -- 
-2.27.0
+2.18.4
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5174,7 +5176,7 @@ Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
-index 0351b2b65bff..a63c35abf96b 100644
+index cc83ec2c525b..05e8118d3342 100644
 --- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 +++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 @@ -4120,12 +4120,10 @@ static irqreturn_t dpni_irq0_handler_thread(int irq_num, void *arg)
@@ -5190,16 +5192,16 @@ index 0351b2b65bff..a63c35abf96b 100644
  	}
  
  	return IRQ_HANDLED;
-@@ -4415,9 +4413,7 @@ static int dpaa2_eth_remove(struct fsl_mc_device *ls_dev)
- #ifdef CONFIG_DEBUG_FS
- 	dpaa2_dbg_remove(priv);
+@@ -4417,9 +4415,7 @@ static int dpaa2_eth_remove(struct fsl_mc_device *ls_dev)
  #endif
+ 
+ 	unregister_netdev(net_dev);
 -	rtnl_lock();
  	dpaa2_eth_disconnect_mac(priv);
 -	rtnl_unlock();
  
- 	unregister_netdev(net_dev);
- 
+ 	dpaa2_eth_dl_port_del(priv);
+ 	dpaa2_eth_dl_traps_unregister(priv);
 diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c
 index 708aced0ed47..31222b2305da 100644
 --- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-mac.c
@@ -5225,5 +5227,5 @@ index 708aced0ed47..31222b2305da 100644
  	dpaa2_pcs_destroy(mac);
  }
 -- 
-2.27.0
+2.18.4
 
