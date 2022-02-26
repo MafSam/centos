@@ -30,7 +30,7 @@ index a3763247547c..8d76d1f153ed 100644
 + *     @level: The lock-down level (can only increase)
   */
  union security_list_options {
- 	int (*binder_set_context_mgr)(struct task_struct *mgr);
+ 	int (*binder_set_context_mgr)(const struct cred *mgr);
 @@ -1818,6 +1824,7 @@ union security_list_options {
  	void (*bpf_prog_free_security)(struct bpf_prog_aux *aux);
  #endif /* CONFIG_BPF_SYSCALL */
@@ -51,7 +51,7 @@ diff --git a/include/linux/security.h b/include/linux/security.h
 index a8d59d612d27..467b9ccdf993 100644
 --- a/include/linux/security.h
 +++ b/include/linux/security.h
-@@ -442,6 +442,7 @@ int security_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen);
+@@ -445,6 +445,7 @@ int security_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen);
  int security_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen);
  int security_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxlen);
  int security_locked_down(enum lockdown_reason what);
@@ -59,7 +59,7 @@ index a8d59d612d27..467b9ccdf993 100644
  #else /* CONFIG_SECURITY */
  
  static inline int call_blocking_lsm_notifier(enum lsm_event event, void *data)
-@@ -1269,6 +1270,10 @@ static inline int security_locked_down(enum lockdown_reason what)
+@@ -1277,6 +1278,10 @@ static inline int security_locked_down(enum lockdown_reason what)
  {
  	return 0;
  }
@@ -74,7 +74,7 @@ diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
 index 8a10b43daf74..72a623075749 100644
 --- a/security/lockdown/lockdown.c
 +++ b/security/lockdown/lockdown.c
-@@ -97,6 +97,7 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
+@@ -100,6 +100,7 @@ static int lockdown_is_locked_down(enum lockdown_reason what)
  
  static struct security_hook_list lockdown_hooks[] __lsm_ro_after_init = {
  	LSM_HOOK_INIT(locked_down, lockdown_is_locked_down),
