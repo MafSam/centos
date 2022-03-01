@@ -2942,6 +2942,9 @@ fi
 #
 #
 %changelog
+* Tue Mar 01 2022 CentOS Sources <bugs@centos.org> - 5.14.0-63.el9.centos
+- Apply debranding changes
+
 * Thu Feb 17 2022 Herton R. Krzesinski <herton@redhat.com> [5.14.0-63.el9]
 - wireguard: ratelimiter: use kvcalloc() instead of kvzalloc() (Hangbin Liu) [2041408]
 - wireguard: receive: drop handshakes if queue lock is contended (Hangbin Liu) [2041408]
