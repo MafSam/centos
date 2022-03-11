@@ -79,7 +79,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 70
+%global distro_build 71
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -131,13 +131,13 @@ Summary: The Linux kernel
 %define kversion 5.14
 
 %define rpmversion 5.14.0
-%define pkgrelease 70.hs1.el9
+%define pkgrelease 71.hs1.el9
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 70.hs1%{?buildid}%{?dist}
+%define specrelease 71.hs1%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -686,7 +686,7 @@ BuildRequires: lld
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: linux-5.14.0-70.hs1.el9.tar.xz
+Source0: linux-5.14.0-71.hs1.el9.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -1353,8 +1353,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.14.0-70.hs1.el9 -c
-mv linux-5.14.0-70.hs1.el9 linux-%{KVERREL}
+%setup -q -n kernel-5.14.0-71.hs1.el9 -c
+mv linux-5.14.0-71.hs1.el9 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -2953,7 +2953,37 @@ fi
 #
 #
 %changelog
-* Sun Mar 06 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-70.hs1.el9]
+* Fri Mar 11 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-71.hs1.el9]
+- tools headers UAPI: Sync powerpc syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
+- tools headers UAPI: Sync s390 syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
+- futex: Wireup futex_waitv syscall (Joel Savitz) [2038794]
+- tools headers UAPI: Sync MIPS syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
+- parisc: Wire up futex_waitv (Joel Savitz) [2038794]
+- s390: wire up sys_futex_waitv system call (Joel Savitz) [2038794]
+- MIPS: syscalls: Wire up futex_waitv syscall (Joel Savitz) [2038794]
+- tools headers UAPI: Sync files changed by new futex_waitv syscall (Joel Savitz) [2038794]
+- futex2: Documentation: Document sys_futex_waitv() uAPI (Joel Savitz) [2038794]
+- selftests: futex: Test sys_futex_waitv() wouldblock (Joel Savitz) [2038794]
+- selftests: futex: Test sys_futex_waitv() timeout (Joel Savitz) [2038794]
+- selftests: futex: Add sys_futex_waitv() test (Joel Savitz) [2038794]
+- futex,arm: Wire up sys_futex_waitv() (Joel Savitz) [2038794]
+- futex,x86: Wire up sys_futex_waitv() (Joel Savitz) [2038794]
+- futex: Implement sys_futex_waitv() (Joel Savitz) [2038794]
+- futex: Simplify double_lock_hb() (Joel Savitz) [2038794]
+- futex: Split out wait/wake (Joel Savitz) [2038794]
+- futex: Split out requeue (Joel Savitz) [2038794]
+- futex: Rename mark_wake_futex() (Joel Savitz) [2038794]
+- futex: Rename: match_futex() (Joel Savitz) [2038794]
+- futex: Rename: hb_waiter_{inc,dec,pending}() (Joel Savitz) [2038794]
+- futex: Split out PI futex (Joel Savitz) [2038794]
+- futex: Rename: {get,cmpxchg}_futex_value_locked() (Joel Savitz) [2038794]
+- futex: Rename hash_futex() (Joel Savitz) [2038794]
+- futex: Rename __unqueue_futex() (Joel Savitz) [2038794]
+- futex: Rename: queue_{,un}lock() (Joel Savitz) [2038794]
+- futex: Rename futex_wait_queue_me() (Joel Savitz) [2038794]
+- futex: Rename {,__}{,un}queue_me() (Joel Savitz) [2038794]
+- futex: Split out syscalls (Joel Savitz) [2038794]
+- futex: Move to kernel/futex/ (Joel Savitz) [2038794]
 - redhat/configs: Disable fbdev drivers and use simpledrm instead (Javier Martinez Canillas) [1986223]
 - drm/simpledrm: Add "panel orientation" property on non-upright mounted LCD panels (Javier Martinez Canillas) [1986223]
 - drm/simpledrm: Request memory region in driver (Javier Martinez Canillas) [1986223]
@@ -2971,6 +3001,33 @@ fi
 - drivers/firmware: move x86 Generic System Framebuffers support (Javier Martinez Canillas) [1986223]
 - redhat: Fix "make dist-release-finish" to use the correct NVR variables (Neal Gompa) [2053836]
 - redhat/configs: Enable the Btrfs file system (Neal Gompa)
+
+* Tue Mar 08 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-71.el9]
+- CI: Build coverage RPMs on c9s environment (Veronika Kabatova)
+- md: use default_groups in kobj_type (Nigel Croxon) [2042797]
+- md: Move alloc/free acct bioset in to personality (Nigel Croxon) [2042797]
+- md: fix spelling of "its" (Nigel Croxon) [2042797]
+- md: raid456 add nowait support (Nigel Croxon) [2042797]
+- md: raid10 add nowait support (Nigel Croxon) [2042797]
+- md: raid1 add nowait support (Nigel Croxon) [2042797]
+- md: add support for REQ_NOWAIT (Nigel Croxon) [2042797]
+- md: drop queue limitation for RAID1 and RAID10 (Nigel Croxon) [2042797]
+- md/raid5: play nice with PREEMPT_RT (Nigel Croxon) [2042797]
+- md/raid1: fix missing bitmap update w/o WriteMostly devices (Nigel Croxon) [2042797]
+- md: fix double free of mddev->private in autorun_array() (Nigel Croxon) [2042797]
+- md: fix update super 1.0 on rdev size change (Nigel Croxon) [2042797]
+- raid5-ppl: use swap() to make code cleaner (Nigel Croxon) [2042797]
+- md/bitmap: don't set max_write_behind if there is no write mostly device (Nigel Croxon) [2042797]
+- md: update superblock after changing rdev flags in state_store (Nigel Croxon) [2042797]
+- md: remove unused argument from md_new_event (Nigel Croxon) [2042797]
+- md/raid5: call roundup_pow_of_two in raid5_run (Nigel Croxon) [2042797]
+- md/raid1: use rdev in raid1_write_request directly (Nigel Croxon) [2042797]
+- md/raid1: only allocate write behind bio fof WriteMostly device (Nigel Croxon) [2042797]
+- md: properly unwind when failing to add the kobject in md_alloc (Nigel Croxon) [2042797]
+- md: extend disks_mutex coverage (Nigel Croxon) [2042797]
+- md: add the bitmap group to the default groups for the md kobject (Nigel Croxon) [2042797]
+- md: add error handling support for add_disk() (Nigel Croxon) [2042797]
+- redhat: Bump RHEL_MINOR for 9.1 (Patrick Talbert)
 
 * Thu Feb 24 2022 Herton R. Krzesinski <herton@redhat.com> [5.14.0-70.el9]
 - stmmac/intel: mark driver as tech preview (Mark Salter) [2045594]
