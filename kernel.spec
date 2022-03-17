@@ -79,7 +79,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 71
+%global distro_build 72
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -131,13 +131,13 @@ Summary: The Linux kernel
 %define kversion 5.14
 
 %define rpmversion 5.14.0
-%define pkgrelease 71.hs1.el9
+%define pkgrelease 72.hs1.el9
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 71.hs1%{?buildid}%{?dist}
+%define specrelease 72.hs1%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -686,7 +686,7 @@ BuildRequires: lld
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: linux-5.14.0-71.hs1.el9.tar.xz
+Source0: linux-5.14.0-72.hs1.el9.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -748,6 +748,8 @@ Source37: filter-aarch64.sh.rhel
 Source38: filter-ppc64le.sh.rhel
 Source39: filter-s390x.sh.rhel
 Source40: filter-modules.sh.rhel
+
+Source41: x509.genkey.centos
 %endif
 
 %if 0%{?include_fedora}
@@ -847,7 +849,8 @@ Provides: kernel-drm-nouveau = 16\
 Provides: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
-Requires(pre): linux-firmware >= 20150904-56.git6ebf5d57\
+Requires(pre): ((linux-firmware >= 20150904-56.git6ebf5d57) if linux-firmware)\
+Recommends: linux-firmware\
 Requires(preun): systemd >= 200\
 Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
@@ -1353,8 +1356,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.14.0-71.hs1.el9 -c
-mv linux-5.14.0-71.hs1.el9 linux-%{KVERREL}
+%setup -q -n kernel-5.14.0-72.hs1.el9 -c
+mv linux-5.14.0-72.hs1.el9 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -1467,6 +1470,18 @@ done
 
 cp %{SOURCE82} .
 RPM_SOURCE_DIR=$RPM_SOURCE_DIR ./update_scripts.sh %{primary_target}
+
+# We may want to override files from the primary target in case of building
+# against a flavour of it (eg. centos not rhel), thus override it here if
+# necessary
+if [ "%{primary_target}" == "rhel" ]; then
+%if 0%{?centos}
+  echo "Updating scripts/sources to centos version"
+  RPM_SOURCE_DIR=$RPM_SOURCE_DIR ./update_scripts.sh centos
+%else
+  echo "Not updating scripts/sources to centos version"
+%endif
+fi
 
 # end of kernel config
 %endif
@@ -2224,6 +2239,14 @@ popd
 # in the source tree. We installed them previously to $RPM_BUILD_ROOT/usr
 # but there's no way to tell the Makefile to take them from there.
 %{make} %{?_smp_mflags} headers_install
+
+# If we re building only tools without kernel, we need to generate config
+# headers and prepare tree for modules building. The modules_prepare target
+# will cover both.
+if [ ! -f include/generated/autoconf.h ]; then
+   %{make} %{?_smp_mflags} modules_prepare
+fi
+
 %{make} %{?_smp_mflags} ARCH=$Arch V=1 M=samples/bpf/
 
 # Prevent bpf selftests to build bpftool repeatedly:
@@ -2953,7 +2976,7 @@ fi
 #
 #
 %changelog
-* Fri Mar 11 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-71.hs1.el9]
+* Wed Mar 16 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-72.hs1.el9]
 - tools headers UAPI: Sync powerpc syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
 - tools headers UAPI: Sync s390 syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
 - futex: Wireup futex_waitv syscall (Joel Savitz) [2038794]
@@ -3002,6 +3025,10 @@ fi
 - redhat: Fix "make dist-release-finish" to use the correct NVR variables (Neal Gompa) [2053836]
 - redhat/configs: Enable the Btrfs file system (Neal Gompa)
 
+* Tue Mar 15 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-72.el9]
+- spec: Fix separate tools build (Jiri Olsa) [2054579]
+- redhat: use centos x509.genkey file if building under centos (Herton R. Krzesinski) [2029952]
+
 * Tue Mar 08 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-71.el9]
 - CI: Build coverage RPMs on c9s environment (Veronika Kabatova)
 - md: use default_groups in kobj_type (Nigel Croxon) [2042797]
@@ -3028,6 +3055,14 @@ fi
 - md: add the bitmap group to the default groups for the md kobject (Nigel Croxon) [2042797]
 - md: add error handling support for add_disk() (Nigel Croxon) [2042797]
 - redhat: Bump RHEL_MINOR for 9.1 (Patrick Talbert)
+
+* Tue Mar 08 2022 Herton R. Krzesinski <herton@redhat.com> [5.14.0-70.1.1.el9_0]
+- Revert 8dffe2b6 "Merge: kabi: add lib ACKed symbols" (Čestmír Kalina) [2059972]
+- include/linux/kernel.h: fix function name for mark_hardware_unmaintained() if !CONFIG_RHEL_DIFFERENCES (Ewan D. Milne) [2059687]
+- scsi: sd: Mark ZBC host-managed SCSI disks as unmaintained (Ewan D. Milne) [2059687]
+- spec: make linux-firmware weak(er) dependency (Jan Stancek) [2031113]
+- redhat/configs: Enable CONFIG_INTEL_PCH_THERMAL for x86 (David Arcari) [2058186]
+- redhat/configs: Disable CONFIG_SURFACE_PLATFORMS (David Arcari) [2056609]
 
 * Thu Feb 24 2022 Herton R. Krzesinski <herton@redhat.com> [5.14.0-70.el9]
 - stmmac/intel: mark driver as tech preview (Mark Salter) [2045594]
