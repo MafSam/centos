@@ -152,11 +152,11 @@ This is in accordance with the DSDT table added for Guts
 
 Signed-off-by: Makarand Pawagi <makarand.pawagi@nxp.com>
 ---
- drivers/soc/fsl/guts.c | 27 ++++++++++++++++++++++-----
- 1 file changed, 22 insertions(+), 5 deletions(-)
+ drivers/soc/fsl/guts.c | 27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c
-index 34810f9bb2ee..56b6797c265e 100644
+index 091e94c04f30..16b9e951dbd6 100644
 --- a/drivers/soc/fsl/guts.c
 +++ b/drivers/soc/fsl/guts.c
 @@ -3,6 +3,7 @@
@@ -167,16 +167,7 @@ index 34810f9bb2ee..56b6797c265e 100644
   */
  
  #include <linux/io.h>
-@@ -138,7 +139,7 @@ static u32 fsl_guts_get_svr(void)
- 
- static int fsl_guts_probe(struct platform_device *pdev)
- {
--	struct device_node *np = pdev->dev.of_node;
-+	struct device_node *root;
- 	struct device *dev = &pdev->dev;
- 	struct resource *res;
- 	const struct fsl_soc_die_attr *soc_die;
-@@ -150,7 +151,8 @@ static int fsl_guts_probe(struct platform_device *pdev)
+@@ -149,7 +150,8 @@ static int fsl_guts_probe(struct platform_device *pdev)
  	if (!guts)
  		return -ENOMEM;
  
@@ -186,7 +177,7 @@ index 34810f9bb2ee..56b6797c265e 100644
  
  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
  	guts->regs = devm_ioremap_resource(dev, res);
-@@ -158,9 +160,17 @@ static int fsl_guts_probe(struct platform_device *pdev)
+@@ -157,17 +159,23 @@ static int fsl_guts_probe(struct platform_device *pdev)
  		return PTR_ERR(guts->regs);
  
  	/* Register soc device */
@@ -204,10 +195,18 @@ index 34810f9bb2ee..56b6797c265e 100644
 +				"model", &machine);
 +	}
 +
- 	if (machine)
- 		soc_dev_attr.machine = machine;
+ 	if (machine) {
+ 		soc_dev_attr.machine = devm_kstrdup(dev, machine, GFP_KERNEL);
+ 		if (!soc_dev_attr.machine) {
+-			of_node_put(root);
+ 			return -ENOMEM;
+ 		}
+ 	}
+-	of_node_put(root);
  
-@@ -234,10 +244,17 @@ static const struct of_device_id fsl_guts_of_match[] = {
+ 	svr = fsl_guts_get_svr();
+ 	soc_die = fsl_soc_die_match(svr, fsl_soc_die);
+@@ -238,10 +246,17 @@ static const struct of_device_id fsl_guts_of_match[] = {
  };
  MODULE_DEVICE_TABLE(of, fsl_guts_of_match);
  
