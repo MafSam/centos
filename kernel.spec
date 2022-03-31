@@ -79,8 +79,6 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 72
-
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
 %else
@@ -131,13 +129,13 @@ Summary: The Linux kernel
 %define kversion 5.14
 
 %define rpmversion 5.14.0
-%define pkgrelease 72.hs1.el9
+%define pkgrelease 76.hs1.el9
 
 # This is needed to do merge window version magic
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 72.hs1%{?buildid}%{?dist}
+%define specrelease 76.hs1%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -686,7 +684,7 @@ BuildRequires: lld
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: linux-5.14.0-72.hs1.el9.tar.xz
+Source0: linux-5.14.0-76.hs1.el9.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -803,8 +801,8 @@ Source211: Module.kabi_dup_ppc64le
 Source212: Module.kabi_dup_s390x
 Source213: Module.kabi_dup_x86_64
 
-Source300: kernel-abi-stablelists-%{rpmversion}-%{distro_build}.tar.bz2
-Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
+Source300: kernel-abi-stablelists-%{rpmversion}-%{pkgrelease}.tar.bz2
+Source301: kernel-kabi-dw-%{rpmversion}-%{pkgrelease}.tar.bz2
 
 # Sources for kernel-tools
 Source2000: cpupower.service
@@ -1356,8 +1354,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.14.0-72.hs1.el9 -c
-mv linux-5.14.0-72.hs1.el9 linux-%{KVERREL}
+%setup -q -n kernel-5.14.0-76.hs1.el9 -c
+mv linux-5.14.0-76.hs1.el9 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -2976,7 +2974,113 @@ fi
 #
 #
 %changelog
-* Wed Mar 16 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-72.hs1.el9]
+* Wed Mar 30 2022 Neal Gompa <ngompa@centosproject.org> [5.14.0-76.hs1.el9]
+- redhat/configs: Disable fbdev drivers and use simpledrm instead (Javier Martinez Canillas) [1986223]
+- drm/simpledrm: Add "panel orientation" property on non-upright mounted LCD panels (Javier Martinez Canillas) [1986223]
+- drm/simpledrm: Request memory region in driver (Javier Martinez Canillas) [1986223]
+- drm/simpledrm: Add [AX]RGB2101010 formats (Javier Martinez Canillas) [1986223]
+- drm: simpledrm: fix wrong unit with pixel clock (Javier Martinez Canillas) [1986223]
+- drm/simpledrm: Support virtual screen sizes (Javier Martinez Canillas) [1986223]
+- drm/fb-helper: Allocate shadow buffer of surface height (Javier Martinez Canillas) [1986223]
+- drm: fb_helper: improve CONFIG_FB dependency (Javier Martinez Canillas) [1986223]
+- drm: fb_helper: fix CONFIG_FB dependency (Javier Martinez Canillas) [1986223]
+- efi: sysfb_efi: fix build when EFI is not set (Javier Martinez Canillas) [1986223]
+- drivers/firmware: Don't mark as busy the simple-framebuffer IO resource (Javier Martinez Canillas) [1986223]
+- drivers/firmware: Add missing platform_device_put() in sysfb_create_simplefb (Javier Martinez Canillas) [1986223]
+- drivers/firmware: fix SYSFB depends to prevent build failures (Javier Martinez Canillas) [1986223]
+- drivers/firmware: consolidate EFI framebuffer setup for all arches (Javier Martinez Canillas) [1986223]
+- drivers/firmware: move x86 Generic System Framebuffers support (Javier Martinez Canillas) [1986223]
+- redhat: Fix "make dist-release-finish" to use the correct NVR variables (Neal Gompa) [2053836]
+- redhat/configs: Enable the Btrfs file system (Neal Gompa)
+
+* Wed Mar 30 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-76.el9]
+- vdpa/mlx5: Fix tracking of current number of VQs (Cindy Lu) [2055451]
+- vdpa/mlx5: Fix is_index_valid() to refer to features (Cindy Lu) [2055451]
+- vdpa: Protect vdpa reset with cf_mutex (Cindy Lu) [2055451]
+- vdpa: Avoid taking cf_mutex lock on get status (Cindy Lu) [2055451]
+- vdpa/vdpa_sim_net: Report max device capabilities (Cindy Lu) [2055451]
+- vdpa: Use BIT_ULL for bit operations (Cindy Lu) [2055451]
+- vdpa/vdpa_sim: Configure max supported virtqueues (Cindy Lu) [2055451]
+- vdpa/mlx5: Report max device capabilities (Cindy Lu) [2055451]
+- vdpa: Support reporting max device capabilities (Cindy Lu) [2055451]
+- vdpa/mlx5: Restore cur_num_vqs in case of failure in change_num_qps() (Cindy Lu) [2055451]
+- vdpa: Add support for returning device configuration information (Cindy Lu) [2055451]
+- vdpa/mlx5: Support configuring max data virtqueue (Cindy Lu) [2055451]
+- vdpa/mlx5: Fix config_attr_mask assignment (Cindy Lu) [2055451]
+- vdpa: Allow to configure max data virtqueues (Cindy Lu) [2055451]
+- vdpa: Read device configuration only if FEATURES_OK (Cindy Lu) [2055451]
+- vdpa: Sync calls set/get config/status with cf_mutex (Cindy Lu) [2055451]
+- vdpa/mlx5: Distribute RX virtqueues in RQT object (Cindy Lu) [2055451]
+- vdpa: Provide interface to read driver features (Cindy Lu) [2055451]
+- vdpa: clean up get_config_size ret value handling (Cindy Lu) [2055451]
+- vdpa/mlx5: Fix wrong configuration of virtio_version_1_0 (Cindy Lu) [2055451]
+- vdpa: Mark vdpa_config_ops.get_vq_notification as optional (Cindy Lu) [2055451]
+- vdpa: Avoid duplicate call to vp_vdpa get_status (Cindy Lu) [2055451]
+- net/mlx5_vdpa: Offer VIRTIO_NET_F_MTU when setting MTU (Cindy Lu) [2055451]
+- vdpa: add driver_override support (Cindy Lu) [2055451]
+- docs: document sysfs ABI for vDPA bus (Cindy Lu) [2055451]
+- ifcvf/vDPA: fix misuse virtio-net device config size for blk dev (Cindy Lu) [2055451]
+- vdpa: Consider device id larger than 31 (Cindy Lu) [2055451]
+- virtio: always enter drivers/virtio/ (Cindy Lu) [2055451]
+- vdpa: check that offsets are within bounds (Cindy Lu) [2055451]
+- vdpa_sim: avoid putting an uninitialized iova_domain (Cindy Lu) [2055451]
+- vhost-vdpa: clean irqs before reseting vdpa device (Cindy Lu) [2055451]
+- vdpa/mlx5: Forward only packets with allowed MAC address (Cindy Lu) [2055451]
+- vdpa/mlx5: Support configuration of MAC (Cindy Lu) [2055451]
+- vdpa/mlx5: Fix clearing of VIRTIO_NET_F_MAC feature bit (Cindy Lu) [2055451]
+- vdpa_sim_net: Enable user to set mac address and mtu (Cindy Lu) [2055451]
+- vdpa: Enable user to set mac and mtu of vdpa device (Cindy Lu) [2055451]
+- vdpa: Use kernel coding style for structure comments (Cindy Lu) [2055451]
+- vdpa: Introduce query of device config layout (Cindy Lu) [2055451]
+- vdpa: Introduce and use vdpa device get, set config helpers (Cindy Lu) [2055451]
+- vdpa/mlx5: Propagate link status from device to vdpa driver (Cindy Lu) [2055451]
+- vdpa/mlx5: Rename control VQ workqueue to vdpa wq (Cindy Lu) [2055451]
+- vdpa/mlx5: Remove mtu field from vdpa net device (Cindy Lu) [2055451]
+- vdpa: add new attribute VDPA_ATTR_DEV_MIN_VQ_SIZE (Cindy Lu) [2055451]
+- virtio_vdpa: setup correct vq size with callbacks get_vq_num_{max,min} (Cindy Lu) [2055451]
+- vdpa: min vq num of vdpa device cannot be greater than max vq num (Cindy Lu) [2055451]
+- vdpa: add new callback get_vq_num_min in vdpa_config_ops (Cindy Lu) [2055451]
+- vp_vdpa: add vq irq offloading support (Cindy Lu) [2055451]
+- vdpa: fix typo (Cindy Lu) [2055451]
+- vhost-vdpa: Fix the wrong input in config_cb (Cindy Lu) [2055451]
+- vhost_vdpa: unset vq irq before freeing irq (Cindy Lu) [2055451]
+- vdpa: potential uninitialized return in vhost_vdpa_va_map() (Cindy Lu) [2055451]
+- vdpa/mlx5: Avoid executing set_vq_ready() if device is reset (Cindy Lu) [2055451]
+- vdpa/mlx5: Clear ready indication for control VQ (Cindy Lu) [2055451]
+- vdpa: Support transferring virtual addressing during DMA mapping (Cindy Lu) [2055451]
+- vdpa: factor out vhost_vdpa_pa_map() and vhost_vdpa_pa_unmap() (Cindy Lu) [2055451]
+- vdpa: Add an opaque pointer for vdpa_config_ops.dma_map() (Cindy Lu) [2055451]
+- vhost-iotlb: Add an opaque pointer for vhost IOTLB (Cindy Lu) [2055451]
+- vhost-vdpa: Handle the failure of vdpa_reset() (Cindy Lu) [2055451]
+- vdpa: Add reset callback in vdpa_config_ops (Cindy Lu) [2055451]
+- vdpa: Fix some coding style issues (Cindy Lu) [2055451]
+- vdpa: Make use of PFN_PHYS/PFN_UP/PFN_DOWN helper macro (Cindy Lu) [2055451]
+- vdpa/mlx5: Add multiqueue support (Cindy Lu) [2055451]
+- vdpa/mlx5: Add support for control VQ and MAC setting (Cindy Lu) [2055451]
+- vdpa/mlx5: Ensure valid indices are provided (Cindy Lu) [2055451]
+- vdpa/mlx5: Decouple virtqueue callback from struct mlx5_vdpa_virtqueue (Cindy Lu) [2055451]
+- vdpa/mlx5: function prototype modifications in preparation to control VQ (Cindy Lu) [2055451]
+- vdpa/mlx5: Remove redundant header file inclusion (Cindy Lu) [2055451]
+- vDPA/ifcvf: enable multiqueue and control vq (Cindy Lu) [2055451]
+- vDPA/ifcvf: detect and use the onboard number of queues directly (Cindy Lu) [2055451]
+- vDPA/ifcvf: implement management netlink framework for ifcvf (Cindy Lu) [2055451]
+- vDPA/ifcvf: introduce get_dev_type() which returns virtio dev id (Cindy Lu) [2055451]
+- x86/hyperv: Output host build info as normal Windows version number (Vitaly Kuznetsov) [2060708]
+- lib/irq_poll: Declare IRQ_POLL softirq vector as ksoftirqd-parking safe (Desnes A. Nunes do Rosario) [2059555]
+- tick/rcu: Stop allowing RCU_SOFTIRQ in idle (Desnes A. Nunes do Rosario) [2059555]
+- tick/rcu: Remove obsolete rcu_needs_cpu() parameters (Desnes A. Nunes do Rosario) [2059555]
+- tick: Detect and fix jiffies update stall (Desnes A. Nunes do Rosario) [2059555]
+- rcu: Move rcu_needs_cpu() to tree.c (Desnes A. Nunes do Rosario) [2059555]
+- rcu: Remove the RCU_FAST_NO_HZ Kconfig option (Desnes A. Nunes do Rosario) [2059555]
+- torture: Remove RCU_FAST_NO_HZ from rcu scenarios (Desnes A. Nunes do Rosario) [2059555]
+- torture: Remove RCU_FAST_NO_HZ from rcuscale and refscale scenarios (Desnes A. Nunes do Rosario) [2059555]
+- copy_process(): Move fd_install() out of sighand->siglock critical section (Waiman Long) [2051855]
+- redhat/configs: enable CONFIG_INTEL_VSEC for x86 (David Arcari) [2058806]
+- platform/x86/intel: Move intel_pmt from MFD to Auxiliary Bus (David Arcari) [2058806]
+- platform/x86: intel_pmt_telemetry: Ignore zero sized entries (David Arcari) [2058806]
+- platform/x86/intel: Move Intel PMT drivers to new subfolder (David Arcari) [2058806]
+- driver core: auxiliary bus: Add driver data helpers (David Arcari) [2058806]
+- PCI: Add #defines for accessing PCIe DVSEC fields (David Arcari) [2058806]
 - tools headers UAPI: Sync powerpc syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
 - tools headers UAPI: Sync s390 syscall table file changed by new futex_waitv syscall (Joel Savitz) [2038794]
 - futex: Wireup futex_waitv syscall (Joel Savitz) [2038794]
@@ -3007,23 +3111,125 @@ fi
 - futex: Rename {,__}{,un}queue_me() (Joel Savitz) [2038794]
 - futex: Split out syscalls (Joel Savitz) [2038794]
 - futex: Move to kernel/futex/ (Joel Savitz) [2038794]
-- redhat/configs: Disable fbdev drivers and use simpledrm instead (Javier Martinez Canillas) [1986223]
-- drm/simpledrm: Add "panel orientation" property on non-upright mounted LCD panels (Javier Martinez Canillas) [1986223]
-- drm/simpledrm: Request memory region in driver (Javier Martinez Canillas) [1986223]
-- drm/simpledrm: Add [AX]RGB2101010 formats (Javier Martinez Canillas) [1986223]
-- drm: simpledrm: fix wrong unit with pixel clock (Javier Martinez Canillas) [1986223]
-- drm/simpledrm: Support virtual screen sizes (Javier Martinez Canillas) [1986223]
-- drm/fb-helper: Allocate shadow buffer of surface height (Javier Martinez Canillas) [1986223]
-- drm: fb_helper: improve CONFIG_FB dependency (Javier Martinez Canillas) [1986223]
-- drm: fb_helper: fix CONFIG_FB dependency (Javier Martinez Canillas) [1986223]
-- efi: sysfb_efi: fix build when EFI is not set (Javier Martinez Canillas) [1986223]
-- drivers/firmware: Don't mark as busy the simple-framebuffer IO resource (Javier Martinez Canillas) [1986223]
-- drivers/firmware: Add missing platform_device_put() in sysfb_create_simplefb (Javier Martinez Canillas) [1986223]
-- drivers/firmware: fix SYSFB depends to prevent build failures (Javier Martinez Canillas) [1986223]
-- drivers/firmware: consolidate EFI framebuffer setup for all arches (Javier Martinez Canillas) [1986223]
-- drivers/firmware: move x86 Generic System Framebuffers support (Javier Martinez Canillas) [1986223]
-- redhat: Fix "make dist-release-finish" to use the correct NVR variables (Neal Gompa) [2053836]
-- redhat/configs: Enable the Btrfs file system (Neal Gompa)
+- cifs: fix double free race when mount fails in cifs_get_root() (Ronnie Sahlberg) [1979175]
+
+* Fri Mar 25 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-75.el9]
+- ipv6: fix skb drops in igmp6_event_query() and igmp6_event_report() (Hangbin Liu) [2059308] {CVE-2022-0742}
+- redhat/configs: aarch64: Fix PAC/BTI config settings (Mark Salter) [2063215]
+- RHEL9.0: arch_hw Update CONFIG_MOUSE_VSXXXAA=m (Tony Camuso) [2062909]
+- redhat/configs: Disable KVM on POWER (Laurent Vivier) [2052898]
+- drm/ast: Create threshold values for AST2600 (Jocelyn Falempe) [2062560]
+- mm: gup: make fault_in_safe_writeable() use fixup_user_fault() (Andreas Gruenbacher) [2062797]
+- drm/vmwgfx: Fix stale file descriptors on failed usercopy (David Airlie) [2047613] {CVE-2022-22942}
+- netfilter: nf_queue: handle socket prefetch (Florian Westphal) [2060092]
+- netfilter: nf_queue: fix possible use-after-free (Florian Westphal) [2060092]
+- selftests: netfilter: add nfqueue TCP_NEW_SYN_RECV socket race test (Florian Westphal) [2060092]
+- netfilter: nf_queue: don't assume sk is full socket (Florian Westphal) [2060092]
+- scsi: mpi3mr: Fix flushing !WQ_MEM_RECLAIM events warning (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix memory leaks (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix reporting of actual data transfer size (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix cmnd getting marked as in use forever (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix hibernation issue (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix printing of pending I/O count (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fix deadlock while canceling the fw event (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Fixes around reply request queues (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Enhanced Task Management Support Reply handling (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Use TM response codes from MPI3 headers (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Increase internal cmnds timeout to 60s (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Do access status validation before adding devices (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Update MPI3 headers - part2 (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Update MPI3 headers - part1 (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Don't reset IOC if cmnds flush with reset status (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Replace spin_lock() with spin_lock_irqsave() (Tomas Henzl) [2056626]
+- scsi: mpi3mr: Add debug APIs based on logging_level bits (Tomas Henzl) [2056626]
+- x86/kvm/fpu: Remove kvm_vcpu_arch.guest_supported_xcr0 (Leonardo Bras) [2043545]
+- x86/kvm/fpu: Limit guest user_xfeatures to supported bits of XCR0 (Leonardo Bras) [2043545]
+- KVM: x86: Move CPUID.(EAX=0x12,ECX=1) mangling to __kvm_update_cpuid_runtime() (Leonardo Bras) [2043545]
+- KVM: x86: Do runtime CPUID update before updating vcpu->arch.cpuid_entries (Leonardo Bras) [2043545]
+- x86/fpu: Fix inline prefix warnings (Leonardo Bras) [2043545]
+- kvm: x86: Emulate IA32_XFD_ERR for guest (Leonardo Bras) [2043545]
+- x86/fpu: Prepare xfd_err in struct fpu_guest (Leonardo Bras) [2043545]
+- kvm: x86: Add emulation for IA32_XFD (Leonardo Bras) [2043545]
+- x86/fpu: Provide fpu_update_guest_xfd() for IA32_XFD emulation (Leonardo Bras) [2043545]
+- kvm: x86: Enable dynamic xfeatures at KVM_SET_CPUID2 (Leonardo Bras) [2043545]
+- x86/fpu: Provide fpu_enable_guest_xfd_features() for KVM (Leonardo Bras) [2043545]
+- x86/fpu: Add guest support to xfd_enable_feature() (Leonardo Bras) [2043545]
+- x86/fpu: Prepare guest FPU for dynamically enabled FPU features (Leonardo Bras) [2043545]
+- x86/fpu: Extend fpu_xstate_prctl() with guest permissions (Leonardo Bras) [2043545]
+- cpuid: kvm_find_kvm_cpuid_features() should be declared 'static' (Leonardo Bras) [2043545]
+- KVM: x86: Make sure KVM_CPUID_FEATURES really are KVM_CPUID_FEATURES (Leonardo Bras) [2043545]
+- KVM: x86: Add helper to consolidate core logic of SET_CPUID{2} flows (Leonardo Bras) [2043545]
+- redhat/configs: Disable watchdog components (Prarit Bhargava) [2060117]
+- sched: Fix yet more sched_fork() races (Phil Auld) [2062836]
+- sched/fair: Fix fault in reweight_entity (Phil Auld) [2062836]
+- x86/cpu: Add Xeon Icelake-D to list of CPUs that support PPIN (David Arcari) [2043225]
+- powerpc/pseries/ddw: Revert "Extend upper limit for huge DMA window for persistent memory" (Steve Best) [2056057]
+- drivers/char: permit access to the RTAS user buffer under lockdown (Desnes A. Nunes do Rosario) [2046472]
+
+* Tue Mar 22 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-74.el9]
+- redhat: rpminspect: disable 'patches' check for known empty patch files (Patrick Talbert)
+- KVM: x86/mmu: Don't advance iterator after restart due to yielding (Nico Pache) [2055725]
+- ibmvnic: don't release napi in __ibmvnic_open() (Diego Domingos) [2055981]
+
+* Sun Mar 20 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-73.el9]
+- CI: Use 9.0-rt branch for rhel-9 realtime_check (Juri Lelli)
+- redhat: enable zstream release numbering for rhel 9.0 (Herton R. Krzesinski)
+- redhat: change kabi tarballs to use the package release (Herton R. Krzesinski)
+- redhat: generate distgit changelog in genspec.sh as well (Herton R. Krzesinski)
+- redhat: make genspec prefer metadata from git notes (Herton R. Krzesinski)
+- redhat: use tags from git notes for zstream to generate changelog (Herton R. Krzesinski)
+- CI: Add disttag setting (Veronika Kabatova)
+- CI: Drop c9s config (Veronika Kabatova)
+- virtio-net: fix pages leaking when building skb in big mode (Laurent Vivier) [2042559]
+- lib/iov_iter: initialize "flags" in new pipe_buffer (Carlos Maiolino) [2060869] {CVE-2022-0847}
+- redhat/configs: Make CRYPTO_ECDH algos built-in (Simo Sorce) [2062199]
+- crypto: api - Move cryptomgr soft dependency into algapi (Vladis Dronov) [2062199]
+- crypto: api - Fix boot-up crash when crypto manager is disabled (Vladis Dronov) [2062199]
+- crypto: api - Do not create test larvals if manager is disabled (Vladis Dronov) [2062199]
+- crypto: api - Export crypto_boot_test_finished (Vladis Dronov) [2062199]
+- crypto: api - Fix built-in testing dependency failures (Vladis Dronov) [2062199]
+- redhat/configs: Add CRYPTO_AES_ARM64 config explicitly (Vladis Dronov) [2062199]
+- crypto: arm64/aes-ce - stop using SIMD helper for skciphers (Vladis Dronov) [2062199]
+- crypto: arm64/aes-neonbs - stop using SIMD helper for skciphers (Vladis Dronov) [2062199]
+- redhat: change default dist suffix for RHEL 9.0 (Herton R. Krzesinski)
+- selftests: kvm: Check whether SIDA memop fails for normal guests (Thomas Huth) [2050813]
+- KVM: s390: Return error on SIDA memop on normal guest (Thomas Huth) [2050813]
+- block: kabi: reserve space for block layer public structure (Ming Lei) [2057238]
+- block: kabi: reserve space for blk-mq related structure (Ming Lei) [2057238]
+- block: kabi: reserve space for bsg related structure (Ming Lei) [2057238]
+- block: kabi: reserve space for integrity related structure (Ming Lei) [2057238]
+- scsi: lpfc: Fix pt2pt NVMe PRLI reject LOGO loop (Dick Kennedy) [2054866]
+- x86/MCE/AMD, EDAC/mce_amd: Support non-uniform MCA bank type enumeration (Aristeu Rozanski) [1898165 2047430 2047446]
+- x86/MCE/AMD, EDAC/mce_amd: Add new SMCA bank types (Aristeu Rozanski) [1898165 2047430 2047446]
+- EDAC/amd64: Add support for AMD Family 19h Models 10h-1Fh and A0h-AFh (Aristeu Rozanski) [1898165 2047430 2047446]
+- EDAC: Add RDDR5 and LRDDR5 memory types (Aristeu Rozanski) [1898165 2047430 2047446]
+- drm/amdgpu: Register MCE notifier for Aldebaran RAS (Aristeu Rozanski) [1898165 2047430 2047446]
+- x86/MCE/AMD: Export smca_get_bank_type symbol (Aristeu Rozanski) [1898165 2047430 2047446]
+- PCI/ACPI: Fix acpi_pci_osc_control_set() kernel-doc comment (Mark Langsdorf) [2049635]
+- PCI/ACPI: Check for _OSC support in acpi_pci_osc_control_set() (Mark Langsdorf) [2049635]
+- PCI/ACPI: Move _OSC query checks to separate function (Mark Langsdorf) [2049635]
+- PCI/ACPI: Move supported and control calculations to separate functions (Mark Langsdorf) [2049635]
+- PCI/ACPI: Remove OSC_PCI_SUPPORT_MASKS and OSC_PCI_CONTROL_MASKS (Mark Langsdorf) [2049635]
+- nvmet-tcp: fix missing unmainted messages (Chris Leech) [2054441]
+- dm stats: fix too short end duration_ns when using precise_timestamps (Benjamin Marzinski) [2051798]
+- dm: fix double accounting of flush with data (Benjamin Marzinski) [2051798]
+- dm: interlock pending dm_io and dm_wait_for_bios_completion (Benjamin Marzinski) [2051798]
+- dm: properly fix redundant bio-based IO accounting (Benjamin Marzinski) [2051798]
+- dm: revert partial fix for redundant bio-based IO accounting (Benjamin Marzinski) [2051798]
+- block: add bio_start_io_acct_time() to control start_time (Benjamin Marzinski) [2051798]
+- scsi: mpt3sas: Fix incorrect system timestamp (Tomas Henzl) [2049631]
+- scsi: mpt3sas: Fix system going into read-only mode (Tomas Henzl) [2049631]
+- scsi: mpt3sas: Fix kernel panic during drive powercycle test (Tomas Henzl) [2049631]
+- redhat/configs: enable mellanox platform drivers to support LED, fan & watchdog devices (Ivan Vecera) [2057491]
+- x86/cpu: Drop spurious underscore from RAPTOR_LAKE #define (David Arcari) [2040022]
+- x86/cpu: Add Raptor Lake to Intel family (David Arcari) [2040022]
+- powerpc/64: Move paca allocation later in boot (Desnes A. Nunes do Rosario) [2055566]
+- powerpc: Set crashkernel offset to mid of RMA region (Desnes A. Nunes do Rosario) [2055566]
+- selftests: kvm: Check whether SIDA memop fails for normal guests (Thomas Huth) [2060814]
+- KVM: s390: Return error on SIDA memop on normal guest (Thomas Huth) [2060814]
+- igb: refactor XDP registration (Corinna Vinschen) [2054379]
+- igc: avoid kernel warning when changing RX ring parameters (Corinna Vinschen) [2054379]
+- redhat/configs: Enable CONFIG_ACER_WIRELESS (Peter Georg) [2025985]
 
 * Tue Mar 15 2022 Patrick Talbert <ptalbert@redhat.com> [5.14.0-72.el9]
 - spec: Fix separate tools build (Jiri Olsa) [2054579]
