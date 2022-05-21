@@ -260,7 +260,7 @@ index eb82f6aac951..43d494603192 100644
  #include <linux/module.h>
  #include <linux/init.h>
 diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 864c8c205ff7..bcc81fd0371f 100644
+index 03e2f965a96a..f8f94c1badc3 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
 @@ -388,22 +388,31 @@ EXPORT_SYMBOL(mmc_of_parse);
@@ -1143,10 +1143,10 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 15 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 7067b7c11626..f8f596c5c086 100644
+index 483c1362cc4a..e201252e9f8d 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-@@ -2308,6 +2308,19 @@ static bool arm_smmu_sid_in_range(struct arm_smmu_device *smmu, u32 sid)
+@@ -2309,6 +2309,19 @@ static bool arm_smmu_sid_in_range(struct arm_smmu_device *smmu, u32 sid)
  
  static struct iommu_ops arm_smmu_ops;
  
@@ -1166,7 +1166,7 @@ index 7067b7c11626..f8f596c5c086 100644
  static struct iommu_device *arm_smmu_probe_device(struct device *dev)
  {
  	int i, ret;
-@@ -2336,21 +2349,12 @@ static struct iommu_device *arm_smmu_probe_device(struct device *dev)
+@@ -2337,21 +2350,12 @@ static struct iommu_device *arm_smmu_probe_device(struct device *dev)
  	INIT_LIST_HEAD(&master->bonds);
  	dev_iommu_priv_set(dev, master);
  
@@ -1215,7 +1215,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index f8f596c5c086..8988c63e7c00 100644
+index e201252e9f8d..27d0b5ea986b 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 @@ -1174,7 +1174,7 @@ static void arm_smmu_sync_ste_for_sid(struct arm_smmu_device *smmu, u32 sid)
@@ -1245,7 +1245,7 @@ index f8f596c5c086..8988c63e7c00 100644
  		strtab += STRTAB_STE_DWORDS;
  	}
  }
-@@ -2038,7 +2038,7 @@ static void arm_smmu_install_ste_for_dev(struct arm_smmu_master *master)
+@@ -2039,7 +2039,7 @@ static void arm_smmu_install_ste_for_dev(struct arm_smmu_master *master)
  		if (j < i)
  			continue;
  
@@ -1279,10 +1279,10 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  2 files changed, 42 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 8988c63e7c00..00f19d37a3df 100644
+index 27d0b5ea986b..223d6ccdbeaa 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-@@ -3486,6 +3486,42 @@ static void __iomem *arm_smmu_ioremap(struct device *dev, resource_size_t start,
+@@ -3487,6 +3487,42 @@ static void __iomem *arm_smmu_ioremap(struct device *dev, resource_size_t start,
  	return devm_ioremap_resource(dev, &res);
  }
  
@@ -1325,7 +1325,7 @@ index 8988c63e7c00..00f19d37a3df 100644
  static int arm_smmu_device_probe(struct platform_device *pdev)
  {
  	int irq, ret;
-@@ -3569,6 +3605,10 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
+@@ -3570,6 +3606,10 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
  	/* Record our private device structure */
  	platform_set_drvdata(pdev, smmu);
  
@@ -1371,10 +1371,10 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 38 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 00f19d37a3df..23c0c4d5ad09 100644
+index 223d6ccdbeaa..d994a04b706b 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-@@ -2492,6 +2492,43 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
+@@ -2493,6 +2493,43 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
  	return iommu_fwspec_add_ids(dev, args->args, 1);
  }
  
@@ -1418,7 +1418,7 @@ index 00f19d37a3df..23c0c4d5ad09 100644
  static void arm_smmu_get_resv_regions(struct device *dev,
  				      struct list_head *head)
  {
-@@ -2506,6 +2543,7 @@ static void arm_smmu_get_resv_regions(struct device *dev,
+@@ -2507,6 +2544,7 @@ static void arm_smmu_get_resv_regions(struct device *dev,
  	list_add_tail(&region->list, head);
  
  	iommu_dma_get_resv_regions(dev, head);
@@ -1985,7 +1985,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  3 files changed, 30 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 4daf94bb56a5..7bd33b930116 100644
+index ea0bf13e8ac3..29636fa3e1d4 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -347,16 +347,7 @@ EXPORT_SYMBOL(of_mdiobus_register);
@@ -2218,7 +2218,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 12 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 7bd33b930116..94ec421dd91b 100644
+index 29636fa3e1d4..7620265e550d 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -360,18 +360,7 @@ EXPORT_SYMBOL(of_mdio_find_device);
@@ -2333,7 +2333,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 11 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 94ec421dd91b..d4cc293358f7 100644
+index 7620265e550d..ae2ab1251102 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -29,17 +29,7 @@ MODULE_LICENSE("GPL");
@@ -2380,7 +2380,7 @@ Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
  3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index d4cc293358f7..c926442dca82 100644
+index ae2ab1251102..b33e93c9c09f 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -115,15 +115,13 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio,
@@ -2588,7 +2588,7 @@ index 000000000000..0982e816a6fb
 +}
 +EXPORT_SYMBOL(fwnode_mdiobus_register_phy);
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index c926442dca82..932912c585c0 100644
+index b33e93c9c09f..ee902569cfd0 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -32,7 +32,7 @@ static int of_get_phy_id(struct device_node *device, u32 *phy_id)
@@ -2679,17 +2679,17 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 2 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 932912c585c0..513afdd5e0ab 100644
+index ee902569cfd0..bfb43af611f0 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
-@@ -12,6 +12,7 @@
+@@ -10,6 +10,7 @@
+ 
  #include <linux/device.h>
- #include <linux/netdevice.h>
  #include <linux/err.h>
 +#include <linux/fwnode_mdio.h>
- #include <linux/phy.h>
- #include <linux/phy_fixed.h>
- #include <linux/of.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/netdevice.h>
 @@ -98,43 +99,7 @@ EXPORT_SYMBOL(of_mdiobus_phy_device_register);
  static int of_mdiobus_register_phy(struct mii_bus *mdio,
  				    struct device_node *child, u32 addr)
