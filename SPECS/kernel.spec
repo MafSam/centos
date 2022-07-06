@@ -115,7 +115,7 @@ Summary: The Linux kernel
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 76.hs1%{?buildid}%{?dist}
+%define specrelease 76.hs2%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -549,7 +549,12 @@ BuildRequires: xmlto, asciidoc, python3-sphinx, python3-sphinx_rtd_theme
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
+BuildRequires: zlib-devel binutils-devel newt-devel bison flex xz-devel
+# Drop perl dependency on el8 to avoid modularity issues
+# https://pagure.io/centos-sig-hyperscale/package-bugs/issue/18
+%if %{?rhel} >= 9
+BuildRequires: perl(ExtUtils::Embed)
+%endif
 BuildRequires: audit-libs-devel
 BuildRequires: java-devel
 %ifnarch %{arm} s390x
@@ -2828,6 +2833,10 @@ fi
 #
 #
 %changelog
+* Wed Jul 06 2022 Davide Cavalca <dcavalca@centosproject.org> - 5.14.0-76.hs2.el8
+- Hotfix build
+- Drop perl dependency for perf on el8 to avoid modularity issues
+
 * Tue May 10 2022 Justin Vreeland <jvreeland@centosproject.org> - 5.14.0-76.hs1.el8
 - redhat/: cherry pick build artifacts needed for CentOS 8 ark-style builds (Justin Vreeland)
 
