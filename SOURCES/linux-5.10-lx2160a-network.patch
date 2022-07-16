@@ -1143,7 +1143,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 15 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 483c1362cc4a..e201252e9f8d 100644
+index bc4cbc7542ce..05530074ba6c 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 @@ -2309,6 +2309,19 @@ static bool arm_smmu_sid_in_range(struct arm_smmu_device *smmu, u32 sid)
@@ -1215,7 +1215,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index e201252e9f8d..27d0b5ea986b 100644
+index 05530074ba6c..3bf7b19cb58b 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 @@ -1174,7 +1174,7 @@ static void arm_smmu_sync_ste_for_sid(struct arm_smmu_device *smmu, u32 sid)
@@ -1279,7 +1279,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  2 files changed, 42 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 27d0b5ea986b..223d6ccdbeaa 100644
+index 3bf7b19cb58b..4b1b9becc59f 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 @@ -3487,6 +3487,42 @@ static void __iomem *arm_smmu_ioremap(struct device *dev, resource_size_t start,
@@ -1325,7 +1325,7 @@ index 27d0b5ea986b..223d6ccdbeaa 100644
  static int arm_smmu_device_probe(struct platform_device *pdev)
  {
  	int irq, ret;
-@@ -3570,6 +3606,10 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
+@@ -3572,6 +3608,10 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
  	/* Record our private device structure */
  	platform_set_drvdata(pdev, smmu);
  
@@ -1371,7 +1371,7 @@ Signed-off-by: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
  1 file changed, 38 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
-index 223d6ccdbeaa..d994a04b706b 100644
+index 4b1b9becc59f..a4397a739b53 100644
 --- a/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 +++ b/drivers/iommu/arm/arm-smmu-v3/arm-smmu-v3.c
 @@ -2493,6 +2493,43 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
@@ -1451,7 +1451,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  2 files changed, 46 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu/arm-smmu.c b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-index df24bbe3ea4f..e11a94c96fa1 100644
+index 6b41fe229a05..2ecdb525fd60 100644
 --- a/drivers/iommu/arm/arm-smmu/arm-smmu.c
 +++ b/drivers/iommu/arm/arm-smmu/arm-smmu.c
 @@ -2099,6 +2099,45 @@ err_reset_platform_ops: __maybe_unused;
@@ -1500,7 +1500,7 @@ index df24bbe3ea4f..e11a94c96fa1 100644
  static int arm_smmu_device_probe(struct platform_device *pdev)
  {
  	struct resource *res;
-@@ -2228,6 +2267,11 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
+@@ -2227,6 +2266,11 @@ static int arm_smmu_device_probe(struct platform_device *pdev)
  	}
  
  	platform_set_drvdata(pdev, smmu);
@@ -1547,7 +1547,7 @@ Signed-off-by: Jon Nettleton <jon@solid-run.com>
  1 file changed, 43 insertions(+)
 
 diff --git a/drivers/iommu/arm/arm-smmu/arm-smmu.c b/drivers/iommu/arm/arm-smmu/arm-smmu.c
-index e11a94c96fa1..34f22b74236b 100644
+index 2ecdb525fd60..1de07f589f16 100644
 --- a/drivers/iommu/arm/arm-smmu/arm-smmu.c
 +++ b/drivers/iommu/arm/arm-smmu/arm-smmu.c
 @@ -1588,6 +1588,48 @@ static int arm_smmu_of_xlate(struct device *dev, struct of_phandle_args *args)
@@ -2461,7 +2461,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  create mode 100644 include/linux/fwnode_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index c64c9354c287..44c5a241a609 100644
+index 4d10e79030a9..7626cf443302 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -2827,7 +2827,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  create mode 100644 include/linux/acpi_mdio.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 44c5a241a609..69e8546622c2 100644
+index 7626cf443302..8ffc052451ab 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -6585,6 +6585,7 @@ F:	Documentation/devicetree/bindings/net/mdio*
@@ -3522,7 +3522,7 @@ Signed-off-by: Ioana Ciornei <ioana.ciornei@nxp.com>
  create mode 100644 include/uapi/linux/fsl_mc.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 69e8546622c2..d4c41af043b5 100644
+index 8ffc052451ab..d80750fff123 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -14424,6 +14424,7 @@ S:	Maintained
@@ -4460,7 +4460,7 @@ index 000000000000..a4d384df9ba8
 +		Management Complex firmware.
 +Users:		Userspace drivers and management tools
 diff --git a/MAINTAINERS b/MAINTAINERS
-index d4c41af043b5..2e7ba07bf49b 100644
+index d80750fff123..8aa88ec0dcfe 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -14421,6 +14421,7 @@ M:	Stuart Yoder <stuyoder@gmail.com>
