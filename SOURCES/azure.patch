@@ -1,7 +1,71 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pablo Greco <pgreco@centosproject.org>
+Date: Sun, 7 Aug 2022 15:42:19 +0000
+Subject: [PATCH 01/54] Revert "PCI: hv: Fix hv_arch_irq_unmask() for
+ multi-MSI"
+
+This reverts commit 73bf070408a7f07e813ab26ebde1b09fca159cd6.
+---
+ arch/x86/include/asm/mshyperv.h     | 7 +++++++
+ drivers/pci/controller/pci-hyperv.c | 5 +----
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/x86/include/asm/mshyperv.h b/arch/x86/include/asm/mshyperv.h
+index 871a8b06d430..30f76b966857 100644
+--- a/arch/x86/include/asm/mshyperv.h
++++ b/arch/x86/include/asm/mshyperv.h
+@@ -247,6 +247,13 @@ bool hv_vcpu_is_preempted(int vcpu);
+ static inline void hv_apic_init(void) {}
+ #endif
+ 
++static inline void hv_set_msi_entry_from_desc(union hv_msi_entry *msi_entry,
++					      struct msi_desc *msi_desc)
++{
++	msi_entry->address = msi_desc->msg.address_lo;
++	msi_entry->data = msi_desc->msg.data;
++}
++
+ #else /* CONFIG_HYPERV */
+ static inline void hyperv_init(void) {}
+ static inline void hyperv_setup_mmu_ops(void) {}
+diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
+index 4353443b89d8..4ebb1f09f21c 100644
+--- a/drivers/pci/controller/pci-hyperv.c
++++ b/drivers/pci/controller/pci-hyperv.c
+@@ -1221,7 +1221,6 @@ static void hv_irq_unmask(struct irq_data *data)
+ 	struct msi_desc *msi_desc = irq_data_get_msi_desc(data);
+ 	struct irq_cfg *cfg = irqd_cfg(data);
+ 	struct hv_retarget_device_interrupt *params;
+-	struct tran_int_desc *int_desc;
+ 	struct hv_pcibus_device *hbus;
+ 	struct cpumask *dest;
+ 	cpumask_var_t tmp;
+@@ -1236,7 +1235,6 @@ static void hv_irq_unmask(struct irq_data *data)
+ 	pdev = msi_desc_to_pci_dev(msi_desc);
+ 	pbus = pdev->bus;
+ 	hbus = container_of(pbus->sysdata, struct hv_pcibus_device, sysdata);
+-	int_desc = data->chip_data;
+ 
+ 	spin_lock_irqsave(&hbus->retarget_msi_interrupt_lock, flags);
+ 
+@@ -1244,8 +1242,7 @@ static void hv_irq_unmask(struct irq_data *data)
+ 	memset(params, 0, sizeof(*params));
+ 	params->partition_id = HV_PARTITION_ID_SELF;
+ 	params->int_entry.source = 1; /* MSI(-X) */
+-	params->int_entry.msi_entry.address = int_desc->address & 0xffffffff;
+-	params->int_entry.msi_entry.data = int_desc->data;
++	hv_set_msi_entry_from_desc(&params->int_entry.msi_entry, msi_desc);
+ 	params->device_id = (hbus->hdev->dev_instance.b[5] << 24) |
+ 			   (hbus->hdev->dev_instance.b[4] << 16) |
+ 			   (hbus->hdev->dev_instance.b[7] << 8) |
+-- 
+2.18.4
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: "Andrea Parri (Microsoft)" <parri.andrea@gmail.com>
 Date: Mon, 1 Feb 2021 15:48:11 +0100
-Subject: [PATCH 01/53] x86/hyperv: Load/save the Isolation Configuration leaf
+Subject: [PATCH 02/54] x86/hyperv: Load/save the Isolation Configuration leaf
 
 If bit 22 of Group B Features is set, the guest has access to the
 Isolation Configuration CPUID leaf.  On x86, the first four bits
@@ -166,7 +230,7 @@ index c57799684170..dff58a3db5d5 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:26 +0000
-Subject: [PATCH 02/53] x86/hyperv: handling hypercall page setup for root
+Subject: [PATCH 03/54] x86/hyperv: handling hypercall page setup for root
 
 When Linux is running as the root partition, the hypercall page will
 have already been setup by Hyper-V. Copy the content over to the
@@ -265,7 +329,7 @@ index ccfb1a6bc2a5..570bcb1d7d64 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:23 +0000
-Subject: [PATCH 03/53] clocksource/hyperv: use MSR-based access if running as
+Subject: [PATCH 04/54] clocksource/hyperv: use MSR-based access if running as
  root
 
 When Linux runs as the root partition, the setup required for TSC page
@@ -284,7 +348,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-5-wei.liu@kernel.org
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index ba04cb381cd3..269a691bd2c4 100644
+index 7c617d8dff3f..d9d055c35c3e 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -426,6 +426,9 @@ static bool __init hv_init_tsc_clocksource(void)
@@ -304,7 +368,7 @@ index ba04cb381cd3..269a691bd2c4 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:24 +0000
-Subject: [PATCH 04/53] x86/hyperv: allocate output arg pages if required
+Subject: [PATCH 05/54] x86/hyperv: allocate output arg pages if required
 
 When Linux runs as the root partition, it will need to make hypercalls
 which return data from the hypervisor.
@@ -418,7 +482,7 @@ index 30f76b966857..cf881d0c7c9d 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:21 +0000
-Subject: [PATCH 05/53] x86/hyperv: detect if Linux is the root partition
+Subject: [PATCH 06/54] x86/hyperv: detect if Linux is the root partition
 
 For now we can use the privilege flag to check. Stash the value to be
 used later.
@@ -523,7 +587,7 @@ index ee0edc8741d6..25cc1740d9b9 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:29 +0000
-Subject: [PATCH 06/53] x86/hyperv: implement and use hv_smp_prepare_cpus
+Subject: [PATCH 07/54] x86/hyperv: implement and use hv_smp_prepare_cpus
 
 Microsoft Hypervisor requires the root partition to make a few
 hypercalls to setup application processors before they can be used.
@@ -601,7 +665,7 @@ index 25cc1740d9b9..3e0069392158 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:20 +0000
-Subject: [PATCH 07/53] asm-generic/hyperv: change HV_CPU_POWER_MANAGEMENT to
+Subject: [PATCH 08/54] asm-generic/hyperv: change HV_CPU_POWER_MANAGEMENT to
  HV_CPU_MANAGEMENT
 
 This makes the name match Hyper-V TLFS.
@@ -636,7 +700,7 @@ index 20d3cd950204..e232ddcb0a2d 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:32 +0000
-Subject: [PATCH 08/53] asm-generic/hyperv: introduce hv_device_id and
+Subject: [PATCH 09/54] asm-generic/hyperv: introduce hv_device_id and
  auxiliary structures
 
 We will need to identify the device we want Microsoft Hypervisor to
@@ -749,7 +813,7 @@ index e232ddcb0a2d..ccc81c277d09 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:25 +0000
-Subject: [PATCH 09/53] x86/hyperv: extract partition ID from Microsoft
+Subject: [PATCH 10/54] x86/hyperv: extract partition ID from Microsoft
  Hypervisor if necessary
 
 We will need the partition ID for executing some hypercalls later.
@@ -861,7 +925,7 @@ index ccc81c277d09..cbc13b7c7022 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:28 +0000
-Subject: [PATCH 10/53] x86/hyperv: provide a bunch of helper functions
+Subject: [PATCH 11/54] x86/hyperv: provide a bunch of helper functions
 
 They are used to deposit pages into Microsoft Hypervisor and bring up
 logical and virtual processors.
@@ -1235,7 +1299,7 @@ index cbc13b7c7022..6e6a129516df 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:33 +0000
-Subject: [PATCH 11/53] asm-generic/hyperv: import data structures for mapping
+Subject: [PATCH 12/54] asm-generic/hyperv: import data structures for mapping
  device interrupts
 
 Signed-off-by: Sunil Muthuswamy <sunilmut@microsoft.com>
@@ -1332,7 +1396,7 @@ index 6e6a129516df..b6ed949be3bf 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:30 +0000
-Subject: [PATCH 12/53] asm-generic/hyperv: update hv_msi_entry
+Subject: [PATCH 13/54] asm-generic/hyperv: update hv_msi_entry
 
 We will soon need to access fields inside the MSI address and MSI data
 fields. Introduce hv_msi_address_register and hv_msi_data_register.
@@ -1415,7 +1479,7 @@ index b6ed949be3bf..2040b196fe59 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:31 +0000
-Subject: [PATCH 13/53] asm-generic/hyperv: update hv_interrupt_entry
+Subject: [PATCH 14/54] asm-generic/hyperv: update hv_interrupt_entry
 
 We will soon use the same structure to handle IO-APIC interrupts as
 well. Introduce an enum to identify the source and a data structure for
@@ -1436,10 +1500,10 @@ Link: https://lore.kernel.org/r/20210203150435.27941-13-wei.liu@kernel.org
  2 files changed, 35 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index a070e69bb49c..45f745b114bf 100644
+index 4ebb1f09f21c..dc2a37f3dcaf 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
-@@ -1215,7 +1215,7 @@ static void hv_irq_unmask(struct irq_data *data)
+@@ -1241,7 +1241,7 @@ static void hv_irq_unmask(struct irq_data *data)
  	params = &hbus->retarget_msi_interrupt_params;
  	memset(params, 0, sizeof(*params));
  	params->partition_id = HV_PARTITION_ID_SELF;
@@ -1511,7 +1575,7 @@ index 2040b196fe59..83448e837ded 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:34 +0000
-Subject: [PATCH 14/53] x86/hyperv: implement an MSI domain for root partition
+Subject: [PATCH 15/54] x86/hyperv: implement an MSI domain for root partition
 
 When Linux runs as the root partition on Microsoft Hypervisor, its
 interrupts are remapped.  Linux will need to explicitly map and unmap
@@ -1951,7 +2015,7 @@ index 7bd4022da061..4533773115ea 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Wei Liu <wei.liu@kernel.org>
 Date: Wed, 3 Feb 2021 15:04:35 +0000
-Subject: [PATCH 15/53] iommu/hyperv: setup an IO-APIC IRQ remapping domain for
+Subject: [PATCH 16/54] iommu/hyperv: setup an IO-APIC IRQ remapping domain for
  root partition
 
 Just like MSI/MSI-X, IO-APIC interrupts are remapped by Microsoft
@@ -2244,7 +2308,7 @@ index e09e2d734c57..d08e5b9e4f0e 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:13 -0800
-Subject: [PATCH 16/53] Drivers: hv: vmbus: Move Hyper-V page allocator to arch
+Subject: [PATCH 17/54] Drivers: hv: vmbus: Move Hyper-V page allocator to arch
  neutral code
 
 The Hyper-V page allocator functions are implemented in an architecture
@@ -2390,7 +2454,7 @@ index dff58a3db5d5..694b5bc3561c 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:14 -0800
-Subject: [PATCH 17/53] x86/hyper-v: Move hv_message_type to architecture
+Subject: [PATCH 18/54] x86/hyper-v: Move hv_message_type to architecture
  neutral module
 
 The definition of enum hv_message_type includes arch neutral and
@@ -2506,7 +2570,7 @@ index 83448e837ded..9cf10837d005 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:20 -0800
-Subject: [PATCH 18/53] clocksource/drivers/hyper-v: Handle sched_clock
+Subject: [PATCH 19/54] clocksource/drivers/hyper-v: Handle sched_clock
  differences inline
 
 While the Hyper-V Reference TSC code is architecture neutral, the
@@ -2555,7 +2619,7 @@ index ef6e968e2828..212d34f80bb4 100644
  
  static inline void hv_enable_stimer0_percpu_irq(int irq) {}
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index 269a691bd2c4..cabd8453461f 100644
+index d9d055c35c3e..6341891f145a 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -418,6 +418,30 @@ static struct clocksource hyperv_cs_msr = {
@@ -2596,7 +2660,7 @@ index 269a691bd2c4..cabd8453461f 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:16 -0800
-Subject: [PATCH 19/53] Drivers: hv: vmbus: Move hyperv_report_panic_msg to
+Subject: [PATCH 20/54] Drivers: hv: vmbus: Move hyperv_report_panic_msg to
  arch neutral code
 
 With the new Hyper-V MSR set function, hyperv_report_panic_msg() can be
@@ -2720,7 +2784,7 @@ index 694b5bc3561c..bbc011390cbb 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:21 -0800
-Subject: [PATCH 20/53] clocksource/drivers/hyper-v: Set clocksource rating
+Subject: [PATCH 21/54] clocksource/drivers/hyper-v: Set clocksource rating
  based on Hyper-V feature
 
 On x86/x64, the TSC clocksource is available in a Hyper-V VM only if
@@ -2753,7 +2817,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  1 file changed, 13 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index cabd8453461f..c97e1b1e6653 100644
+index 6341891f145a..b9905b67bc62 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -302,14 +302,6 @@ EXPORT_SYMBOL_GPL(hv_stimer_global_cleanup);
@@ -2814,7 +2878,7 @@ index cabd8453461f..c97e1b1e6653 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Zheng Yongjun <zhengyongjun3@huawei.com>
 Date: Fri, 26 Mar 2021 14:49:42 +0800
-Subject: [PATCH 21/53] x86/hyperv: remove unused linux/version.h header
+Subject: [PATCH 22/54] x86/hyperv: remove unused linux/version.h header
 
 That header is not needed in hv_proc.c.
 
@@ -2845,7 +2909,7 @@ index 60461e598239..27e17ad3ba49 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sunil Muthuswamy <sunilmut@microsoft.com>
 Date: Tue, 23 Mar 2021 18:47:16 +0000
-Subject: [PATCH 22/53] x86/Hyper-V: Support for free page reporting
+Subject: [PATCH 23/54] x86/Hyper-V: Support for free page reporting
 
 Linux has support for free page reporting now (36e66c554b5c) for
 virtualized environment. On Hyper-V when virtually backed VMs are
@@ -3228,7 +3292,7 @@ index bbc011390cbb..c749d1c4f682 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Joseph Salisbury <joseph.salisbury@microsoft.com>
 Date: Fri, 16 Apr 2021 17:43:02 -0700
-Subject: [PATCH 23/53] x86/hyperv: Move hv_do_rep_hypercall to asm-generic
+Subject: [PATCH 24/54] x86/hyperv: Move hv_do_rep_hypercall to asm-generic
 
 This patch makes no functional changes.  It simply moves hv_do_rep_hypercall()
 out of arch/x86/include/asm/mshyperv.h and into asm-generic/mshyperv.h
@@ -3342,7 +3406,7 @@ index c749d1c4f682..2f01140bbf66 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Joseph Salisbury <joseph.salisbury@microsoft.com>
 Date: Fri, 16 Apr 2021 17:43:03 -0700
-Subject: [PATCH 24/53] drivers: hv: Create a consistent pattern for checking
+Subject: [PATCH 25/54] drivers: hv: Create a consistent pattern for checking
  Hyper-V hypercall status
 
 There is not a consistent pattern for checking Hyper-V hypercall status.
@@ -3647,10 +3711,10 @@ index cca8d5ea61f0..3b1ba6c607a1 100644
  
  int hv_synic_alloc(void)
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index 45f745b114bf..ddf7965606f3 100644
+index dc2a37f3dcaf..56244e5a0454 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
-@@ -1291,7 +1291,7 @@ static void hv_irq_unmask(struct irq_data *data)
+@@ -1317,7 +1317,7 @@ static void hv_irq_unmask(struct irq_data *data)
  	 * resumes, hv_pci_restore_msi_state() is able to correctly restore
  	 * the interrupt with the correct affinity.
  	 */
@@ -3718,7 +3782,7 @@ index 2f01140bbf66..7a2492fb0ee1 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Long Li <longli@microsoft.com>
 Date: Wed, 12 May 2021 01:06:49 -0700
-Subject: [PATCH 25/53] PCI: hv: Remove bus device removal unused
+Subject: [PATCH 26/54] PCI: hv: Remove bus device removal unused
  refcount/functions
 
 With the new method of flushing/stopping the workqueue before doing bus
@@ -3736,7 +3800,7 @@ Reviewed-by: Michael Kelley <mikelley@microsoft.com>
  1 file changed, 3 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index ddf7965606f3..122c0567bc0e 100644
+index 56244e5a0454..25087e12315a 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
 @@ -452,7 +452,6 @@ struct hv_pcibus_device {
@@ -3765,7 +3829,7 @@ index ddf7965606f3..122c0567bc0e 100644
  /*
   * There is no good way to get notified from vmbus_onoffer_rescind(),
   * so let's use polling here, since this is not a hot path.
-@@ -2076,10 +2071,8 @@ static void pci_devices_present_work(struct work_struct *work)
+@@ -2138,10 +2133,8 @@ static void pci_devices_present_work(struct work_struct *work)
  	}
  	spin_unlock_irqrestore(&hbus->device_list_lock, flags);
  
@@ -3777,7 +3841,7 @@ index ddf7965606f3..122c0567bc0e 100644
  
  	/* First, mark all existing children as reported missing. */
  	spin_lock_irqsave(&hbus->device_list_lock, flags);
-@@ -2162,7 +2155,6 @@ static void pci_devices_present_work(struct work_struct *work)
+@@ -2224,7 +2217,6 @@ static void pci_devices_present_work(struct work_struct *work)
  		break;
  	}
  
@@ -3785,7 +3849,7 @@ index ddf7965606f3..122c0567bc0e 100644
  	kfree(dr);
  }
  
-@@ -2203,12 +2195,10 @@ static int hv_pci_start_relations_work(struct hv_pcibus_device *hbus,
+@@ -2265,12 +2257,10 @@ static int hv_pci_start_relations_work(struct hv_pcibus_device *hbus,
  	list_add_tail(&dr->list_entry, &hbus->dr_list);
  	spin_unlock_irqrestore(&hbus->device_list_lock, flags);
  
@@ -3800,7 +3864,7 @@ index ddf7965606f3..122c0567bc0e 100644
  
  	return 0;
  }
-@@ -2351,8 +2341,6 @@ static void hv_eject_device_work(struct work_struct *work)
+@@ -2413,8 +2403,6 @@ static void hv_eject_device_work(struct work_struct *work)
  	put_pcichild(hpdev);
  	put_pcichild(hpdev);
  	/* hpdev has been freed. Do not use it any more. */
@@ -3809,7 +3873,7 @@ index ddf7965606f3..122c0567bc0e 100644
  }
  
  /**
-@@ -2376,7 +2364,6 @@ static void hv_pci_eject_device(struct hv_pci_dev *hpdev)
+@@ -2438,7 +2426,6 @@ static void hv_pci_eject_device(struct hv_pci_dev *hpdev)
  	hpdev->state = hv_pcichild_ejecting;
  	get_pcichild(hpdev);
  	INIT_WORK(&hpdev->wrk, hv_eject_device_work);
@@ -3817,7 +3881,7 @@ index ddf7965606f3..122c0567bc0e 100644
  	queue_work(hbus->wq, &hpdev->wrk);
  }
  
-@@ -2976,17 +2963,6 @@ static int hv_send_resources_released(struct hv_device *hdev)
+@@ -3038,17 +3025,6 @@ static int hv_send_resources_released(struct hv_device *hdev)
  	return 0;
  }
  
@@ -3835,7 +3899,7 @@ index ddf7965606f3..122c0567bc0e 100644
  #define HVPCI_DOM_MAP_SIZE (64 * 1024)
  static DECLARE_BITMAP(hvpci_dom_map, HVPCI_DOM_MAP_SIZE);
  
-@@ -3106,14 +3082,12 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3168,14 +3144,12 @@ static int hv_pci_probe(struct hv_device *hdev,
  	hbus->sysdata.domain = dom;
  
  	hbus->hdev = hdev;
@@ -3850,7 +3914,7 @@ index ddf7965606f3..122c0567bc0e 100644
  	hbus->wq = alloc_ordered_workqueue("hv_pci_%x", 0,
  					   hbus->sysdata.domain);
  	if (!hbus->wq) {
-@@ -3357,8 +3331,6 @@ static int hv_pci_remove(struct hv_device *hdev)
+@@ -3419,8 +3393,6 @@ static int hv_pci_remove(struct hv_device *hdev)
  	hv_pci_free_bridge_windows(hbus);
  	irq_domain_remove(hbus->irq_domain);
  	irq_domain_free_fwnode(hbus->sysdata.fwnode);
@@ -3866,7 +3930,7 @@ index ddf7965606f3..122c0567bc0e 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sudeep Holla <sudeep.holla@arm.com>
 Date: Tue, 18 May 2021 17:36:18 +0100
-Subject: [PATCH 26/53] arm64: smccc: Add support for SMCCCv1.2 extended
+Subject: [PATCH 27/54] arm64: smccc: Add support for SMCCCv1.2 extended
  input/output registers
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -4057,7 +4121,7 @@ index ff38737475ec..d0d78c5ab3d6 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 2 Jun 2021 14:36:44 -0700
-Subject: [PATCH 27/53] Drivers: hv: Move Hyper-V extended capability check to
+Subject: [PATCH 28/54] Drivers: hv: Move Hyper-V extended capability check to
  arch neutral code
 
 The extended capability query code is currently under arch/x86, but it
@@ -4245,7 +4309,7 @@ index 000000000000..f0053c786891
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:52 +0800
-Subject: [PATCH 28/53] arm64: PCI: Restructure pcibios_root_bridge_prepare()
+Subject: [PATCH 29/54] arm64: PCI: Restructure pcibios_root_bridge_prepare()
 
 Restructure the pcibios_root_bridge_prepare() as the preparation for
 supporting cases when no real ACPI device is related to the PCI host
@@ -4300,7 +4364,7 @@ index 1006ed2d7c60..5148ae242780 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:53 +0800
-Subject: [PATCH 29/53] arm64: PCI: Support root bridge preparation for Hyper-V
+Subject: [PATCH 30/54] arm64: PCI: Support root bridge preparation for Hyper-V
 
 Currently at root bridge preparation, the corresponding ACPI device will
 be set as the companion, however for a Hyper-V virtual PCI root bridge,
@@ -4357,7 +4421,7 @@ index 5148ae242780..2276689b5411 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Sun, 11 Jul 2021 19:50:04 -0700
-Subject: [PATCH 30/53] asm-generic/hyperv: Add missing #include of nmi.h
+Subject: [PATCH 31/54] asm-generic/hyperv: Add missing #include of nmi.h
 
 The recent move of hv_do_rep_hypercall() to this file adds
 a reference to touch_nmi_watchdog(). Its function definition
@@ -4393,7 +4457,7 @@ index 7a2492fb0ee1..2c7500e4810f 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:55 +0800
-Subject: [PATCH 31/53] PCI: hv: Set ->domain_nr of pci_host_bridge at probing
+Subject: [PATCH 32/54] PCI: hv: Set ->domain_nr of pci_host_bridge at probing
  time
 
 No functional change, just store and maintain the PCI domain number in
@@ -4411,10 +4475,10 @@ Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
  1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index 122c0567bc0e..17cfbba21d78 100644
+index 25087e12315a..8f3f1440af3f 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
-@@ -2312,7 +2312,7 @@ static void hv_eject_device_work(struct work_struct *work)
+@@ -2374,7 +2374,7 @@ static void hv_eject_device_work(struct work_struct *work)
  	 * because hbus->pci_bus may not exist yet.
  	 */
  	wslot = wslot_to_devfn(hpdev->desc.win_slot.slot);
@@ -4423,7 +4487,7 @@ index 122c0567bc0e..17cfbba21d78 100644
  	if (pdev) {
  		pci_lock_rescan_remove();
  		pci_stop_and_remove_bus_device(pdev);
-@@ -3079,6 +3079,7 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3141,6 +3141,7 @@ static int hv_pci_probe(struct hv_device *hdev,
  			 "PCI dom# 0x%hx has collision, using 0x%hx",
  			 dom_req, dom);
  
@@ -4431,7 +4495,7 @@ index 122c0567bc0e..17cfbba21d78 100644
  	hbus->sysdata.domain = dom;
  
  	hbus->hdev = hdev;
-@@ -3089,7 +3090,7 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3151,7 +3152,7 @@ static int hv_pci_probe(struct hv_device *hdev,
  	spin_lock_init(&hbus->device_list_lock);
  	spin_lock_init(&hbus->retarget_msi_interrupt_lock);
  	hbus->wq = alloc_ordered_workqueue("hv_pci_%x", 0,
@@ -4440,7 +4504,7 @@ index 122c0567bc0e..17cfbba21d78 100644
  	if (!hbus->wq) {
  		ret = -ENOMEM;
  		goto free_dom;
-@@ -3216,7 +3217,7 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3278,7 +3279,7 @@ static int hv_pci_probe(struct hv_device *hdev,
  destroy_wq:
  	destroy_workqueue(hbus->wq);
  free_dom:
@@ -4449,7 +4513,7 @@ index 122c0567bc0e..17cfbba21d78 100644
  free_bus:
  	kfree(hbus);
  	return ret;
-@@ -3332,7 +3333,7 @@ static int hv_pci_remove(struct hv_device *hdev)
+@@ -3394,7 +3395,7 @@ static int hv_pci_remove(struct hv_device *hdev)
  	irq_domain_remove(hbus->irq_domain);
  	irq_domain_free_fwnode(hbus->sysdata.fwnode);
  
@@ -4465,7 +4529,7 @@ index 122c0567bc0e..17cfbba21d78 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Arnd Bergmann <arnd@arndb.de>
 Date: Tue, 27 Jul 2021 02:06:54 +0800
-Subject: [PATCH 32/53] PCI: hv: Generify PCI probing
+Subject: [PATCH 33/54] PCI: hv: Generify PCI probing
 
 In order to support ARM64 Hyper-V PCI, we need to set up the bridge at
 probing time because ARM64 is a PCI_DOMAIN_GENERIC=y arch and we don't
@@ -4488,7 +4552,7 @@ Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
  1 file changed, 30 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index 17cfbba21d78..ecfd55342da3 100644
+index 8f3f1440af3f..3666132695f7 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
 @@ -449,6 +449,7 @@ enum hv_pcibus_state {
@@ -4508,7 +4572,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	struct list_head children;
  	struct list_head dr_list;
  
-@@ -1798,7 +1797,7 @@ static void hv_pci_assign_slots(struct hv_pcibus_device *hbus)
+@@ -1860,7 +1859,7 @@ static void hv_pci_assign_slots(struct hv_pcibus_device *hbus)
  
  		slot_nr = PCI_SLOT(wslot_to_devfn(hpdev->desc.win_slot.slot));
  		snprintf(name, SLOT_NAME_SIZE, "%u", hpdev->desc.ser);
@@ -4517,7 +4581,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  					  name, NULL);
  		if (IS_ERR(hpdev->pci_slot)) {
  			pr_warn("pci_create slot %s failed\n", name);
-@@ -1828,7 +1827,7 @@ static void hv_pci_remove_slots(struct hv_pcibus_device *hbus)
+@@ -1890,7 +1889,7 @@ static void hv_pci_remove_slots(struct hv_pcibus_device *hbus)
  static void hv_pci_assign_numa_node(struct hv_pcibus_device *hbus)
  {
  	struct pci_dev *dev;
@@ -4526,7 +4590,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	struct hv_pci_dev *hv_dev;
  
  	list_for_each_entry(dev, &bus->devices, bus_list) {
-@@ -1860,24 +1859,25 @@ static void hv_pci_assign_numa_node(struct hv_pcibus_device *hbus)
+@@ -1922,24 +1921,25 @@ static void hv_pci_assign_numa_node(struct hv_pcibus_device *hbus)
   */
  static int create_root_hv_pci_bus(struct hv_pcibus_device *hbus)
  {
@@ -4563,7 +4627,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	pci_unlock_rescan_remove();
  	hbus->state = hv_pcibus_installed;
  	return 0;
-@@ -2140,7 +2140,7 @@ static void pci_devices_present_work(struct work_struct *work)
+@@ -2202,7 +2202,7 @@ static void pci_devices_present_work(struct work_struct *work)
  		 * because there may have been changes.
  		 */
  		pci_lock_rescan_remove();
@@ -4572,7 +4636,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  		hv_pci_assign_numa_node(hbus);
  		hv_pci_assign_slots(hbus);
  		pci_unlock_rescan_remove();
-@@ -2308,8 +2308,8 @@ static void hv_eject_device_work(struct work_struct *work)
+@@ -2370,8 +2370,8 @@ static void hv_eject_device_work(struct work_struct *work)
  	/*
  	 * Ejection can come before or after the PCI bus has been set up, so
  	 * attempt to find it and tear down the bus state, if it exists.  This
@@ -4583,7 +4647,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	 */
  	wslot = wslot_to_devfn(hpdev->desc.win_slot.slot);
  	pdev = pci_get_domain_bus_and_slot(hbus->bridge->domain_nr, 0, wslot);
-@@ -2675,8 +2675,7 @@ static int hv_pci_allocate_bridge_windows(struct hv_pcibus_device *hbus)
+@@ -2737,8 +2737,7 @@ static int hv_pci_allocate_bridge_windows(struct hv_pcibus_device *hbus)
  		/* Modify this resource to become a bridge window. */
  		hbus->low_mmio_res->flags |= IORESOURCE_WINDOW;
  		hbus->low_mmio_res->flags &= ~IORESOURCE_BUSY;
@@ -4593,7 +4657,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	}
  
  	if (hbus->high_mmio_space) {
-@@ -2695,8 +2694,7 @@ static int hv_pci_allocate_bridge_windows(struct hv_pcibus_device *hbus)
+@@ -2757,8 +2756,7 @@ static int hv_pci_allocate_bridge_windows(struct hv_pcibus_device *hbus)
  		/* Modify this resource to become a bridge window. */
  		hbus->high_mmio_res->flags |= IORESOURCE_WINDOW;
  		hbus->high_mmio_res->flags &= ~IORESOURCE_BUSY;
@@ -4603,7 +4667,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	}
  
  	return 0;
-@@ -3015,6 +3013,7 @@ static void hv_put_dom_num(u16 dom)
+@@ -3077,6 +3075,7 @@ static void hv_put_dom_num(u16 dom)
  static int hv_pci_probe(struct hv_device *hdev,
  			const struct hv_vmbus_device_id *dev_id)
  {
@@ -4611,7 +4675,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	struct hv_pcibus_device *hbus;
  	u16 dom_req, dom;
  	char *name;
-@@ -3027,6 +3026,10 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3089,6 +3088,10 @@ static int hv_pci_probe(struct hv_device *hdev,
  	 */
  	BUILD_BUG_ON(sizeof(*hbus) > HV_HYP_PAGE_SIZE);
  
@@ -4622,7 +4686,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	/*
  	 * With the recent 59bb47985c1d ("mm, sl[aou]b: guarantee natural
  	 * alignment for kmalloc(power-of-two)"), kzalloc() is able to allocate
-@@ -3048,6 +3051,8 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3110,6 +3113,8 @@ static int hv_pci_probe(struct hv_device *hdev,
  	hbus = kzalloc(HV_HYP_PAGE_SIZE, GFP_KERNEL);
  	if (!hbus)
  		return -ENOMEM;
@@ -4631,7 +4695,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	hbus->state = hv_pcibus_init;
  	hbus->wslot_res_allocated = -1;
  
-@@ -3085,7 +3090,6 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3147,7 +3152,6 @@ static int hv_pci_probe(struct hv_device *hdev,
  	hbus->hdev = hdev;
  	INIT_LIST_HEAD(&hbus->children);
  	INIT_LIST_HEAD(&hbus->dr_list);
@@ -4639,7 +4703,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	spin_lock_init(&hbus->config_lock);
  	spin_lock_init(&hbus->device_list_lock);
  	spin_lock_init(&hbus->retarget_msi_interrupt_lock);
-@@ -3316,9 +3320,9 @@ static int hv_pci_remove(struct hv_device *hdev)
+@@ -3378,9 +3382,9 @@ static int hv_pci_remove(struct hv_device *hdev)
  
  		/* Remove the bus from PCI's point of view. */
  		pci_lock_rescan_remove();
@@ -4651,7 +4715,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  		pci_unlock_rescan_remove();
  	}
  
-@@ -3328,7 +3332,6 @@ static int hv_pci_remove(struct hv_device *hdev)
+@@ -3390,7 +3394,6 @@ static int hv_pci_remove(struct hv_device *hdev)
  
  	iounmap(hbus->cfg_addr);
  	hv_free_config_window(hbus);
@@ -4659,7 +4723,7 @@ index 17cfbba21d78..ecfd55342da3 100644
  	hv_pci_free_bridge_windows(hbus);
  	irq_domain_remove(hbus->irq_domain);
  	irq_domain_free_fwnode(hbus->sysdata.fwnode);
-@@ -3411,7 +3414,7 @@ static int hv_pci_restore_msi_msg(struct pci_dev *pdev, void *arg)
+@@ -3473,7 +3476,7 @@ static int hv_pci_restore_msi_msg(struct pci_dev *pdev, void *arg)
   */
  static void hv_pci_restore_msi_state(struct hv_pcibus_device *hbus)
  {
@@ -4675,7 +4739,7 @@ index 17cfbba21d78..ecfd55342da3 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:50 +0800
-Subject: [PATCH 33/53] PCI: Introduce domain_nr in pci_host_bridge
+Subject: [PATCH 34/54] PCI: Introduce domain_nr in pci_host_bridge
 
 Currently we retrieve the PCI domain number of the host bridge from the
 bus sysdata (or pci_config_window if PCI_DOMAINS_GENERIC=y). Actually
@@ -4727,7 +4791,7 @@ index ece90a23936d..7e4cb5f7c9ca 100644
  
  	b = pci_find_bus(pci_domain_nr(bus), bridge->busnr);
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index bc5a1150f072..77ba6053aeb4 100644
+index 692ce678c5f1..8054d61721aa 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
 @@ -523,6 +523,16 @@ static inline int pci_channel_offline(struct pci_dev *pdev)
@@ -4762,7 +4826,7 @@ index bc5a1150f072..77ba6053aeb4 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:51 +0800
-Subject: [PATCH 34/53] PCI: Support populating MSI domains of root buses via
+Subject: [PATCH 35/54] PCI: Support populating MSI domains of root buses via
  bridges
 
 Currently, at probing time, the MSI domains of root buses are populated
@@ -4826,7 +4890,7 @@ index 7e4cb5f7c9ca..a49ca043ded8 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 4 Aug 2021 08:52:39 -0700
-Subject: [PATCH 35/53] Drivers: hv: Enable Hyper-V code to be built on ARM64
+Subject: [PATCH 36/54] Drivers: hv: Enable Hyper-V code to be built on ARM64
 
 Update drivers/hv/Kconfig so CONFIG_HYPERV can be selected on
 ARM64, causing the Hyper-V specific code to be built. Exclude the
@@ -4875,7 +4939,7 @@ index 66c794d92391..d1123ceb38f3 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 4 Aug 2021 08:52:35 -0700
-Subject: [PATCH 36/53] arm64: hyperv: Add Hyper-V hypercall and register
+Subject: [PATCH 37/54] arm64: hyperv: Add Hyper-V hypercall and register
  access utilities
 
 hyperv-tlfs.h defines Hyper-V interfaces from the Hyper-V Top Level
@@ -4917,7 +4981,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  create mode 100644 arch/arm64/include/asm/mshyperv.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 7c118b507912..d9870f2daade 100644
+index 4d10e79030a9..549be23643f8 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -8153,6 +8153,9 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/hyperv/linux.git
@@ -5225,7 +5289,7 @@ index 000000000000..20070a847304
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 4 Aug 2021 08:52:37 -0700
-Subject: [PATCH 37/53] arm64: hyperv: Initialize hypervisor on boot
+Subject: [PATCH 38/54] arm64: hyperv: Initialize hypervisor on boot
 
 Add ARM64-specific code to initialize the Hyper-V
 hypervisor when booting as a guest VM.
@@ -5353,7 +5417,7 @@ index 000000000000..bbbe351e9045
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 4 Aug 2021 08:52:36 -0700
-Subject: [PATCH 38/53] arm64: hyperv: Add panic handler
+Subject: [PATCH 39/54] arm64: hyperv: Add panic handler
 
 Add a function to inform Hyper-V about a guest panic.
 
@@ -5439,7 +5503,7 @@ index 4c5dc0f51b12..b54c34793701 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 4 Aug 2021 08:52:38 -0700
-Subject: [PATCH 39/53] arm64: efi: Export screen_info
+Subject: [PATCH 40/54] arm64: efi: Export screen_info
 
 The Hyper-V frame buffer driver may be built as a module, and
 it needs access to screen_info. So export screen_info.
@@ -5475,7 +5539,7 @@ index fa02efb28e88..e1be6c429810 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:57 +0800
-Subject: [PATCH 40/53] PCI: hv: Turn on the host bridge probing on ARM64
+Subject: [PATCH 41/54] PCI: hv: Turn on the host bridge probing on ARM64
 
 Now we have everything we need, just provide a proper sysdata type for
 the bus to use on ARM64 and everything else works.
@@ -5489,7 +5553,7 @@ Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index ecfd55342da3..5fdd22bf2f38 100644
+index 3666132695f7..c3db607a1ae4 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
 @@ -40,6 +40,7 @@
@@ -5512,7 +5576,7 @@ index ecfd55342da3..5fdd22bf2f38 100644
  	struct pci_host_bridge *bridge;
  	/* Protocol version negotiated with the host */
  	enum pci_protocol_version_t protocol_version;
-@@ -3085,7 +3090,9 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3147,7 +3152,9 @@ static int hv_pci_probe(struct hv_device *hdev,
  			 dom_req, dom);
  
  	hbus->bridge->domain_nr = dom;
@@ -5529,7 +5593,7 @@ index ecfd55342da3..5fdd22bf2f38 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Matheus Castello <matheus@castello.eng.br>
 Date: Wed, 25 Nov 2020 00:29:26 -0300
-Subject: [PATCH 41/53] drivers: hv: vmbus: Fix checkpatch SPLIT_STRING
+Subject: [PATCH 42/54] drivers: hv: vmbus: Fix checkpatch SPLIT_STRING
 
 Checkpatch emits WARNING: quoted string split across lines.
 To keep the code clean and with the 80 column length indentation the
@@ -5605,7 +5669,7 @@ index 937a6b25c6ab..873b7d92e4d1 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:15 -0800
-Subject: [PATCH 42/53] Drivers: hv: Redo Hyper-V synthetic MSR get/set
+Subject: [PATCH 43/54] Drivers: hv: Redo Hyper-V synthetic MSR get/set
  functions
 
 Current code defines a separate get and set macro for each Hyper-V
@@ -5856,7 +5920,7 @@ index a34f31dd5d93..ec7928d0120b 100644
  	((val).vdso_clock_mode = VDSO_CLOCKMODE_HVCLOCK)
  #define hv_enable_vdso_clocksource() \
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index c97e1b1e6653..bbda003f8a1c 100644
+index b9905b67bc62..584ee570745e 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -68,14 +68,14 @@ static int hv_ce_set_next_event(unsigned long delta,
@@ -6075,7 +6139,7 @@ index 2c7500e4810f..41c65e434a0d 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:17 -0800
-Subject: [PATCH 43/53] Drivers: hv: vmbus: Handle auto EOI quirk inline
+Subject: [PATCH 44/54] Drivers: hv: vmbus: Handle auto EOI quirk inline
 
 On x86/x64, Hyper-V provides a flag to indicate auto EOI functionality,
 but it doesn't on ARM64. Handle this quirk inline instead of calling
@@ -6137,7 +6201,7 @@ index 2fb794d2435d..08ff1d19824e 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:19 -0800
-Subject: [PATCH 44/53] clocksource/drivers/hyper-v: Handle vDSO differences
+Subject: [PATCH 45/54] clocksource/drivers/hyper-v: Handle vDSO differences
  inline
 
 While the driver for the Hyper-V Reference TSC and STIMERs is architecture
@@ -6179,7 +6243,7 @@ index 93b3a4fbec52..1a58715a8399 100644
  #define hv_get_vector() HYPERVISOR_CALLBACK_VECTOR
  
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index bbda003f8a1c..7a9030ca68c4 100644
+index 584ee570745e..6f72abdadd7b 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -362,11 +362,13 @@ static void resume_hv_clock_tsc(struct clocksource *arg)
@@ -6225,7 +6289,7 @@ index bbda003f8a1c..7a9030ca68c4 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Vitaly Kuznetsov <vkuznets@redhat.com>
 Date: Thu, 13 May 2021 09:32:46 +0200
-Subject: [PATCH 45/53] clocksource/drivers/hyper-v: Re-enable
+Subject: [PATCH 46/54] clocksource/drivers/hyper-v: Re-enable
  VDSO_CLOCKMODE_HVCLOCK on X86
 
 Mohammed reports (https://bugzilla.kernel.org/show_bug.cgi?id=213029)
@@ -6263,7 +6327,7 @@ index 119ac8612d89..136e5e57cfe1 100644
 +
  #endif /* __ASM_VDSO_CLOCKSOURCE_H */
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index 7a9030ca68c4..1259402569bb 100644
+index 6f72abdadd7b..ee63913c4396 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -362,7 +362,7 @@ static void resume_hv_clock_tsc(struct clocksource *arg)
@@ -6291,7 +6355,7 @@ index 7a9030ca68c4..1259402569bb 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:18 -0800
-Subject: [PATCH 46/53] Drivers: hv: vmbus: Move handling of VMbus interrupts
+Subject: [PATCH 47/54] Drivers: hv: vmbus: Move handling of VMbus interrupts
 
 VMbus interrupts are most naturally modelled as per-cpu IRQs.  But
 because x86/x64 doesn't have per-cpu IRQs, the core VMbus interrupt
@@ -6543,7 +6607,7 @@ index 41c65e434a0d..f9cde867c892 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 2 Mar 2021 13:38:22 -0800
-Subject: [PATCH 47/53] clocksource/drivers/hyper-v: Move handling of STIMER0
+Subject: [PATCH 48/54] clocksource/drivers/hyper-v: Move handling of STIMER0
  interrupts
 
 STIMER0 interrupts are most naturally modeled as per-cpu IRQs. But
@@ -6633,7 +6697,7 @@ index 33d1d759490e..3ed63fd87895 100644
  void hv_setup_kexec_handler(void (*handler)(void))
  {
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index 1259402569bb..150a3f7174a9 100644
+index ee63913c4396..8509eacbcd04 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -18,6 +18,9 @@
@@ -6921,7 +6985,7 @@ index 34eef083c988..b6774aa5a4b8 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 14 Jul 2021 11:34:45 -0700
-Subject: [PATCH 48/53] Drivers: hv: Make portions of Hyper-V init code be arch
+Subject: [PATCH 49/54] Drivers: hv: Make portions of Hyper-V init code be arch
  neutral
 
 The code to allocate and initialize the hv_vp_index array is
@@ -7323,7 +7387,7 @@ index e13f137a0ba8..977166ff8672 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 14 Jul 2021 11:34:46 -0700
-Subject: [PATCH 49/53] Drivers: hv: Add arch independent default functions for
+Subject: [PATCH 50/54] Drivers: hv: Add arch independent default functions for
  some Hyper-V handlers
 
 Architecture independent Hyper-V code calls various arch-specific handlers
@@ -7478,7 +7542,7 @@ index caba4f728987..cac9c6bfc653 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Boqun Feng <boqun.feng@gmail.com>
 Date: Tue, 27 Jul 2021 02:06:56 +0800
-Subject: [PATCH 50/53] PCI: hv: Set up MSI domain at bridge probing time
+Subject: [PATCH 51/54] PCI: hv: Set up MSI domain at bridge probing time
 
 Since PCI_HYPERV depends on PCI_MSI_IRQ_DOMAIN which selects
 GENERIC_MSI_IRQ_DOMAIN, we can use dev_set_msi_domain() to set up the
@@ -7498,7 +7562,7 @@ Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
  1 file changed, 8 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/pci/controller/pci-hyperv.c b/drivers/pci/controller/pci-hyperv.c
-index 5fdd22bf2f38..39ec86b43f92 100644
+index c3db607a1ae4..5386abaf2426 100644
 --- a/drivers/pci/controller/pci-hyperv.c
 +++ b/drivers/pci/controller/pci-hyperv.c
 @@ -455,6 +455,7 @@ struct hv_pcibus_device {
@@ -7509,7 +7573,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
  	/* Protocol version negotiated with the host */
  	enum pci_protocol_version_t protocol_version;
  	enum hv_pcibus_state state;
-@@ -1571,7 +1572,7 @@ static int hv_pcie_init_irq_domain(struct hv_pcibus_device *hbus)
+@@ -1633,7 +1634,7 @@ static int hv_pcie_init_irq_domain(struct hv_pcibus_device *hbus)
  	hbus->msi_info.handler = handle_edge_irq;
  	hbus->msi_info.handler_name = "edge";
  	hbus->msi_info.data = hbus;
@@ -7518,7 +7582,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
  						     &hbus->msi_info,
  						     x86_vector_domain);
  	if (!hbus->irq_domain) {
-@@ -1580,6 +1581,8 @@ static int hv_pcie_init_irq_domain(struct hv_pcibus_device *hbus)
+@@ -1642,6 +1643,8 @@ static int hv_pcie_init_irq_domain(struct hv_pcibus_device *hbus)
  		return -ENODEV;
  	}
  
@@ -7527,7 +7591,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
  	return 0;
  }
  
-@@ -3138,9 +3141,9 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3200,9 +3203,9 @@ static int hv_pci_probe(struct hv_device *hdev,
  		goto unmap;
  	}
  
@@ -7539,7 +7603,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
  		ret = -ENOMEM;
  		goto unmap;
  	}
-@@ -3218,7 +3221,7 @@ static int hv_pci_probe(struct hv_device *hdev,
+@@ -3280,7 +3283,7 @@ static int hv_pci_probe(struct hv_device *hdev,
  free_irq_domain:
  	irq_domain_remove(hbus->irq_domain);
  free_fwnode:
@@ -7548,7 +7612,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
  unmap:
  	iounmap(hbus->cfg_addr);
  free_config:
-@@ -3341,7 +3344,7 @@ static int hv_pci_remove(struct hv_device *hdev)
+@@ -3403,7 +3406,7 @@ static int hv_pci_remove(struct hv_device *hdev)
  	hv_free_config_window(hbus);
  	hv_pci_free_bridge_windows(hbus);
  	irq_domain_remove(hbus->irq_domain);
@@ -7564,7 +7628,7 @@ index 5fdd22bf2f38..39ec86b43f92 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Wed, 14 Jul 2021 11:34:47 -0700
-Subject: [PATCH 51/53] Drivers: hv: Move Hyper-V misc functionality to
+Subject: [PATCH 52/54] Drivers: hv: Move Hyper-V misc functionality to
  arch-neutral code
 
 The check for whether hibernation is possible, and the enabling of
@@ -7687,7 +7751,7 @@ index cac9c6bfc653..4d7fcff39b8c 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Kelley <mikelley@microsoft.com>
 Date: Tue, 13 Jul 2021 17:01:46 -0700
-Subject: [PATCH 52/53] drivers: hv: Decouple Hyper-V clock/timer code from
+Subject: [PATCH 53/54] drivers: hv: Decouple Hyper-V clock/timer code from
  VMbus drivers
 
 Hyper-V clock/timer code in hyperv_timer.c is mostly independent from
@@ -7717,7 +7781,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  5 files changed, 25 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/clocksource/hyperv_timer.c b/drivers/clocksource/hyperv_timer.c
-index 150a3f7174a9..6b59c0492cdd 100644
+index 8509eacbcd04..42102f2416b9 100644
 --- a/drivers/clocksource/hyperv_timer.c
 +++ b/drivers/clocksource/hyperv_timer.c
 @@ -361,9 +361,6 @@ EXPORT_SYMBOL_GPL(hv_stimer_global_cleanup);
@@ -7834,7 +7898,7 @@ index b6774aa5a4b8..b3f5d73ae1d6 100644
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Pablo Greco <pgreco@centosproject.org>
 Date: Sat, 23 Oct 2021 15:42:26 +0000
-Subject: [PATCH 53/53] Avoid backporting
+Subject: [PATCH 54/54] Avoid backporting
  f39650de687e35766572ac89dbcd16a5911e2f0a
 
 ---
