@@ -156,7 +156,7 @@ Signed-off-by: Makarand Pawagi <makarand.pawagi@nxp.com>
  1 file changed, 21 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c
-index 091e94c04f30..16b9e951dbd6 100644
+index 6b0c433954bf..da95835a49f6 100644
 --- a/drivers/soc/fsl/guts.c
 +++ b/drivers/soc/fsl/guts.c
 @@ -3,6 +3,7 @@
@@ -341,7 +341,7 @@ index a4bd85b200a3..7a12885c7ad1 100644
  	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 343648fcbc31..ef8e6e7cb27d 100644
+index d53374991e13..034ca02a7c74 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 @@ -10,6 +10,7 @@
@@ -367,7 +367,7 @@ index 343648fcbc31..ef8e6e7cb27d 100644
  struct sdhci_esdhc {
  	u8 vendor_ver;
  	u8 spec_ver;
-@@ -1370,29 +1379,35 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+@@ -1371,29 +1380,35 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
  		esdhc->clk_fixup = match->data;
  	np = pdev->dev.of_node;
  
@@ -425,7 +425,7 @@ index 343648fcbc31..ef8e6e7cb27d 100644
  
  	esdhc_clock_enable(host, false);
  	val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-@@ -1425,7 +1440,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -1426,7 +1441,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  
  	np = pdev->dev.of_node;
  
@@ -434,7 +434,7 @@ index 343648fcbc31..ef8e6e7cb27d 100644
  		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
  					sizeof(struct sdhci_esdhc));
  	else
-@@ -1493,7 +1508,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -1494,7 +1509,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  	if (ret)
  		goto err;
  
@@ -443,7 +443,7 @@ index 343648fcbc31..ef8e6e7cb27d 100644
  
  	ret = sdhci_add_host(host);
  	if (ret)
-@@ -1510,6 +1525,9 @@ static struct platform_driver sdhci_esdhc_driver = {
+@@ -1511,6 +1526,9 @@ static struct platform_driver sdhci_esdhc_driver = {
  		.name = "sdhci-esdhc",
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
  		.of_match_table = sdhci_esdhc_of_match,
@@ -557,7 +557,7 @@ index cf88a5554d9c..9774db79fa87 100644
   * fwnode_get_phy_mode - Get phy mode for given firmware node
   * @fwnode:	Pointer to the given node
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index ef8e6e7cb27d..b28bf79f0d54 100644
+index 034ca02a7c74..959c880f7f67 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
 @@ -545,8 +545,11 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
@@ -1632,7 +1632,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>
  3 files changed, 59 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
-index d89ddc165ec2..cc83ec2c525b 100644
+index 35401202523e..520e10ff85ce 100644
 --- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 +++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 @@ -4066,15 +4066,24 @@ static int dpaa2_eth_connect_mac(struct dpaa2_eth_priv *priv)
@@ -1985,10 +1985,10 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  3 files changed, 30 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index ea0bf13e8ac3..29636fa3e1d4 100644
+index 5bae47f3da40..285a0d9703da 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
-@@ -347,16 +347,7 @@ EXPORT_SYMBOL(of_mdiobus_register);
+@@ -348,16 +348,7 @@ EXPORT_SYMBOL(of_mdiobus_register);
   */
  struct mdio_device *of_mdio_find_device(struct device_node *np)
  {
@@ -2218,10 +2218,10 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 12 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 29636fa3e1d4..7620265e550d 100644
+index 285a0d9703da..c99209e10f30 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
-@@ -360,18 +360,7 @@ EXPORT_SYMBOL(of_mdio_find_device);
+@@ -361,18 +361,7 @@ EXPORT_SYMBOL(of_mdio_find_device);
   */
  struct phy_device *of_phy_find_device(struct device_node *phy_np)
  {
@@ -2333,7 +2333,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 1 insertion(+), 11 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index 7620265e550d..ae2ab1251102 100644
+index c99209e10f30..e8e60f99ee36 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -29,17 +29,7 @@ MODULE_LICENSE("GPL");
@@ -2380,7 +2380,7 @@ Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
  3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index ae2ab1251102..b33e93c9c09f 100644
+index e8e60f99ee36..619c33b89857 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -115,15 +115,13 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio,
@@ -2588,7 +2588,7 @@ index 000000000000..0982e816a6fb
 +}
 +EXPORT_SYMBOL(fwnode_mdiobus_register_phy);
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index b33e93c9c09f..ee902569cfd0 100644
+index 619c33b89857..2fbb65cea2f4 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -32,7 +32,7 @@ static int of_get_phy_id(struct device_node *device, u32 *phy_id)
@@ -2679,7 +2679,7 @@ Signed-off-by: Calvin Johnson <calvin.johnson@oss.nxp.com>
  1 file changed, 2 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/net/mdio/of_mdio.c b/drivers/net/mdio/of_mdio.c
-index ee902569cfd0..bfb43af611f0 100644
+index 2fbb65cea2f4..c0e695f730b4 100644
 --- a/drivers/net/mdio/of_mdio.c
 +++ b/drivers/net/mdio/of_mdio.c
 @@ -10,6 +10,7 @@
@@ -5175,7 +5175,7 @@ Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
-index cc83ec2c525b..05e8118d3342 100644
+index 520e10ff85ce..23f3431b096e 100644
 --- a/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 +++ b/drivers/net/ethernet/freescale/dpaa2/dpaa2-eth.c
 @@ -4120,12 +4120,10 @@ static irqreturn_t dpni_irq0_handler_thread(int irq_num, void *arg)

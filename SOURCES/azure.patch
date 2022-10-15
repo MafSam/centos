@@ -2720,7 +2720,7 @@ index 32998f5e01e2..611f164d08e9 100644
  {
  	union hv_x64_msr_hypercall_contents hypercall_msr;
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 5d820037e291..937a6b25c6ab 100644
+index 514279dac7cb..05c1d1bb4981 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1362,22 +1362,36 @@ static void hv_kmsg_dump(struct kmsg_dumper *dumper,
@@ -5610,7 +5610,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  1 file changed, 20 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 937a6b25c6ab..873b7d92e4d1 100644
+index 05c1d1bb4981..cbd40dbcfff8 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1398,6 +1398,24 @@ static struct kmsg_dumper hv_kmsg_dumper = {
@@ -6107,7 +6107,7 @@ index 3b1ba6c607a1..2fb794d2435d 100644
  {
  	struct vmbus_channel *channel, *sc;
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 873b7d92e4d1..d1c43bd431e7 100644
+index cbd40dbcfff8..3f59865dad20 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1505,7 +1505,7 @@ static int vmbus_bus_init(void)
@@ -6466,7 +6466,7 @@ index 08ff1d19824e..147abe31b540 100644
  
  
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index d1c43bd431e7..b6dfe59e8a8d 100644
+index 3f59865dad20..d335216c72e7 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -48,8 +48,10 @@ static int hyperv_cpuhp_online;
@@ -6542,7 +6542,7 @@ index d1c43bd431e7..b6dfe59e8a8d 100644
  err_setup:
  	bus_unregister(&hv_bus);
  	unregister_sysctl_table(hv_ctl_table_hdr);
-@@ -2647,6 +2679,18 @@ static int __init hv_acpi_init(void)
+@@ -2655,6 +2687,18 @@ static int __init hv_acpi_init(void)
  		ret = -ETIMEDOUT;
  		goto cleanup;
  	}
@@ -6561,7 +6561,7 @@ index d1c43bd431e7..b6dfe59e8a8d 100644
  	hv_debug_init();
  
  	ret = vmbus_bus_init();
-@@ -2677,7 +2721,12 @@ static void __exit vmbus_exit(void)
+@@ -2685,7 +2729,12 @@ static void __exit vmbus_exit(void)
  	vmbus_connection.conn_state = DISCONNECTED;
  	hv_stimer_global_cleanup();
  	vmbus_disconnect();
