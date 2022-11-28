@@ -247,7 +247,7 @@ Signed-off-by: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
  7 files changed, 67 insertions(+), 38 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index eb82f6aac951..43d494603192 100644
+index 7d9ec91e081b..8718600e6959 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
 @@ -6,6 +6,8 @@
@@ -328,10 +328,10 @@ index 3c4d950a4755..3178554a9efc 100644
  
  	oms->detect_irq = irq_of_parse_and_map(np, 0);
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a4bd85b200a3..7a12885c7ad1 100644
+index 1f1bdd34dd55..bfa184fe2b87 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1516,7 +1516,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+@@ -1501,7 +1501,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
  	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
  		boarddata->delay_line = 0;
  
