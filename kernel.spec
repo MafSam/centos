@@ -127,15 +127,15 @@ Summary: The Linux kernel
 # define buildid .local
 %define specversion 5.14.0
 %define patchversion 5.14
-%define pkgrelease 258.hs1
+%define pkgrelease 258.hs2
 %define kversion 5
-%define tarfile_release 5.14.0-258.hs1.el9
+%define tarfile_release 5.14.0-258.hs2.el9
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 258.hs1%{?buildid}%{?dist}
+%define specrelease 258.hs2%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 5.14.0-258.hs1.el9
+%define kabiversion 5.14.0-258.hs2.el9
 
 #
 # End of genspec.sh variables
@@ -3124,6 +3124,9 @@ fi
 #
 #
 %changelog
+* Wed Feb 08 2023 Neal Gompa <ngompa@centosproject.org> [5.14.0-258.hs2.el9]
+- redhat/configs: Enable the Android Binder IPC system (Neal Gompa)
+
 * Sun Feb 05 2023 Neal Gompa <ngompa@centosproject.org> [5.14.0-258.hs1.el9]
 - redhat/configs: Disable fbdev drivers and use simpledrm instead (Javier Martinez Canillas) [1986223]
 - [Backport 0079c3b17631] btrfs: Convert from set_page_dirty to dirty_folio (Matthew Wilcox (Oracle))
