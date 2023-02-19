@@ -68,7 +68,7 @@ index 317bba602ad5..61aeb949b272 100644
  	for (i = 0; i < hest_tab->error_source_count; i++) {
  		len = hest_esrc_len(hest_hdr);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -145,7 +145,7 @@ index c68e694fca26..146cba5ae5bc 100644
  	return ctx.rc;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -179,10 +179,10 @@ Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
  1 file changed, 9 insertions(+)
 
 diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 6e9cd41c5f9b..07db2f6afa17 100644
+index ae74720888db..114f9ee40af3 100644
 --- a/drivers/acpi/scan.c
 +++ b/drivers/acpi/scan.c
-@@ -1727,6 +1727,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
+@@ -1728,6 +1728,15 @@ static bool acpi_device_enumeration_by_parent(struct acpi_device *device)
  	if (!acpi_match_device_ids(device, ignore_serial_bus_ids))
  		return false;
  
@@ -199,7 +199,7 @@ index 6e9cd41c5f9b..07db2f6afa17 100644
  	acpi_dev_get_resources(device, &resource_list,
  			       acpi_check_serial_bus_slave,
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -256,7 +256,7 @@ index f3851724fe35..cac21da49455 100644
  
  static int __init parse_acpi(char *arg)
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -333,7 +333,7 @@ index a531064233f9..0d76bbb4b3b9 100644
   * Intersil/Techwell TW686[4589]-based video capture cards have an empty (zero)
   * class code.  Fix it.
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -395,7 +395,7 @@ Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
  1 file changed, 18 insertions(+)
 
 diff --git a/drivers/ata/libahci.c b/drivers/ata/libahci.c
-index 395772fa3943..35aa1b420262 100644
+index 192115a45dd7..a78a1da99e1c 100644
 --- a/drivers/ata/libahci.c
 +++ b/drivers/ata/libahci.c
 @@ -672,6 +672,24 @@ int ahci_stop_engine(struct ata_port *ap)
@@ -424,7 +424,7 @@ index 395772fa3943..35aa1b420262 100644
  	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
  				PORT_CMD_LIST_ON, PORT_CMD_LIST_ON, 1, 500);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -513,7 +513,7 @@ index bbf7029e224b..cf7faa970dd6 100644
  		dmi_decode_ipmi((const struct dmi_header *) dev->device_data);
  
 diff --git a/drivers/char/ipmi/ipmi_msghandler.c b/drivers/char/ipmi/ipmi_msghandler.c
-index 2badf36d4816..703836cadb4e 100644
+index 15c211c5d6f4..6886fe8b17e6 100644
 --- a/drivers/char/ipmi/ipmi_msghandler.c
 +++ b/drivers/char/ipmi/ipmi_msghandler.c
 @@ -35,6 +35,7 @@
@@ -524,7 +524,7 @@ index 2badf36d4816..703836cadb4e 100644
  #include <linux/delay.h>
  
  #define IPMI_DRIVER_VERSION "39.2"
-@@ -5178,8 +5179,21 @@ static int __init ipmi_init_msghandler_mod(void)
+@@ -5184,8 +5185,21 @@ static int __init ipmi_init_msghandler_mod(void)
  {
  	int rv;
  
@@ -548,7 +548,7 @@ index 2badf36d4816..703836cadb4e 100644
  	rv = ipmi_register_driver();
  	mutex_unlock(&ipmi_interfaces_mutex);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -650,7 +650,7 @@ index 7f409e9eea4b..976473a4895b 100644
   * Changes the default domain of an iommu group that has *only* one device
   *
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -677,10 +677,10 @@ Signed-off-by: Jeremy Cline <jcline@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 24cce3b9ff1a..22caf88c64ca 100644
+index 9d3cbe786f8d..784e78ebd6a8 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -945,7 +945,7 @@ endchoice
+@@ -978,7 +978,7 @@ endchoice
  
  config ARM64_FORCE_52BIT
  	bool "Force 52-bit virtual addresses for userspace"
@@ -690,7 +690,7 @@ index 24cce3b9ff1a..22caf88c64ca 100644
  	  For systems with 52-bit userspace VAs enabled, the kernel will attempt
  	  to maintain compatibility with older software by providing 48-bit VAs
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -710,7 +710,7 @@ Signed-off-by: Peter Jones <pjones@redhat.com>
  2 files changed, 96 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e3df82d5d37a..56274356784b 100644
+index a2765d668856..4603cab6198f 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -31,6 +31,7 @@
@@ -721,7 +721,7 @@ index e3df82d5d37a..56274356784b 100644
  
  #include <asm/early_ioremap.h>
  
-@@ -848,40 +849,101 @@ int efi_mem_type(unsigned long phys_addr)
+@@ -851,40 +852,101 @@ int efi_mem_type(unsigned long phys_addr)
  }
  #endif
  
@@ -855,7 +855,7 @@ index e3df82d5d37a..56274356784b 100644
  
  static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index d34e8a7ed4d5..43c0667259a6 100644
+index 5598fc348c69..8d23a1fd6913 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -43,6 +43,8 @@
@@ -876,7 +876,7 @@ index d34e8a7ed4d5..43c0667259a6 100644
  /*
   * Variable Attributes
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -893,10 +893,10 @@ Signed-off-by: Jeremy Cline <jcline@redhat.com>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index 185c609c6e38..011d49f601ce 100644
+index d2f2c3936277..1d5dbbe2321c 100644
 --- a/security/integrity/platform_certs/load_uefi.c
 +++ b/security/integrity/platform_certs/load_uefi.c
-@@ -72,7 +72,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+@@ -73,7 +73,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
  		return NULL;
  
  	if (*status != EFI_BUFFER_TOO_SMALL) {
@@ -906,7 +906,7 @@ index 185c609c6e38..011d49f601ce 100644
  		return NULL;
  	}
  
-@@ -83,7 +84,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+@@ -84,7 +85,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
  	*status = efi.get_variable(name, guid, NULL, &lsize, db);
  	if (*status != EFI_SUCCESS) {
  		kfree(db);
@@ -917,7 +917,7 @@ index 185c609c6e38..011d49f601ce 100644
  	}
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1022,7 +1022,7 @@ index 7b9f9d3fffe5..0251fbe67828 100644
  int security_perf_event_open(struct perf_event_attr *attr, int type)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1135,7 +1135,7 @@ index 000000000000..de0a3714a5d4
 +	}
 +}
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 43c0667259a6..580547464acf 100644
+index 8d23a1fd6913..c449e97caa38 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
 @@ -786,6 +786,14 @@ extern int __init efi_setup_pcdp_console(char *);
@@ -1186,7 +1186,7 @@ index 43c0667259a6..580547464acf 100644
  enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1259,7 +1259,7 @@ index e84ddf484010..d0501353a4b9 100644
  	prompt "Kernel default lockdown mode"
  	default LOCK_DOWN_KERNEL_FORCE_NONE
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1328,7 +1328,7 @@ index 4dfe37b06889..da67876b8b15 100644
  	/* boot_command_line has been already set up in early.c */
  	*cmdline_p = boot_command_line;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1349,10 +1349,10 @@ Signed-off-by: Jeremy Cline <jcline@redhat.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 22caf88c64ca..0e702d154997 100644
+index 784e78ebd6a8..cb8a3bb68caa 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1183,6 +1183,7 @@ config XEN
+@@ -1216,6 +1216,7 @@ config XEN
  config FORCE_MAX_ZONEORDER
  	int
  	default "14" if ARM64_64K_PAGES
@@ -1361,7 +1361,7 @@ index 22caf88c64ca..0e702d154997 100644
  	default "11"
  	help
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1381,10 +1381,10 @@ Signed-off-by: Mark Salter <msalter@redhat.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 0e702d154997..abd34d88b9ea 100644
+index cb8a3bb68caa..a06192c8efe7 100644
 --- a/arch/arm64/Kconfig
 +++ b/arch/arm64/Kconfig
-@@ -1183,7 +1183,7 @@ config XEN
+@@ -1216,7 +1216,7 @@ config XEN
  config FORCE_MAX_ZONEORDER
  	int
  	default "14" if ARM64_64K_PAGES
@@ -1394,7 +1394,7 @@ index 0e702d154997..abd34d88b9ea 100644
  	default "11"
  	help
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1410,7 +1410,7 @@ Signed-off-by: Jon Masters <jcm@redhat.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 4ebd512043be..6743668b7b33 100644
+index a8ae17f5740d..319139a28271 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
 @@ -1471,9 +1471,9 @@ config HIGHMEM
@@ -1426,7 +1426,7 @@ index 4ebd512043be..6743668b7b33 100644
  	  The VM uses one page of physical memory for each page table.
  	  For systems with a lot of processes, this can use a lot of
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1441,10 +1441,10 @@ Patch for disconnect issues with storage attached to a
  1 file changed, 7 insertions(+)
 
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 98bdae4ac314..2ff2777a827a 100644
+index d23ccace5ca2..686bcb1561cb 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5669,6 +5669,13 @@ static void hub_event(struct work_struct *work)
+@@ -5672,6 +5672,13 @@ static void hub_event(struct work_struct *work)
  			(u16) hub->change_bits[0],
  			(u16) hub->event_bits[0]);
  
@@ -1459,7 +1459,7 @@ index 98bdae4ac314..2ff2777a827a 100644
  	 * disconnected while waiting for the lock to succeed. */
  	usb_lock_device(hdev);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1790,7 +1790,7 @@ index ab7eea01ab42..fff7c5f737fc 100644
  
  int rmi_register_transport_device(struct rmi_transport_dev *xport);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1835,7 +1835,7 @@ index 8723ae70ea1f..fb2d773498c2 100644
 +	return ret;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1910,7 +1910,7 @@ index e24252eaf8e4..368d64adeee8 100644
  	platform_driver_unregister(&etm4_platform_driver);
  	etm4_pm_clear();
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1963,7 +1963,7 @@ Date:   Tue Aug 25 21:52:45 2020 -0400
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index 76d8a72f52e2..5444b41bff3e 100644
+index 672f53d5651a..088770e43f5f 100644
 --- a/drivers/nvme/host/core.c
 +++ b/drivers/nvme/host/core.c
 @@ -262,6 +262,9 @@ static void nvme_delete_ctrl_sync(struct nvme_ctrl *ctrl)
@@ -1977,7 +1977,7 @@ index 76d8a72f52e2..5444b41bff3e 100644
  	case NVME_SC_SUCCESS:
  		return BLK_STS_OK;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2018,7 +2018,7 @@ Signed-off-by: Mike Snitzer <snitzer@redhat.com>
  1 file changed, 14 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index 5444b41bff3e..529484e333f3 100644
+index 088770e43f5f..dd8f90ded991 100644
 --- a/drivers/nvme/host/core.c
 +++ b/drivers/nvme/host/core.c
 @@ -324,6 +324,7 @@ enum nvme_disposition {
@@ -2073,7 +2073,7 @@ index 5444b41bff3e..529484e333f3 100644
  }
  EXPORT_SYMBOL_GPL(nvme_complete_rq);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2118,7 +2118,7 @@ Signed-off-by: Mike Snitzer <snitzer@redhat.com>
  3 files changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index 529484e333f3..034e724255e1 100644
+index dd8f90ded991..91cd6fa9e460 100644
 --- a/drivers/nvme/host/core.c
 +++ b/drivers/nvme/host/core.c
 @@ -365,6 +365,8 @@ static inline void nvme_end_req(struct request *req)
@@ -2131,7 +2131,7 @@ index 529484e333f3..034e724255e1 100644
  	nvme_end_req(req);
  }
 diff --git a/drivers/nvme/host/multipath.c b/drivers/nvme/host/multipath.c
-index 04fa276701d1..8c2f4261d85f 100644
+index 8d97b942de01..d3b0426db418 100644
 --- a/drivers/nvme/host/multipath.c
 +++ b/drivers/nvme/host/multipath.c
 @@ -65,14 +65,10 @@ bool nvme_mpath_set_disk_name(struct nvme_ns *ns, char *disk_name, int *flags)
@@ -2168,10 +2168,10 @@ index 04fa276701d1..8c2f4261d85f 100644
  	spin_lock_irqsave(&ns->head->requeue_lock, flags);
  	for (bio = req->bio; bio; bio = bio->bi_next)
 diff --git a/drivers/nvme/host/nvme.h b/drivers/nvme/host/nvme.h
-index 75a7e7baa1fc..4f93a37d5e9b 100644
+index 39ca48babbe8..ae768ab513ce 100644
 --- a/drivers/nvme/host/nvme.h
 +++ b/drivers/nvme/host/nvme.h
-@@ -771,6 +771,7 @@ void nvme_mpath_wait_freeze(struct nvme_subsystem *subsys);
+@@ -781,6 +781,7 @@ void nvme_mpath_wait_freeze(struct nvme_subsystem *subsys);
  void nvme_mpath_start_freeze(struct nvme_subsystem *subsys);
  bool nvme_mpath_set_disk_name(struct nvme_ns *ns, char *disk_name, int *flags);
  void nvme_failover_req(struct request *req);
@@ -2179,7 +2179,7 @@ index 75a7e7baa1fc..4f93a37d5e9b 100644
  void nvme_kick_requeue_lists(struct nvme_ctrl *ctrl);
  int nvme_mpath_alloc_disk(struct nvme_ctrl *ctrl,struct nvme_ns_head *head);
  void nvme_mpath_add_disk(struct nvme_ns *ns, struct nvme_id_ns *id);
-@@ -810,6 +811,9 @@ static inline bool nvme_mpath_set_disk_name(struct nvme_ns *ns, char *disk_name,
+@@ -820,6 +821,9 @@ static inline bool nvme_mpath_set_disk_name(struct nvme_ns *ns, char *disk_name,
  static inline void nvme_failover_req(struct request *req)
  {
  }
@@ -2190,7 +2190,7 @@ index 75a7e7baa1fc..4f93a37d5e9b 100644
  {
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2240,10 +2240,10 @@ Date:   Wed Jan 29 15:29:37 2020 -0500
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/nvme/host/multipath.c b/drivers/nvme/host/multipath.c
-index 8c2f4261d85f..609fe97148f1 100644
+index d3b0426db418..7158a9528aa8 100644
 --- a/drivers/nvme/host/multipath.c
 +++ b/drivers/nvme/host/multipath.c
-@@ -842,8 +842,7 @@ int nvme_mpath_init_identify(struct nvme_ctrl *ctrl, struct nvme_id_ctrl *id)
+@@ -848,8 +848,7 @@ int nvme_mpath_init_identify(struct nvme_ctrl *ctrl, struct nvme_id_ctrl *id)
  	int error = 0;
  
  	/* check if multipath is enabled and we have the capability */
@@ -2254,7 +2254,7 @@ index 8c2f4261d85f..609fe97148f1 100644
  
  	if (!ctrl->max_namespaces ||
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2286,7 +2286,7 @@ index 9e5d07f5712e..dae8c252bc2b 100644
  			op-sink-microwatt = <1000000>;
  			power-role = "dual";
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2515,7 +2515,7 @@ index 3507f456fcd0..091ec7e94fcb 100644
  	} else if (!strcmp(str, "big_root_window")) {
  		pci_probe |= PCI_BIG_ROOT_WINDOW;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2610,7 +2610,7 @@ index 72d473054262..f357dac92610 100644
  			acpi_pci_irq_enable(dev);
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2655,7 +2655,7 @@ index 3dc055ce6e61..bb56640eb31f 100644
  static inline bool tpacpi_is_led_restricted(const unsigned int led)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2693,10 +2693,10 @@ index 34c266502a50..dae1a7e4732f 100644
  
  #if IS_ENABLED(CONFIG_NF_NAT)
 diff --git a/net/netfilter/nf_conntrack_core.c b/net/netfilter/nf_conntrack_core.c
-index 31399c53dfb1..e304f038656d 100644
+index 43ea8cfd374b..ead3b51931f8 100644
 --- a/net/netfilter/nf_conntrack_core.c
 +++ b/net/netfilter/nf_conntrack_core.c
-@@ -1800,6 +1800,9 @@ resolve_normal_ct(struct nf_conn *tmpl,
+@@ -1808,6 +1808,9 @@ resolve_normal_ct(struct nf_conn *tmpl,
  			return 0;
  		if (IS_ERR(h))
  			return PTR_ERR(h);
@@ -2707,7 +2707,7 @@ index 31399c53dfb1..e304f038656d 100644
  	ct = nf_ct_tuplehash_to_ctrack(h);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2839,7 +2839,7 @@ index 032f2de6e14e..1ba2cba7d580 100755
  	# test packet filter based mitigation: prevent forwarding of
  	# packets claiming to come from the service port.
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2886,5 +2886,5 @@ index cc4c2b8a5efd..96132d68be1e 100644
  
  	pcibios_free_irq(dev);
 -- 
-2.18.4
+2.39.0
 

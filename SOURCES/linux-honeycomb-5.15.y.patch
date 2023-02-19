@@ -50,7 +50,7 @@ index d2f3435e7d17..d5cfd0c6a217 100644
  
  /**
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -236,7 +236,7 @@ index f2f8f05662de..7df83d80819b 100644
  
  #ifdef CONFIG_ZONE_DMA
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -336,7 +336,7 @@ index 24607dc3c2ac..7579c014e274 100644
  #endif	/* CONFIG_IOMMU_DMA */
  #endif	/* __DMA_IOMMU_H */
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -461,7 +461,7 @@ index f1f0842a2cb2..d8c030c103f5 100644
  
  #endif /* __ACPI_IORT_H__ */
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -526,7 +526,7 @@ index e7da4a47ce52..4a8c2f5158ea 100644
  		/* Insert into SID tree */
  		new_node = &(smmu->streams.rb_node);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -600,7 +600,7 @@ index 4a8c2f5158ea..ce47559cfca7 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -672,7 +672,7 @@ index ce47559cfca7..dbddb5ea2321 100644
  	ret = arm_smmu_device_reset(smmu, bypass);
  	if (ret)
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -760,7 +760,7 @@ index 324e8f32962a..1d65dd243fee 100644
  	arm_smmu_test_smr_masks(smmu);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -856,7 +856,7 @@ index 4e4d00a3adaf..0014a70597ef 100644
  EXPORT_SYMBOL(iommu_dma_get_resv_regions);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -974,7 +974,7 @@ index d8c030c103f5..f0a3882c26d4 100644
  
  #endif /* __ACPI_IORT_H__ */
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1060,7 +1060,7 @@ index 0b2c7fdbaa5b..35b74bf4b65c 100644
  	.probe = fsl_guts_probe,
  	.remove = fsl_guts_remove,
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1178,7 +1178,7 @@ index 04a37fd137ee..af25ec17801b 100644
  	},
  	.probe = sdhci_esdhc_probe,
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1287,7 +1287,7 @@ index 357513a977e5..a9009883ab9e 100644
  
  int device_get_phy_mode(struct device *dev);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1345,7 +1345,7 @@ index 6e02448d15d9..f79757c34a77 100644
  		pdata->clk = clk;
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1461,7 +1461,7 @@ index 315e830b6ecd..2268869bf6ab 100644
  	 * Allocate IRQ's before binding the scanned devices with their
  	 * respective drivers.
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1501,7 +1501,7 @@ index 7f409e9eea4b..2dc9592ff309 100644
  	/* Pre-notify listeners that a device is being removed. */
  	blocking_notifier_call_chain(&group->notifier,
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1756,7 +1756,7 @@ index 30ece3ae6df7..e026f6c48b49 100644
   * struct dpcon_attr - Structure representing DPCON attributes
   * @id: DPCON object ID
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1848,7 +1848,7 @@ index 0ead91bfa838..6d7b2d2571a2 100644
  	}
  	default:
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1941,5 +1941,5 @@ index 9c4c1395fcdb..0b8733f0f189 100644
  	/* Common commands amongst all types of objects. Must be checked last. */
  	[OPEN] = {
 -- 
-2.18.4
+2.39.0
 
