@@ -3017,6 +3017,9 @@ fi
 #
 #
 %changelog
+* Tue Feb 28 2023 CentOS Sources <bugs@centos.org> - 5.14.0-162.18.1.el9.centos
+- Apply debranding changes
+
 * Thu Feb 09 2023 Patrick Talbert <ptalbert@redhat.com> [5.14.0-162.18.1.el9_1]
 - powerpc/pseries: Use lparcfg to reconfig VAS windows for DLPAR CPU (Steve Best) [2154305 2133101]
 - redhat/configs: Change the amd-pstate driver from builtin to loadable (David Arcari) [2151274 2143793]
