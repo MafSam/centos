@@ -3017,6 +3017,9 @@ fi
 #
 #
 %changelog
+* Mon Mar 27 2023 CentOS Sources <bugs@centos.org> - 5.14.0-162.22.2.el9.centos
+- Apply debranding changes
+
 * Wed Mar 15 2023 Lucas Zampieri <lzampier@redhat.com> [5.14.0-162.22.2.el9_1]
 - tun: avoid double free in tun_free_netdev (Jon Maloy) [2156373] {CVE-2022-4744}
 
