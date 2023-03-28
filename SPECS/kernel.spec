@@ -3434,6 +3434,9 @@ fi
 #
 #
 %changelog
+* Tue Mar 28 2023 CentOS Sources <bugs@centos.org> - 5.14.0-283.el9.centos
+- Apply debranding changes
+
 * Thu Feb 23 2023 Herton R. Krzesinski <herton@redhat.com> [5.14.0-283.el9]
 - redhat: fix duplicate jira issues in the resolves line (Herton R. Krzesinski)
 - redhat/kernel.spec.template: Parallelize compression (Herton R. Krzesinski)
