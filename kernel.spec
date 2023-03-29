@@ -127,15 +127,15 @@ Summary: The Linux kernel
 # define buildid .local
 %define specversion 5.14.0
 %define patchversion 5.14
-%define pkgrelease 258.hs2
+%define pkgrelease 258.hs3
 %define kversion 5
-%define tarfile_release 5.14.0-258.hs2.el9
+%define tarfile_release 5.14.0-258.hs3.el9
 # This is needed to do merge window version magic
 %define patchlevel 14
 # This allows pkg_release to have configurable %%{?dist} tag
-%define specrelease 258.hs2%{?buildid}%{?dist}
+%define specrelease 258.hs3%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 5.14.0-258.hs2.el9
+%define kabiversion 5.14.0-258.hs3.el9
 
 #
 # End of genspec.sh variables
@@ -3124,6 +3124,9 @@ fi
 #
 #
 %changelog
+* Wed Mar 29 2023 Davide Cavalca <dcavalca@centosproject.org> [5.14.0-258.hs3.el9]
+- Revert "redhat/configs: Enable the Android Binder IPC system" (Davide Cavalca)
+
 * Wed Feb 08 2023 Neal Gompa <ngompa@centosproject.org> [5.14.0-258.hs2.el9]
 - redhat/configs: Enable the Android Binder IPC system (Neal Gompa)
 

@@ -67,4 +67,4 @@ ifneq ("$(ZSTREAM)", "yes")
 endif
 
 # kernel variant extra version suffix
-VARIANTVERSION = .hs2
+VARIANTVERSION = .hs3
