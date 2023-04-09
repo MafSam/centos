@@ -82,7 +82,7 @@ index e329cdd7156c..a68afc9d1e32 100644
  
  	/*
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -139,7 +139,7 @@ index 85ca5fdee581..c932387641fa 100644
  	__le32 flags;
  	__le32 pad3;
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -225,7 +225,7 @@ index 6b0c433954bf..da95835a49f6 100644
  	.probe = fsl_guts_probe,
  	.remove = fsl_guts_remove,
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -479,7 +479,7 @@ index 40d7e98fc990..e1214995633e 100644
  static inline void *mmc_priv(struct mmc_host *host)
  {
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -588,7 +588,7 @@ index 2d4542629d80..3e0a1a5655f0 100644
  
  int device_get_phy_mode(struct device *dev);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -678,7 +678,7 @@ index ec66779cb193..274fce7b5c01 100644
   *
   * IVRS - I/O Virtualization Reporting Structure
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -854,7 +854,7 @@ index 50ed949dc144..017c311b89ca 100644
  		if (ops) {
  			fwnode = acpi_alloc_fwnode_static();
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -979,7 +979,7 @@ index e90c267e7f3e..9549eca5925d 100644
  		      const struct iommu_ops *ops);
  void iommu_fwspec_free(struct device *dev);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1125,7 +1125,7 @@ index 1a12baa58e40..a925cac61573 100644
  
  #endif /* __ACPI_IORT_H__ */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1191,7 +1191,7 @@ index bc4cbc7542ce..05530074ba6c 100644
  
  	master->ssid_bits = min(smmu->ssid_bits, fwspec->num_pasid_bits);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1255,7 +1255,7 @@ index 05530074ba6c..3bf7b19cb58b 100644
  }
  
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1350,7 +1350,7 @@ index 57e5d223c467..90fcf8a52234 100644
  
  /* SMMU private data for each master */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1427,7 +1427,7 @@ index 4b1b9becc59f..a4397a739b53 100644
  
  static bool arm_smmu_dev_has_feature(struct device *dev,
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1526,7 +1526,7 @@ index b71647eaa319..a3c3442e7d4c 100644
  
  enum arm_smmu_context_fmt {
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1608,7 +1608,7 @@ index 2ecdb525fd60..1de07f589f16 100644
  
  static int arm_smmu_def_domain_type(struct device *dev)
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1805,7 +1805,7 @@ index 955a52856210..13d42dd58ec9 100644
  
  void dpaa2_mac_disconnect(struct dpaa2_mac *mac);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1964,7 +1964,7 @@ index 000000000000..7d01ae8b3cc6
 +
 +[4] Documentation/devicetree/bindings/net/ethernet-controller.yaml
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2063,7 +2063,7 @@ index 08725a262f32..4bd26a744c98 100644
  {
  	return NULL;
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2202,7 +2202,7 @@ index 4bd26a744c98..4e911cc926f0 100644
  struct phy_device *get_phy_device(struct mii_bus *bus, int addr, bool is_c45)
  {
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2242,7 +2242,7 @@ index 285a0d9703da..c99209e10f30 100644
  EXPORT_SYMBOL(of_phy_find_device);
  
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2316,7 +2316,7 @@ index 4e911cc926f0..a79f8ab3baf8 100644
  struct mdio_device *fwnode_mdio_find_device(struct fwnode_handle *fwnode)
  {
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2356,7 +2356,7 @@ index c99209e10f30..e8e60f99ee36 100644
  
  static struct mii_timestamper *of_find_mii_timestamper(struct device_node *node)
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2430,7 +2430,7 @@ index 0fa369c6eaa1..077c76a1e9a6 100644
  	device_del(&phydev->mdio.dev);
  
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2663,7 +2663,7 @@ index f56c6a9230ac..a60bf3d74207 100644
  					    struct phy_device *phy,
  					    struct device_node *child, u32 addr)
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2736,7 +2736,7 @@ index 2fbb65cea2f4..c0e695f730b4 100644
  
  static int of_mdiobus_register_device(struct mii_bus *mdio,
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2804,7 +2804,7 @@ index 96d69404a54f..dabc52a9d23e 100644
  
  #ifdef CONFIG_ACPI_HOTPLUG_IOAPIC
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2962,7 +2962,7 @@ index 000000000000..748d261fe2f9
 +
 +#endif /* __LINUX_ACPI_MDIO_H */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3040,7 +3040,7 @@ index 8c0392845916..20f22211260b 100644
  
  #endif /* __LINUX_FWNODE_MDIO_H */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3127,7 +3127,7 @@ index b7984a772e12..19f64d329f7c 100644
  		dev_err(&pdev->dev, "cannot register MDIO bus\n");
  		goto err_registration;
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3231,7 +3231,7 @@ index d81a714cfbbd..75d4f99090fd 100644
  
  void phylink_mac_change(struct phylink *, bool up);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3297,7 +3297,7 @@ index a2910b4e5e0a..f1150e835cf4 100644
  EXPORT_SYMBOL_GPL(phylink_of_phy_connect);
  
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3501,7 +3501,7 @@ index 50dd302abcf4..efd804d4a1bf 100644
  	return err;
  }
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3598,7 +3598,7 @@ index 000000000000..cf56d46f052e
 +
 +#endif /* _UAPI_FSL_MC_H_ */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3641,7 +3641,7 @@ index 85a0225db522..b291b35e3884 100644
  	struct mc_cmd_header *hdr = (struct mc_cmd_header *)&cmd->header;
  	u16 cmd_id = le16_to_cpu(hdr->cmd_id);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4420,7 +4420,7 @@ index cf56d46f052e..e57451570033 100644
 +
  #endif /* _UAPI_FSL_MC_H_ */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4559,7 +4559,7 @@ index 6293a24de456..42bdb8679a36 100644
  
  void fsl_mc_allocator_driver_exit(void);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4742,7 +4742,7 @@ index 42bdb8679a36..1958fa065360 100644
 +
  #endif /* _FSL_MC_PRIVATE_H_ */
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4858,7 +4858,7 @@ index df71c16f8a73..787844f0b636 100644
  	 * Allocate IRQ's before binding the scanned devices with their
  	 * respective drivers.
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4898,7 +4898,7 @@ index 9d65557dfb2c..3c3c1cb7df37 100644
  	/* Pre-notify listeners that a device is being removed. */
  	blocking_notifier_call_chain(&group->notifier,
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4999,7 +4999,7 @@ index 62bb9272dcb2..af36cd647bf5 100644
  };
  
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5067,7 +5067,7 @@ index efd804d4a1bf..1b347dbced9f 100644
  	default:
  		goto empty_set;
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5104,7 +5104,7 @@ index 1b347dbced9f..272b4b4aac92 100644
  		if (err)
  			goto err_put_node;
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5144,7 +5144,7 @@ index 272b4b4aac92..708aced0ed47 100644
  			break;
  		phylink_set(mask, 5000baseT_Full);
 -- 
-2.18.4
+2.39.1
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5226,5 +5226,5 @@ index 708aced0ed47..31222b2305da 100644
  	dpaa2_pcs_destroy(mac);
  }
 -- 
-2.18.4
+2.39.1
 

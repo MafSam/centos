@@ -59,7 +59,7 @@ index 4353443b89d8..4ebb1f09f21c 100644
  			   (hbus->hdev->dev_instance.b[4] << 16) |
  			   (hbus->hdev->dev_instance.b[7] << 8) |
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -94,7 +94,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  5 files changed, 45 insertions(+)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 01860c0d324d..ccfb1a6bc2a5 100644
+index 70fd21ebb9d5..f80c9d4c26d4 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -10,6 +10,7 @@
@@ -105,7 +105,7 @@ index 01860c0d324d..ccfb1a6bc2a5 100644
  #include <asm/apic.h>
  #include <asm/desc.h>
  #include <asm/hypervisor.h>
-@@ -561,3 +562,17 @@ bool hv_is_hibernation_supported(void)
+@@ -559,3 +560,17 @@ bool hv_is_hibernation_supported(void)
  	return acpi_sleep_state_supported(ACPI_STATE_S4);
  }
  EXPORT_SYMBOL_GPL(hv_is_hibernation_supported);
@@ -124,7 +124,7 @@ index 01860c0d324d..ccfb1a6bc2a5 100644
 +}
 +EXPORT_SYMBOL_GPL(hv_is_isolation_supported);
 diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
-index 0ed20e8bba9e..cc878049c39b 100644
+index ae7192b75136..292e8841a416 100644
 --- a/arch/x86/include/asm/hyperv-tlfs.h
 +++ b/arch/x86/include/asm/hyperv-tlfs.h
 @@ -22,6 +22,7 @@
@@ -224,7 +224,7 @@ index c57799684170..dff58a3db5d5 100644
  #else /* CONFIG_HYPERV */
  static inline bool hv_is_hyperv_initialized(void) { return false; }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -254,7 +254,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-8-wei.liu@kernel.org
  1 file changed, 34 insertions(+), 3 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index ccfb1a6bc2a5..570bcb1d7d64 100644
+index f80c9d4c26d4..ea3350e978da 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -27,6 +27,7 @@
@@ -313,7 +313,7 @@ index ccfb1a6bc2a5..570bcb1d7d64 100644
  
  	/*
  	 * hyperv_init() is called before LAPIC is initialized: see
-@@ -559,7 +590,7 @@ EXPORT_SYMBOL_GPL(hv_is_hyperv_initialized);
+@@ -557,7 +588,7 @@ EXPORT_SYMBOL_GPL(hv_is_hyperv_initialized);
  
  bool hv_is_hibernation_supported(void)
  {
@@ -323,7 +323,7 @@ index ccfb1a6bc2a5..570bcb1d7d64 100644
  EXPORT_SYMBOL_GPL(hv_is_hibernation_supported);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -362,7 +362,7 @@ index 7c617d8dff3f..d9d055c35c3e 100644
  	phys_addr = virt_to_phys(hv_get_tsc_page());
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -388,7 +388,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-6-wei.liu@kernel.org
  2 files changed, 31 insertions(+), 5 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 570bcb1d7d64..adbec5f5dcf0 100644
+index ea3350e978da..d1ed3c61bc62 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -46,6 +46,9 @@ EXPORT_SYMBOL_GPL(hv_vp_assist_page);
@@ -476,7 +476,7 @@ index 30f76b966857..cf881d0c7c9d 100644
  static inline u64 hv_do_hypercall(u64 control, void *input, void *output)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -502,7 +502,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-3-wei.liu@kernel.org
  3 files changed, 32 insertions(+)
 
 diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
-index cc878049c39b..9cf3118a80d4 100644
+index 292e8841a416..d86814e6ac46 100644
 --- a/arch/x86/include/asm/hyperv-tlfs.h
 +++ b/arch/x86/include/asm/hyperv-tlfs.h
 @@ -21,6 +21,7 @@
@@ -581,7 +581,7 @@ index ee0edc8741d6..25cc1740d9b9 100644
  	 * Extract host information.
  	 */
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -659,7 +659,7 @@ index 25cc1740d9b9..3e0069392158 100644
  
  	/*
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -694,7 +694,7 @@ index 20d3cd950204..e232ddcb0a2d 100644
  
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -807,7 +807,7 @@ index e232ddcb0a2d..ccc81c277d09 100644
 +
  #endif
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -831,7 +831,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-7-wei.liu@kernel.org
  3 files changed, 34 insertions(+)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index adbec5f5dcf0..cd2f5e8cafa8 100644
+index d1ed3c61bc62..2647128d9daa 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -30,6 +30,8 @@
@@ -919,7 +919,7 @@ index ccc81c277d09..cbc13b7c7022 100644
  union hv_msi_entry {
  	u64 as_uint64;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1293,7 +1293,7 @@ index cbc13b7c7022..6e6a129516df 100644
  union hv_msi_entry {
  	u64 as_uint64;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1314,7 +1314,7 @@ Link: https://lore.kernel.org/r/20210203150435.27941-15-wei.liu@kernel.org
  2 files changed, 49 insertions(+)
 
 diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
-index 9cf3118a80d4..19ac499ab251 100644
+index d86814e6ac46..cb4933286690 100644
 --- a/arch/x86/include/asm/hyperv-tlfs.h
 +++ b/arch/x86/include/asm/hyperv-tlfs.h
 @@ -541,6 +541,19 @@ struct hv_partition_assist_pg {
@@ -1390,7 +1390,7 @@ index 6e6a129516df..b6ed949be3bf 100644
 +
  #endif
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1473,7 +1473,7 @@ index b6ed949be3bf..2040b196fe59 100644
  };
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1569,7 +1569,7 @@ index 2040b196fe59..83448e837ded 100644
  
  /*
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -1610,7 +1610,7 @@ index 565358020921..48e2c51464e8 100644
  
  ifdef CONFIG_X86_64
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index cd2f5e8cafa8..4a7cb755ca31 100644
+index 2647128d9daa..490259c7264a 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -517,6 +517,15 @@ void __init hyperv_init(void)
@@ -2009,7 +2009,7 @@ index 7bd4022da061..4533773115ea 100644
  static inline void hyperv_init(void) {}
  static inline void hyperv_setup_mmu_ops(void) {}
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2302,7 +2302,7 @@ index e09e2d734c57..d08e5b9e4f0e 100644
 +
  #endif
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2330,7 +2330,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  4 files changed, 40 insertions(+), 27 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 4a7cb755ca31..32998f5e01e2 100644
+index 490259c7264a..0cfc445496a0 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -54,28 +54,6 @@ EXPORT_SYMBOL_GPL(hyperv_pcpu_output_arg);
@@ -2448,7 +2448,7 @@ index dff58a3db5d5..694b5bc3561c 100644
   * hv_cpu_number_to_vp_number() - Map CPU to VP.
   * @cpu_number: CPU number in Linux terms
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2478,7 +2478,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  2 files changed, 35 insertions(+), 29 deletions(-)
 
 diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
-index 19ac499ab251..119cc587775a 100644
+index cb4933286690..2feb95446a17 100644
 --- a/arch/x86/include/asm/hyperv-tlfs.h
 +++ b/arch/x86/include/asm/hyperv-tlfs.h
 @@ -281,35 +281,6 @@ struct hv_tsc_emulation_status {
@@ -2564,7 +2564,7 @@ index 83448e837ded..9cf10837d005 100644
  union hv_message_flags {
  	__u8 asu8;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2654,7 +2654,7 @@ index d9d055c35c3e..6341891f145a 100644
  {
  	u64		tsc_msr;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2682,10 +2682,10 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  3 files changed, 19 insertions(+), 33 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 32998f5e01e2..611f164d08e9 100644
+index 0cfc445496a0..5ac4575010ad 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
-@@ -577,33 +577,6 @@ void hyperv_report_panic(struct pt_regs *regs, long err, bool in_die)
+@@ -575,33 +575,6 @@ void hyperv_report_panic(struct pt_regs *regs, long err, bool in_die)
  }
  EXPORT_SYMBOL_GPL(hyperv_report_panic);
  
@@ -2720,7 +2720,7 @@ index 32998f5e01e2..611f164d08e9 100644
  {
  	union hv_x64_msr_hypercall_contents hypercall_msr;
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 514279dac7cb..05c1d1bb4981 100644
+index e99400f3ae1d..591438deda76 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1362,22 +1362,36 @@ static void hv_kmsg_dump(struct kmsg_dumper *dumper,
@@ -2778,7 +2778,7 @@ index 694b5bc3561c..bbc011390cbb 100644
  bool hv_is_hibernation_supported(void);
  enum hv_isolation_type hv_get_isolation_type(void);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2872,7 +2872,7 @@ index 6341891f145a..b9905b67bc62 100644
  	phys_addr = virt_to_phys(hv_get_tsc_page());
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2903,7 +2903,7 @@ index 60461e598239..27e17ad3ba49 100644
  #include <linux/mm.h>
  #include <linux/clockchips.h>
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -2935,7 +2935,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  6 files changed, 180 insertions(+), 8 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 611f164d08e9..4310e6e40eb8 100644
+index 5ac4575010ad..1b315fb4e44c 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -504,6 +504,8 @@ void __init hyperv_init(void)
@@ -2947,7 +2947,7 @@ index 611f164d08e9..4310e6e40eb8 100644
  	return;
  
  remove_cpuhp_state:
-@@ -607,7 +609,7 @@ EXPORT_SYMBOL_GPL(hv_is_hibernation_supported);
+@@ -605,7 +607,7 @@ EXPORT_SYMBOL_GPL(hv_is_hibernation_supported);
  
  enum hv_isolation_type hv_get_isolation_type(void)
  {
@@ -2956,7 +2956,7 @@ index 611f164d08e9..4310e6e40eb8 100644
  		return HV_ISOLATION_TYPE_NONE;
  	return FIELD_GET(HV_ISOLATION_TYPE, ms_hyperv.isolation_config_b);
  }
-@@ -618,3 +620,50 @@ bool hv_is_isolation_supported(void)
+@@ -616,3 +618,50 @@ bool hv_is_isolation_supported(void)
  	return hv_get_isolation_type() != HV_ISOLATION_TYPE_NONE;
  }
  EXPORT_SYMBOL_GPL(hv_is_isolation_supported);
@@ -3286,7 +3286,7 @@ index bbc011390cbb..c749d1c4f682 100644
  static inline bool hv_is_hyperv_initialized(void) { return false; }
  static inline bool hv_is_hibernation_supported(void) { return false; }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3400,7 +3400,7 @@ index c749d1c4f682..2f01140bbf66 100644
  /* Generate the guest OS identifier as described in the Hyper-V TLFS */
  static inline  __u64 generate_guest_id(__u64 d_info1, __u64 kernel_version,
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3503,7 +3503,7 @@ index 284e73661a18..ca581b24974a 100644
  
  static void hv_send_ipi(int cpu, int vector)
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 4310e6e40eb8..3b70b61508e3 100644
+index 1b315fb4e44c..e1e7802e4cbc 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -353,7 +353,7 @@ static void __init hv_get_partition_id(void)
@@ -3776,7 +3776,7 @@ index 2f01140bbf66..7a2492fb0ee1 100644
  static inline void vmbus_signal_eom(struct hv_message *msg, u32 old_msg_type)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -3924,7 +3924,7 @@ index 56244e5a0454..25087e12315a 100644
  	hv_put_dom_num(hbus->sysdata.domain);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4115,7 +4115,7 @@ index ff38737475ec..d0d78c5ab3d6 100644
   * struct arm_smccc_quirk - Contains quirk information
   * @id: quirk identification
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4152,10 +4152,10 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  create mode 100644 drivers/hv/hv_common.c
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 3b70b61508e3..2fd8fa8fffd6 100644
+index e1e7802e4cbc..f7d6f368a395 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
-@@ -620,50 +620,3 @@ bool hv_is_isolation_supported(void)
+@@ -618,50 +618,3 @@ bool hv_is_isolation_supported(void)
  	return hv_get_isolation_type() != HV_ISOLATION_TYPE_NONE;
  }
  EXPORT_SYMBOL_GPL(hv_is_isolation_supported);
@@ -4303,7 +4303,7 @@ index 000000000000..f0053c786891
 +}
 +EXPORT_SYMBOL_GPL(hv_query_ext_cap);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4358,7 +4358,7 @@ index 1006ed2d7c60..5148ae242780 100644
  	return 0;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4415,7 +4415,7 @@ index 5148ae242780..2276689b5411 100644
  
  	ACPI_COMPANION_SET(&bridge->dev, adev);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4451,7 +4451,7 @@ index 7a2492fb0ee1..2c7500e4810f 100644
  #include <asm/hyperv-tlfs.h>
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4523,7 +4523,7 @@ index 25087e12315a..8f3f1440af3f 100644
  	kfree(hbus);
  	return ret;
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4733,7 +4733,7 @@ index 8f3f1440af3f..3666132695f7 100644
  
  static int hv_pci_resume(struct hv_device *hdev)
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4820,7 +4820,7 @@ index 692ce678c5f1..8054d61721aa 100644
  	struct list_head dma_ranges;	/* dma ranges resource list */
  	u8 (*swizzle_irq)(struct pci_dev *, u8 *); /* Platform IRQ swizzler */
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4884,7 +4884,7 @@ index 7e4cb5f7c9ca..a49ca043ded8 100644
  		d = pci_host_bridge_acpi_msi_domain(bus);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4933,7 +4933,7 @@ index 66c794d92391..d1123ceb38f3 100644
  config HYPERV_UTILS
  	tristate "Microsoft Hyper-V Utilities driver"
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -4981,7 +4981,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  create mode 100644 arch/arm64/include/asm/mshyperv.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4d10e79030a9..549be23643f8 100644
+index f6c6b403a1b7..733b083535e7 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -8153,6 +8153,9 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/hyperv/linux.git
@@ -5283,7 +5283,7 @@ index 000000000000..20070a847304
 +
 +#endif
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5411,7 +5411,7 @@ index 000000000000..bbbe351e9045
 +}
 +EXPORT_SYMBOL_GPL(hv_is_hyperv_initialized);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5497,7 +5497,7 @@ index 4c5dc0f51b12..b54c34793701 100644
 +}
 +EXPORT_SYMBOL_GPL(hyperv_report_panic);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5521,10 +5521,10 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index fa02efb28e88..e1be6c429810 100644
+index 72f432d23ec5..386bd81ca12b 100644
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
-@@ -55,6 +55,7 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
+@@ -71,6 +71,7 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
  
  /* we will fill this structure from the stub, so don't put it in .bss */
  struct screen_info screen_info __section(".data");
@@ -5533,7 +5533,7 @@ index fa02efb28e88..e1be6c429810 100644
  int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5587,7 +5587,7 @@ index 3666132695f7..c3db607a1ae4 100644
  	hbus->hdev = hdev;
  	INIT_LIST_HEAD(&hbus->children);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5610,7 +5610,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  1 file changed, 20 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 05c1d1bb4981..cbd40dbcfff8 100644
+index 591438deda76..5adcbb1dc91e 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1398,6 +1398,24 @@ static struct kmsg_dumper hv_kmsg_dumper = {
@@ -5663,7 +5663,7 @@ index 05c1d1bb4981..cbd40dbcfff8 100644
  		register_die_notifier(&hyperv_die_block);
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -5706,7 +5706,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  7 files changed, 110 insertions(+), 100 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 2fd8fa8fffd6..f5bf019cf5d0 100644
+index f7d6f368a395..5a80a5c0655c 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -75,7 +75,7 @@ static int hv_cpu_init(unsigned int cpu)
@@ -5719,7 +5719,7 @@ index 2fd8fa8fffd6..f5bf019cf5d0 100644
  	hv_vp_index[smp_processor_id()] = msr_vp_index;
  
 diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
-index 119cc587775a..89eb0a885319 100644
+index 2feb95446a17..fb0580cb61d0 100644
 --- a/arch/x86/include/asm/hyperv-tlfs.h
 +++ b/arch/x86/include/asm/hyperv-tlfs.h
 @@ -149,7 +149,7 @@ enum hv_isolation_type {
@@ -6107,7 +6107,7 @@ index 3b1ba6c607a1..2fb794d2435d 100644
  {
  	struct vmbus_channel *channel, *sc;
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index cbd40dbcfff8..3f59865dad20 100644
+index 5adcbb1dc91e..0ad251b5dfa7 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -1505,7 +1505,7 @@ static int vmbus_bus_init(void)
@@ -6133,7 +6133,7 @@ index 2c7500e4810f..41c65e434a0d 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -6195,7 +6195,7 @@ index 2fb794d2435d..08ff1d19824e 100644
  				shared_sint.as_uint64);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -6283,7 +6283,7 @@ index 584ee570745e..6f72abdadd7b 100644
  
  	hv_sched_clock_offset = hv_read_reference_counter();
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -6349,7 +6349,7 @@ index 6f72abdadd7b..ee63913c4396 100644
  	.vdso_clock_mode = VDSO_CLOCKMODE_HVCLOCK,
  #else
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -6466,7 +6466,7 @@ index 08ff1d19824e..147abe31b540 100644
  
  
 diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
-index 3f59865dad20..d335216c72e7 100644
+index 0ad251b5dfa7..e61ab3739036 100644
 --- a/drivers/hv/vmbus_drv.c
 +++ b/drivers/hv/vmbus_drv.c
 @@ -48,8 +48,10 @@ static int hyperv_cpuhp_online;
@@ -6542,7 +6542,7 @@ index 3f59865dad20..d335216c72e7 100644
  err_setup:
  	bus_unregister(&hv_bus);
  	unregister_sysctl_table(hv_ctl_table_hdr);
-@@ -2655,6 +2687,18 @@ static int __init hv_acpi_init(void)
+@@ -2656,6 +2688,18 @@ static int __init hv_acpi_init(void)
  		ret = -ETIMEDOUT;
  		goto cleanup;
  	}
@@ -6561,7 +6561,7 @@ index 3f59865dad20..d335216c72e7 100644
  	hv_debug_init();
  
  	ret = vmbus_bus_init();
-@@ -2685,7 +2729,12 @@ static void __exit vmbus_exit(void)
+@@ -2686,7 +2730,12 @@ static void __exit vmbus_exit(void)
  	vmbus_connection.conn_state = DISCONNECTED;
  	hv_stimer_global_cleanup();
  	vmbus_disconnect();
@@ -6601,7 +6601,7 @@ index 41c65e434a0d..f9cde867c892 100644
  #if IS_ENABLED(CONFIG_HYPERV)
  /*
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -6640,7 +6640,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  6 files changed, 120 insertions(+), 72 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index f5bf019cf5d0..5f1a6bffab14 100644
+index 5a80a5c0655c..b938102ecc51 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -333,7 +333,7 @@ static void __init hv_stimer_setup_percpu_clockev(void)
@@ -6979,7 +6979,7 @@ index 34eef083c988..b6774aa5a4b8 100644
  extern void hv_stimer_legacy_init(unsigned int cpu, int sint);
  extern void hv_stimer_legacy_cleanup(unsigned int cpu);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7013,7 +7013,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  5 files changed, 158 insertions(+), 88 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 5f1a6bffab14..5f2515a07c28 100644
+index b938102ecc51..a0e47c02d138 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -39,48 +39,17 @@ EXPORT_SYMBOL_GPL(hv_hypercall_pg);
@@ -7381,7 +7381,7 @@ index e13f137a0ba8..977166ff8672 100644
  void *hv_alloc_hyperv_zeroed_page(void);
  void hv_free_hyperv_page(unsigned long addr);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7410,10 +7410,10 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  3 files changed, 49 insertions(+), 8 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index 5f2515a07c28..ac218fae0114 100644
+index a0e47c02d138..3f085e5b0375 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
-@@ -474,7 +474,6 @@ void hyperv_cleanup(void)
+@@ -472,7 +472,6 @@ void hyperv_cleanup(void)
  	hypercall_msr.as_uint64 = 0;
  	wrmsrl(HV_X64_MSR_REFERENCE_TSC, hypercall_msr.as_uint64);
  }
@@ -7421,7 +7421,7 @@ index 5f2515a07c28..ac218fae0114 100644
  
  void hyperv_report_panic(struct pt_regs *regs, long err, bool in_die)
  {
-@@ -548,4 +547,3 @@ bool hv_is_isolation_supported(void)
+@@ -546,4 +545,3 @@ bool hv_is_isolation_supported(void)
  {
  	return hv_get_isolation_type() != HV_ISOLATION_TYPE_NONE;
  }
@@ -7536,7 +7536,7 @@ index caba4f728987..cac9c6bfc653 100644
 +}
 +EXPORT_SYMBOL_GPL(hyperv_cleanup);
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7622,7 +7622,7 @@ index c3db607a1ae4..5386abaf2426 100644
  	hv_put_dom_num(hbus->bridge->domain_nr);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7649,7 +7649,7 @@ Signed-off-by: Wei Liu <wei.liu@kernel.org>
  3 files changed, 19 insertions(+), 17 deletions(-)
 
 diff --git a/arch/x86/hyperv/hv_init.c b/arch/x86/hyperv/hv_init.c
-index ac218fae0114..a25138a5ef1b 100644
+index 3f085e5b0375..b3048f874b20 100644
 --- a/arch/x86/hyperv/hv_init.c
 +++ b/arch/x86/hyperv/hv_init.c
 @@ -7,10 +7,10 @@
@@ -7664,7 +7664,7 @@ index ac218fae0114..a25138a5ef1b 100644
  #include <asm/apic.h>
  #include <asm/desc.h>
  #include <asm/hypervisor.h>
-@@ -529,12 +529,6 @@ bool hv_is_hyperv_initialized(void)
+@@ -527,12 +527,6 @@ bool hv_is_hyperv_initialized(void)
  }
  EXPORT_SYMBOL_GPL(hv_is_hyperv_initialized);
  
@@ -7745,7 +7745,7 @@ index cac9c6bfc653..4d7fcff39b8c 100644
   * may be overridden by architecture specific versions. Architectures
   * for which the default "no-op" behavior is sufficient can leave
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7892,7 +7892,7 @@ index b6774aa5a4b8..b3f5d73ae1d6 100644
  
  #endif
 -- 
-2.18.4
+2.39.0
 
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
@@ -7919,5 +7919,5 @@ index e589ca2d3f38..3dc8e120b48d 100644
  #include <linux/slab.h>
  #include <asm/hyperv-tlfs.h>
 -- 
-2.18.4
+2.39.0
 
