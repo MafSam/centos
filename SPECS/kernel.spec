@@ -91,19 +91,19 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 15
+%define base_sublevel 1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 90
+%define stable_update 18
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %endif
-%define rpmversion 5.%{base_sublevel}.%{stable_update}
+%define rpmversion 6.%{base_sublevel}.%{stable_update}
 
 ## The not-released-kernel case ##
 %else
@@ -114,7 +114,7 @@ Summary: The Linux kernel
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
-%define rpmversion 5.%{upstream_sublevel}.0
+%define rpmversion 6.%{upstream_sublevel}.0
 %endif
 # Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
@@ -264,7 +264,7 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-%define kversion 5.%{base_sublevel}
+%define kversion 6.%{base_sublevel}
 
 
 # turn off debug kernel and kabichk for gcov builds
@@ -484,11 +484,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%if 0%{?fedora}%{?centos}
-%define nobuildarches i386
-%else
 %define nobuildarches i386 i686
-%endif
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -556,12 +552,19 @@ BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex, gcc-c++
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if 0%{?rhel} == 7
-BuildRequires:  devtoolset-9-build
-BuildRequires:  devtoolset-9-binutils
-BuildRequires:  devtoolset-9-gcc
-BuildRequires:  devtoolset-9-gcc-c++
-BuildRequires:  devtoolset-9-make
+BuildRequires:  devtoolset-12-build
+BuildRequires:  devtoolset-12-binutils
+BuildRequires:  devtoolset-12-gcc
+BuildRequires:  devtoolset-12-gcc-c++
+BuildRequires:  devtoolset-12-make
 BuildRequires:  python3-rpm-macros
+%endif
+%if 0%{?rhel} == 8 || 0%{?rhel} == 9
+BuildRequires:  gcc-toolset-12-annobin-plugin-gcc
+BuildRequires:  gcc-toolset-12-build
+BuildRequires:  gcc-toolset-12-binutils
+BuildRequires:  gcc-toolset-12-gcc
+BuildRequires:  gcc-toolset-12-gcc-c++
 %endif
 %if 0%{?fedora} || 0%{?rhel} >= 8
 BuildRequires: dwarves
@@ -663,7 +666,7 @@ BuildRequires: asciidoc
 BuildRequires: libcap-devel
 %endif
 
-Source0: https://www.kernel.org/pub/linux/kernel/v5.x/linux-%{kversion}.tar.xz
+Source0: https://www.kernel.org/pub/linux/kernel/v6.x/linux-%{kversion}.tar.xz
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -720,7 +723,6 @@ Source79: parallel_xz.sh
 
 Source80: filter-x86_64.sh.fedora
 Source81: filter-armv7hl.sh.fedora
-Source82: filter-i686.sh.fedora
 Source83: filter-aarch64.sh.fedora
 Source86: filter-ppc64le.sh.fedora
 Source87: filter-s390x.sh.fedora
@@ -728,7 +730,6 @@ Source89: filter-modules.sh.fedora
 
 Source90: filter-x86_64.sh.rhel
 Source91: filter-armv7hl.sh.rhel
-Source92: filter-i686.sh.rhel
 Source93: filter-aarch64.sh.rhel
 Source96: filter-ppc64le.sh.rhel
 Source97: filter-s390x.sh.rhel
@@ -751,8 +752,6 @@ Source39: kernel-armv7hl-fedora.config
 Source40: kernel-armv7hl-debug-fedora.config
 Source41: kernel-armv7hl-lpae-fedora.config
 Source42: kernel-armv7hl-lpae-debug-fedora.config
-Source43: kernel-i686-fedora.config
-Source44: kernel-i686-debug-fedora.config
 Source45: kernel-ppc64le-fedora.config
 Source46: kernel-ppc64le-debug-fedora.config
 Source47: kernel-s390x-fedora.config
@@ -808,7 +807,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  https://cdn.kernel.org/pub/linux/kernel/v6.x/patch-6.%{base_sublevel}.%{stable_base}.xz
 Source5000: %{stable_patch_00}
 %endif
 
@@ -817,14 +816,14 @@ Source5000: %{stable_patch_00}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Source5000: patch-5.%{upstream_sublevel}-rc%{rcrev}.xz
+Source5000: patch-6.%{upstream_sublevel}-rc%{rcrev}.xz
 %if 0%{?gitrev}
-Source5001: patch-5.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.xz
+Source5001: patch-6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Source5000: patch-5.%{base_sublevel}-git%{gitrev}.xz
+Source5000: patch-6.%{base_sublevel}-git%{gitrev}.xz
 %endif
 %endif
 %endif
@@ -835,34 +834,12 @@ Source5000: patch-5.%{base_sublevel}-git%{gitrev}.xz
 
 %if !%{nopatches}
 
-Patch6: fedora-v5.15.patch
-Patch7: 0001-Fix-build-on-i686.patch
-Patch11: 0001-kdump-round-up-the-total-memory-size-to-128M-for-cra.patch
-#Patch12: 0001-kdump-add-support-for-crashkernel-auto.patch
-#Patch15: 0001-kdump-fix-a-grammar-issue-in-a-kernel-message.patch
-Patch24: 0001-scsi-smartpqi-add-inspur-advantech-ids.patch
-Patch62: 0001-Drop-that-for-now.patch
-Patch64: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
-Patch66: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
-#Patch67: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
-Patch68: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
-Patch72: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
+Patch6: fedora-v6.1.patch
 
-# A patch to fix some undocumented things broke a bunch of Allwinner networks due to wrong assumptions
-Patch102: 0001-update-phy-on-pine64-a64-devices.patch
-
-# OMAP Pandaboard fix
-#Patch103: arm-pandaboard-fix-add-bluetooth.patch
-
-# Fix for USB on some newer RPi4 / firmware combinations
-Patch104: 0001-brcm-rpi4-fix-usb-numeration.patch
-
-# RPi-4 and wifi issues
-#Patch105: arm-dts-rpi-4-disable-wifi-frequencies.patch
 %ifarch aarch64
-Patch10000: linux-honeycomb-5.15.y.patch
+Patch10000: linux-honeycomb-6.1.y.patch
 %else
-Source10000: linux-honeycomb-5.15.y.patch
+Source10000: linux-honeycomb-6.1.y.patch
 %endif
 
 # END OF PATCH DEFINITIONS
@@ -1312,8 +1289,11 @@ input and output, etc.
 
 %prep
 %if 0%{?rhel} == 7
-source scl_source enable devtoolset-9 || :
+source scl_source enable devtoolset-12 || :
 source scl_source enable llvm-toolset-7.0 || :
+%endif
+%if 0%{?rhel} == 8 || 0%{?rhel} == 9
+source scl_source enable gcc-toolset-12 || :
 %endif
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
@@ -1347,7 +1327,7 @@ ApplyPatch()
     exit 1
   fi
   if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:8}" != "patch-5." ] ; then
+    if [ "${patch:0:8}" != "patch-6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
@@ -1380,20 +1360,20 @@ ApplyOptionalPatch()
 
 # Update to latest upstream.
 %if 0%{?released_kernel}
-%define vanillaversion 5.%{base_sublevel}
+%define vanillaversion 6.%{base_sublevel}
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-%define vanillaversion 5.%{upstream_sublevel}-rc%{rcrev}
+%define vanillaversion 6.%{upstream_sublevel}-rc%{rcrev}
 %if 0%{?gitrev}
-%define vanillaversion 5.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
+%define vanillaversion 6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-%define vanillaversion 5.%{base_sublevel}-git%{gitrev}
+%define vanillaversion 6.%{base_sublevel}-git%{gitrev}
 %else
-%define vanillaversion 5.%{base_sublevel}
+%define vanillaversion 6.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1406,7 +1386,7 @@ ApplyOptionalPatch()
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
-sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-5.*' \
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-6.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
 # Delete all old stale trees.
@@ -1633,8 +1613,11 @@ cd ..
 ###
 %build
 %if 0%{?rhel} == 7
-source scl_source enable devtoolset-9 || :
+source scl_source enable devtoolset-12 || :
 source scl_source enable llvm-toolset-7.0 || :
+%endif
+%if 0%{?rhel} == 8 || 0%{?rhel} == 9
+source scl_source enable gcc-toolset-12 || :
 %endif
 
 %if %{with_sparse}
@@ -2419,8 +2402,11 @@ find Documentation -type d | xargs chmod u+w
 
 %install
 %if 0%{?rhel} == 7
-source scl_source enable devtoolset-9 || :
+source scl_source enable devtoolset-12 || :
 source scl_source enable llvm-toolset-7.0 || :
+%endif
+%if 0%{?rhel} == 8 || 0%{?rhel} == 9
+source scl_source enable gcc-toolset-12 || :
 %endif
 
 cd linux-%{KVERREL}
@@ -3017,51 +3003,8 @@ fi
 #
 #
 %changelog
-* Sun Jan 29 2023 Pablo Greco <pgreco@centosproject.org> - 5.15.90-200
-- Update to version v5.15.90
-
-* Sun Nov 27 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.80-200
-- Update to version v5.15.80
-
-* Sat Oct 15 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.74-200
-- Update to version v5.15.74
-
-* Sun Aug  7 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.59-200
-- Update to version v5.15.59
-
-* Sat Jul 16 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.55-200
-- Update to version v5.15.55
-
-* Sun Jun 19 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.48-200
-- Update to version v5.15.48
-
-* Sat May 21 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.41-200
-- Update to version v5.15.41
-
-* Sun Apr 17 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.34-200
-- Update to version v5.15.34
-
-* Thu Mar 17 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.29-200
-- Update to version v5.15.29
-
-* Sat Feb 26 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.25-200
-- Update to version v5.15.25
-
-* Mon Feb  7 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.21-200
-- Linux v5.15.21
-
-* Sat Jan 29 2022 Pablo Greco <pgreco@centosproject.org> - 5.15.18-200
-- Linux v5.15.18
-
-* Tue Dec 21 2021 Pablo Greco <pgreco@centosproject.org> - 5.15.10-200
-- Linux v5.15.10
-- Add Honeycomb support
-
-* Wed Dec 15 2021 Pablo Greco <pgreco@centosproject.org> - 5.15.8-200
-- Linux v5.15.8
-
-* Sat Nov  6 2021 Pablo Greco <pgreco@centosproject.org> - 5.15.0-200
-- Linux v5.15.0 (Initial version)
+* Sun Mar 12 2023 Pablo Greco <pgreco@centosproject.org> - 6.1.18-200
+- Linux v6.1.18 (Initial version)
 
 # The following bit is important for automation so please do not remove
 # END OF CHANGELOG

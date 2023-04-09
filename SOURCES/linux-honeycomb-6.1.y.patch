@@ -1,0 +1,1899 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Fri, 10 Dec 2021 11:24:01 +0100
+Subject: [PATCH 01/13] PCI: layerscape: Add LX2160a MCFG quirks for ECAM
+ errata
+
+The PCIe controller in Layerscape LX2160a SoC is not 100% ECAM-compliant.
+For both V1 and V2 of the SOC which have different PCIe implementations
+the devices behind the bus can be enumerated via ECAM, however the root
+port is only accessible via the CCSR address space.
+
+By default the firmware only exposes the devices so that most PCIe
+devices will work out of the box on most distributions, however some
+users may want to also have the root port exposed as well, especially
+if working with SR-IOV. This quirk will work with the default firmware
+as a normal ecam setup, but if the firmware exposes the root port as
+bus 0 (the default) then this quirk will also allow access to a more
+traditional PCIe layout.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ drivers/acpi/pci_mcfg.c                       | 10 +++
+ drivers/pci/controller/Makefile               |  1 +
+ drivers/pci/controller/pcie-layerscape-ecam.c | 89 +++++++++++++++++++
+ include/linux/pci-ecam.h                      |  1 +
+ 4 files changed, 101 insertions(+)
+ create mode 100644 drivers/pci/controller/pcie-layerscape-ecam.c
+
+diff --git a/drivers/acpi/pci_mcfg.c b/drivers/acpi/pci_mcfg.c
+index 860014b89b8e..c80b94af1601 100644
+--- a/drivers/acpi/pci_mcfg.c
++++ b/drivers/acpi/pci_mcfg.c
+@@ -55,6 +55,16 @@ static struct mcfg_fixup mcfg_quirks[] = {
+ 	AL_ECAM("GRAVITON", 0, 6, &al_pcie_ops),
+ 	AL_ECAM("GRAVITON", 0, 7, &al_pcie_ops),
+ 
++#define NXP_ECAM(seg) \
++	{ "NXP   ", "LX2160  ", 1, seg, MCFG_BUS_ANY, &ls_pcie_ecam_ops }
++
++	NXP_ECAM(0),
++	NXP_ECAM(1),
++	NXP_ECAM(2),
++	NXP_ECAM(3),
++	NXP_ECAM(4),
++	NXP_ECAM(5),
++
+ #define QCOM_ECAM32(seg) \
+ 	{ "QCOM  ", "QDF2432 ", 1, seg, MCFG_BUS_ANY, &pci_32b_ops }
+ 
+diff --git a/drivers/pci/controller/Makefile b/drivers/pci/controller/Makefile
+index 37c8663de7fe..46b28acfff55 100644
+--- a/drivers/pci/controller/Makefile
++++ b/drivers/pci/controller/Makefile
+@@ -57,6 +57,7 @@ obj-y				+= mobiveil/
+ 
+ ifdef CONFIG_ACPI
+ ifdef CONFIG_PCI_QUIRKS
++obj-$(CONFIG_ARM64) += pcie-layerscape-ecam.o
+ obj-$(CONFIG_ARM64) += pci-thunder-ecam.o
+ obj-$(CONFIG_ARM64) += pci-thunder-pem.o
+ obj-$(CONFIG_ARM64) += pci-xgene.o
+diff --git a/drivers/pci/controller/pcie-layerscape-ecam.c b/drivers/pci/controller/pcie-layerscape-ecam.c
+new file mode 100644
+index 000000000000..c580bae170e0
+--- /dev/null
++++ b/drivers/pci/controller/pcie-layerscape-ecam.c
+@@ -0,0 +1,89 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * PCIe ecam driver for NXP's Layerscape SOCs, adopted from
++ * Amazon's Graviton driver.
++ *
++ * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
++ * Copyright 2021 SolidRun Ltd. All Rights Reserved.
++ *
++ * Author: Jonathan Chocron <jonnyc@amazon.com>
++ * Author: Jon Nettleton <jon@solid-run.com>
++ */
++
++#include <linux/pci.h>
++#include <linux/pci-ecam.h>
++#include <linux/pci-acpi.h>
++#include "../pci.h"
++
++#if defined(CONFIG_ACPI) && defined(CONFIG_PCI_QUIRKS)
++
++struct ls_pcie_ecam  {
++	void __iomem *ccsr_base;
++};
++
++static void __iomem *ls_pcie_ecam_map_bus(struct pci_bus *bus, unsigned int devfn,
++				     int where)
++{
++	struct pci_config_window *cfg = bus->sysdata;
++	struct ls_pcie_ecam *pcie = cfg->priv;
++	void __iomem *ccsr_base = pcie->ccsr_base;
++
++	if (bus->number == 0) {
++		/*
++		 * 
++		 * No devices/functions on the root bus num, so we do this here.
++		 */
++		if (PCI_SLOT(devfn) > 0)
++			return NULL;
++		else
++			return ccsr_base + where;
++	}
++
++	return pci_ecam_map_bus(bus, devfn, where);
++}
++
++static int ls_pcie_ecam_init(struct pci_config_window *cfg)
++{
++	struct device *dev = cfg->parent;
++	struct acpi_device *adev = to_acpi_device(dev);
++	struct acpi_pci_root *root = acpi_driver_data(adev);
++	struct ls_pcie_ecam *ls_pcie;
++	struct resource *res;
++	int ret;
++
++	ls_pcie = devm_kzalloc(dev, sizeof(*ls_pcie), GFP_KERNEL);
++	if (!ls_pcie)
++		return -ENOMEM;
++
++	res = devm_kzalloc(dev, sizeof(*res), GFP_KERNEL);
++	if (!res)
++		return -ENOMEM;
++
++	ret = acpi_get_rc_resources(dev, "NXP0016", root->segment, res);
++	if (ret) {
++		dev_err(dev, "can't get rc csr base address for SEG %d\n",
++			root->segment);
++		return ret;
++	}
++
++	dev_dbg(dev, "Root port ccsr res: %pR\n", res);
++
++	ls_pcie->ccsr_base = devm_pci_remap_cfg_resource(dev, res);
++	if (IS_ERR(ls_pcie->ccsr_base))
++		return PTR_ERR(ls_pcie->ccsr_base);
++
++	cfg->priv = ls_pcie;
++
++	return 0;
++}
++
++const struct pci_ecam_ops ls_pcie_ecam_ops = {
++	.init         =  ls_pcie_ecam_init,
++	.pci_ops      = {
++		.map_bus    = ls_pcie_ecam_map_bus,
++		.read       = pci_generic_config_read,
++		.write      = pci_generic_config_write,
++	}
++};
++
++#endif /* defined(CONFIG_ACPI) && defined(CONFIG_PCI_QUIRKS) */
+diff --git a/include/linux/pci-ecam.h b/include/linux/pci-ecam.h
+index 6b1301e2498e..e1d70dec5e89 100644
+--- a/include/linux/pci-ecam.h
++++ b/include/linux/pci-ecam.h
+@@ -88,6 +88,7 @@ extern const struct pci_ecam_ops xgene_v2_pcie_ecam_ops; /* APM X-Gene PCIe v2.x
+ extern const struct pci_ecam_ops al_pcie_ops;	/* Amazon Annapurna Labs PCIe */
+ extern const struct pci_ecam_ops tegra194_pcie_ops; /* Tegra194 PCIe */
+ extern const struct pci_ecam_ops loongson_pci_ecam_ops; /* Loongson PCIe */
++extern const struct pci_ecam_ops ls_pcie_ecam_ops;     /* NXP Layerscape LX2160a PCIe */
+ #endif
+ 
+ #if IS_ENABLED(CONFIG_PCI_HOST_COMMON)
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@armlinux.org.uk>
+Date: Tue, 24 Dec 2019 14:46:48 +0000
+Subject: [PATCH 02/13] bus: fsl-mc: fix dprc object reading race
+
+When modifying the objects attached to a DPRC, we may end up reading
+the list of objects from the firmware while another thread is changing
+changing the list. Since we read the objects via:
+
+- Read the number of DPRC objects
+- Iterate over this number of objects retrieving their details
+
+and objects can be added in the middle of the list, this causes the
+last few objects to unexpectedly disappear. The side effect of this
+is if network interfaces are added after boot, they come and go. This
+can result in already configured interfaces unexpectedly disappearing.
+
+This has been easy to provoke with the restool interface added, and a
+script which adds network interfaces one after each other; the kernel
+rescanning runs asynchronously to restool.
+
+NXP's approach to fixing this was to introduce a sysfs "attribute" in
+their vendor tree, /sys/bus/fsl-mc/rescan, which userspace poked at to
+request the kernel to rescan the DPRC object tree each time the
+"restool" command completed (whether or not the tool changed anything.)
+This has the effect of making the kernel's rescan synchronous with a
+scripted restool, but still fails if we have multiple restools running
+concurrently.
+
+This patch takes a different approach:
+- Read the number of DPRC objects
+- Iterate over this number of objects retrieving their details
+- Re-read the number of DPRC objects
+- If the number of DPRC objects has changed while reading, repeat.
+
+This solves the issue where network interfaces unexpectedly disappear
+while adding others via ls-addni, because they've fallen off the end
+of the object list.
+
+This does *not* solve the issue that if an object is deleted while
+another is added while we are reading the objects - that requires
+firmware modification, or a more elaborate solution on the Linux side
+(e.g., CRCing the object details and reading all objects at least
+twice to check the CRC is stable.)
+
+However, without firmware modification, this is probably the best way
+to ensure that we read all the objects.
+
+Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
+---
+ drivers/bus/fsl-mc/dprc-driver.c | 32 +++++++++++++++++++++++++++++---
+ 1 file changed, 29 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/bus/fsl-mc/dprc-driver.c b/drivers/bus/fsl-mc/dprc-driver.c
+index 5e70f9775a0e..a3c8d4869132 100644
+--- a/drivers/bus/fsl-mc/dprc-driver.c
++++ b/drivers/bus/fsl-mc/dprc-driver.c
+@@ -240,11 +240,11 @@ static void dprc_add_new_devices(struct fsl_mc_device *mc_bus_dev,
+ int dprc_scan_objects(struct fsl_mc_device *mc_bus_dev,
+ 		      bool alloc_interrupts)
+ {
+-	int num_child_objects;
++	int num_child_objects, num_child_objects2;
+ 	int dprc_get_obj_failures;
+ 	int error;
+-	unsigned int irq_count = mc_bus_dev->obj_desc.irq_count;
+-	struct fsl_mc_obj_desc *child_obj_desc_array = NULL;
++	unsigned int irq_count;
++	struct fsl_mc_obj_desc *child_obj_desc_array;
+ 	struct fsl_mc_bus *mc_bus = to_fsl_mc_bus(mc_bus_dev);
+ 
+ 	error = dprc_get_obj_count(mc_bus_dev->mc_io,
+@@ -257,6 +257,9 @@ int dprc_scan_objects(struct fsl_mc_device *mc_bus_dev,
+ 		return error;
+ 	}
+ 
++retry:
++	irq_count = mc_bus_dev->obj_desc.irq_count;
++	child_obj_desc_array = NULL;
+ 	if (num_child_objects != 0) {
+ 		int i;
+ 
+@@ -315,6 +318,29 @@ int dprc_scan_objects(struct fsl_mc_device *mc_bus_dev,
+ 		}
+ 	}
+ 
++	error = dprc_get_obj_count(mc_bus_dev->mc_io,
++				   0,
++				   mc_bus_dev->mc_handle,
++				   &num_child_objects2);
++	if (error < 0) {
++		if (child_obj_desc_array)
++			devm_kfree(&mc_bus_dev->dev, child_obj_desc_array);
++		dev_err(&mc_bus_dev->dev, "dprc_get_obj_count() failed: %d\n",
++			error);
++		return error;
++	}
++
++	if (num_child_objects != num_child_objects2) {
++		/*
++		 * Something changed while reading the number of objects.
++		 * Retry reading the child object list.
++		 */
++		if (child_obj_desc_array)
++			devm_kfree(&mc_bus_dev->dev, child_obj_desc_array);
++		num_child_objects = num_child_objects2;
++		goto retry;
++	}
++
+ 	/*
+ 	 * Allocate IRQ's before binding the scanned devices with their
+ 	 * respective drivers.
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@armlinux.org.uk>
+Date: Fri, 24 Jan 2020 17:59:49 +0000
+Subject: [PATCH 03/13] iommu: silence iommu group prints
+
+On the LX2160A, there are lots (about 160) of IOMMU messages produced
+during boot; this is excessive.  Reduce the severity of these messages
+to debug level.
+
+Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
+---
+ drivers/iommu/iommu.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
+index bfb2f163c691..d88ae5d10716 100644
+--- a/drivers/iommu/iommu.c
++++ b/drivers/iommu/iommu.c
+@@ -996,7 +996,7 @@ int iommu_group_add_device(struct iommu_group *group, struct device *dev)
+ 
+ 	trace_add_device_to_group(group->id, dev);
+ 
+-	dev_info(dev, "Adding to iommu group %d\n", group->id);
++	dev_dbg(dev, "Adding to iommu group %d\n", group->id);
+ 
+ 	return 0;
+ 
+@@ -1033,7 +1033,7 @@ void iommu_group_remove_device(struct device *dev)
+ 	if (!group)
+ 		return;
+ 
+-	dev_info(dev, "Removing from iommu group %d\n", group->id);
++	dev_dbg(dev, "Removing from iommu group %d\n", group->id);
+ 
+ 	mutex_lock(&group->mutex);
+ 	list_for_each_entry(tmp_device, &group->devices, list) {
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Fri, 2 Jul 2021 07:28:21 -0400
+Subject: [PATCH 04/13] ACPI: APD: Allow apd device to override fixed_clk_rate
+
+Currently by default the apd drivers are always using the
+fixed_clk_rate assigned in the matched acpi_device_desc.
+This causes an issue on the LX2160a platform because the
+NXP0001 settings do not match the platform and instead the
+I2C bus is only running at 24000kHZ rather than the expect
+100000. Instead of patching the source with more static numbers
+that may or may not change instead add a check for the device
+property "fixed-clock-rate" that can be added to the ACPI
+tables to instruct the driver what rate to use.
+
+I have chosen fixed-clock-rate because clock-frequency is already
+used by I2C devices in acpi and device-tree to specify by bus
+speed, and fixed-clock-rate matches the fixed_clk_rate used by the
+apd_device_desc.  If this device property is not set then the
+default static values are used so this should cause no regressions.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ drivers/acpi/acpi_apd.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/acpi/acpi_apd.c b/drivers/acpi/acpi_apd.c
+index 3bbe2276cac7..80ff4495e5b1 100644
+--- a/drivers/acpi/acpi_apd.c
++++ b/drivers/acpi/acpi_apd.c
+@@ -46,12 +46,21 @@ struct apd_private_data {
+ static int acpi_apd_setup(struct apd_private_data *pdata)
+ {
+ 	const struct apd_device_desc *dev_desc = pdata->dev_desc;
++	struct acpi_device *adev = pdata->adev;
++	const union acpi_object *obj;
++	unsigned int fixed_clk_rate;
+ 	struct clk *clk;
+ 
+-	if (dev_desc->fixed_clk_rate) {
++	if (!acpi_dev_get_property(adev, "uefi-clock-frequency", ACPI_TYPE_INTEGER, &obj)) {
++		fixed_clk_rate = obj->integer.value;
++	} else if (dev_desc->fixed_clk_rate) {
++		fixed_clk_rate = dev_desc->fixed_clk_rate;
++	}
++
++	if (fixed_clk_rate) {
+ 		clk = clk_register_fixed_rate(&pdata->adev->dev,
+ 					dev_name(&pdata->adev->dev),
+-					NULL, 0, dev_desc->fixed_clk_rate);
++					NULL, 0, fixed_clk_rate);
+ 		clk_register_clkdev(clk, NULL, dev_name(&pdata->adev->dev));
+ 		pdata->clk = clk;
+ 	}
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
+Date: Wed, 27 May 2020 21:35:11 +0530
+Subject: [PATCH 05/13] mmc: sdhci-of-esdhc: Add ACPI support
+
+This patch is to add acpi support in esdhc controller driver
+
+Signed-off-by: Meenakshi Aggarwal <meenakshi.aggarwal@nxp.com>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 62 +++++++++++++++++++------------
+ 1 file changed, 39 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index e0266638381d..602ec77936ae 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -10,6 +10,7 @@
+  *	    Anton Vorontsov <avorontsov@ru.mvista.com>
+  */
+ 
++#include <linux/acpi.h>
+ #include <linux/err.h>
+ #include <linux/io.h>
+ #include <linux/of.h>
+@@ -73,6 +74,14 @@ static const struct of_device_id sdhci_esdhc_of_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_esdhc_of_match);
+ 
++#ifdef CONFIG_ACPI
++static const struct acpi_device_id sdhci_esdhc_ids[] = {
++	{"NXP0003" },
++	{ }
++};
++MODULE_DEVICE_TABLE(acpi, sdhci_esdhc_ids);
++#endif
++
+ struct sdhci_esdhc {
+ 	u8 vendor_ver;
+ 	u8 spec_ver;
+@@ -1371,29 +1380,35 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 		esdhc->clk_fixup = match->data;
+ 	np = pdev->dev.of_node;
+ 
+-	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
+-		esdhc->quirk_delay_before_data_reset = true;
+-		esdhc->quirk_trans_complete_erratum = true;
+-	}
++	/* in case of device tree, get clock from framework */
++	if (np) {
++		if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
++			esdhc->quirk_delay_before_data_reset = true;
++			esdhc->quirk_trans_complete_erratum = true;
++		}
+ 
+-	clk = of_clk_get(np, 0);
+-	if (!IS_ERR(clk)) {
+-		/*
+-		 * esdhc->peripheral_clock would be assigned with a value
+-		 * which is eSDHC base clock when use periperal clock.
+-		 * For some platforms, the clock value got by common clk
+-		 * API is peripheral clock while the eSDHC base clock is
+-		 * 1/2 peripheral clock.
+-		 */
+-		if (of_device_is_compatible(np, "fsl,ls1046a-esdhc") ||
+-		    of_device_is_compatible(np, "fsl,ls1028a-esdhc") ||
+-		    of_device_is_compatible(np, "fsl,ls1088a-esdhc"))
+-			esdhc->peripheral_clock = clk_get_rate(clk) / 2;
+-		else
+-			esdhc->peripheral_clock = clk_get_rate(clk);
+-
+-		clk_put(clk);
+-	}
++		clk = of_clk_get(np, 0);
++		if (!IS_ERR(clk)) {
++			/*
++			 * esdhc->peripheral_clock would be assigned with a value
++			 * which is eSDHC base clock when use periperal clock.
++			 * For some platforms, the clock value got by common clk
++			 * API is peripheral clock while the eSDHC base clock is
++			 * 1/2 peripheral clock.
++			 */
++			if (of_device_is_compatible(np, "fsl,ls1046a-esdhc") ||
++			    of_device_is_compatible(np, "fsl,ls1028a-esdhc") ||
++			    of_device_is_compatible(np, "fsl,ls1088a-esdhc"))
++				esdhc->peripheral_clock = clk_get_rate(clk) / 2;
++			else
++				esdhc->peripheral_clock = clk_get_rate(clk);
++
++			clk_put(clk);
++		}
++	} else {
++		device_property_read_u32(&pdev->dev, "clock-frequency",
++					 &esdhc->peripheral_clock);
++        }
+ 
+ 	esdhc_clock_enable(host, false);
+ 	val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+@@ -1426,7 +1441,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 
+ 	np = pdev->dev.of_node;
+ 
+-	if (of_property_read_bool(np, "little-endian"))
++	if (device_property_read_bool(&pdev->dev, "little-endian"))
+ 		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
+ 					sizeof(struct sdhci_esdhc));
+ 	else
+@@ -1513,6 +1528,7 @@ static struct platform_driver sdhci_esdhc_driver = {
+ 		.name = "sdhci-esdhc",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table = sdhci_esdhc_of_match,
++		.acpi_match_table = sdhci_esdhc_ids,
+ 		.pm = &esdhc_of_dev_pm_ops,
+ 	},
+ 	.probe = sdhci_esdhc_probe,
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Meharbaan <meharbaan.ali@puresoftware.com>
+Date: Tue, 28 Jul 2020 17:41:31 +0530
+Subject: [PATCH 06/13] drivers/mmc/host/sdhci-of-esdhc : Fix DMA coherent
+ check in ACPI mode.
+
+DMA-coherent check to set ESDHC_DMA_SNOOP mask was bypassed
+when booted in ACPI mode. Now it also checks the acpi device and
+its parents for _CCA property in the device, and sets the flag
+accordingly.
+
+Signed-off-by: Meharbaan <meharbaan.ali@puresoftware.com>
+---
+ drivers/base/property.c           | 38 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-esdhc.c |  7 ++++--
+ include/linux/property.h          |  2 ++
+ 3 files changed, 45 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/base/property.c b/drivers/base/property.c
+index 7f338cb4fb7b..68bf74957c55 100644
+--- a/drivers/base/property.c
++++ b/drivers/base/property.c
+@@ -16,6 +16,7 @@
+ #include <linux/of_irq.h>
+ #include <linux/property.h>
+ #include <linux/phy.h>
++#include <linux/platform_device.h>
+ 
+ struct fwnode_handle *dev_fwnode(const struct device *dev)
+ {
+@@ -879,6 +880,43 @@ enum dev_dma_attr device_get_dma_attr(struct device *dev)
+ }
+ EXPORT_SYMBOL_GPL(device_get_dma_attr);
+ 
++/**
++ * device_match_fw_node - Check if the device is the parent node.
++ * @dev:		Pointer to the device.
++ * @parent_fwnode	Pointer to the parent's firmware node.
++ *
++ * The function returns true if the device has no parent.
++ *
++ */
++static int device_match_fw_node(struct device *dev, const void *parent_fwnode)
++{
++	return dev->fwnode == parent_fwnode;
++}
++
++/**
++ * dev_dma_is_coherent - Check if the device or any of its parents has
++ * dma support enabled.
++ * @dev:     Pointer to the device.
++ *
++ * The function gets the device pointer and check for device_dma_supported()
++ * on the device pointer passed and then recursively on its parent nodes.
++ */
++
++bool dev_dma_is_coherent(struct device *dev)
++{
++	struct fwnode_handle *parent_fwnode;
++
++	while (dev) {
++		if (device_dma_supported(dev))
++			return true;
++		parent_fwnode = fwnode_get_next_parent(dev->fwnode);
++		dev = bus_find_device(&platform_bus_type, NULL,	parent_fwnode,
++				      device_match_fw_node);
++	}
++	return false;
++}
++EXPORT_SYMBOL_GPL(dev_dma_is_coherent);
++
+ /**
+  * fwnode_get_phy_mode - Get phy mode for given firmware node
+  * @fwnode:	Pointer to the given node
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 602ec77936ae..308353675dd6 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -545,8 +545,11 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ 	}
+ 
+ 	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+-
+-	if (of_dma_is_coherent(dev->of_node))
++	/*
++	 * of_dma_is_coherent() returns false in case of acpi hence
++	 * dev_dma_is_coherent() is used along with it.
++	 */
++	if (of_dma_is_coherent(dev->of_node) ||  dev_dma_is_coherent(dev))
+ 		value |= ESDHC_DMA_SNOOP;
+ 	else
+ 		value &= ~ESDHC_DMA_SNOOP;
+diff --git a/include/linux/property.h b/include/linux/property.h
+index 117cc200c656..e0c7799519df 100644
+--- a/include/linux/property.h
++++ b/include/linux/property.h
+@@ -387,6 +387,8 @@ bool device_dma_supported(struct device *dev);
+ 
+ enum dev_dma_attr device_get_dma_attr(struct device *dev);
+ 
++bool dev_dma_is_coherent(struct device *dev);
++
+ const void *device_get_match_data(const struct device *dev);
+ 
+ int device_get_phy_mode(struct device *dev);
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Thu, 18 Aug 2022 09:00:51 +0200
+Subject: [PATCH 07/13] aarch64: Optimize memcpy for Cortex-A72
+
+This variant of memcpy not only works around some hardware issues
+but also outperforms the current memcpy used by the kernel and glibc
+on Cortex-A72 hardware.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ arch/arm64/lib/memcpy.S | 49 ++++++++++++++++++-----------------------
+ 1 file changed, 21 insertions(+), 28 deletions(-)
+
+diff --git a/arch/arm64/lib/memcpy.S b/arch/arm64/lib/memcpy.S
+index 4ab48d49c451..ec867fa90eb3 100644
+--- a/arch/arm64/lib/memcpy.S
++++ b/arch/arm64/lib/memcpy.S
+@@ -36,12 +36,8 @@
+ #define D_h	x13
+ #define E_l	x14
+ #define E_h	x15
+-#define F_l	x16
+-#define F_h	x17
+-#define G_l	count
+-#define G_h	dst
+-#define H_l	src
+-#define H_h	srcend
++#define F_l	count
++#define F_h	dst
+ #define tmp1	x14
+ 
+ /* This implementation handles overlaps and supports both memcpy and memmove
+@@ -60,10 +56,10 @@
+ SYM_FUNC_START(__pi_memcpy)
+ 	add	srcend, src, count
+ 	add	dstend, dstin, count
+-	cmp	count, 128
++	cmp	count, 96
+ 	b.hi	L(copy_long)
+ 	cmp	count, 32
+-	b.hi	L(copy32_128)
++	b.hi	L(copy32_96)
+ 
+ 	/* Small copies: 0..32 bytes.  */
+ 	cmp	count, 16
+@@ -107,14 +103,14 @@ L(copy0):
+ 	ret
+ 
+ 	.p2align 4
+-	/* Medium copies: 33..128 bytes.  */
+-L(copy32_128):
++	/* Medium copies: 33..96 bytes.  */
++L(copy32_96):
+ 	ldp	A_l, A_h, [src]
+ 	ldp	B_l, B_h, [src, 16]
+ 	ldp	C_l, C_h, [srcend, -32]
+ 	ldp	D_l, D_h, [srcend, -16]
+ 	cmp	count, 64
+-	b.hi	L(copy128)
++	b.hi	L(copy96)
+ 	stp	A_l, A_h, [dstin]
+ 	stp	B_l, B_h, [dstin, 16]
+ 	stp	C_l, C_h, [dstend, -32]
+@@ -122,17 +118,10 @@ L(copy32_128):
+ 	ret
+ 
+ 	.p2align 4
+-	/* Copy 65..128 bytes.  */
+-L(copy128):
++	/* Copy 65..96 bytes.  */
++L(copy96):
+ 	ldp	E_l, E_h, [src, 32]
+ 	ldp	F_l, F_h, [src, 48]
+-	cmp	count, 96
+-	b.ls	L(copy96)
+-	ldp	G_l, G_h, [srcend, -64]
+-	ldp	H_l, H_h, [srcend, -48]
+-	stp	G_l, G_h, [dstend, -64]
+-	stp	H_l, H_h, [dstend, -48]
+-L(copy96):
+ 	stp	A_l, A_h, [dstin]
+ 	stp	B_l, B_h, [dstin, 16]
+ 	stp	E_l, E_h, [dstin, 32]
+@@ -161,7 +150,8 @@ L(copy_long):
+ 	stp	D_l, D_h, [dstin]
+ 	ldp	B_l, B_h, [src, 32]
+ 	ldp	C_l, C_h, [src, 48]
+-	ldp	D_l, D_h, [src, 64]!
++	ldp	D_l, D_h, [src, 64]
++	add	src, src, 64
+ 	subs	count, count, 128 + 16	/* Test and readjust count.  */
+ 	b.ls	L(copy64_from_end)
+ 
+@@ -173,7 +163,8 @@ L(loop64):
+ 	stp	C_l, C_h, [dst, 48]
+ 	ldp	C_l, C_h, [src, 48]
+ 	stp	D_l, D_h, [dst, 64]!
+-	ldp	D_l, D_h, [src, 64]!
++	ldp	D_l, D_h, [src, 64]
++	add	src, src, 64
+ 	subs	count, count, 64
+ 	b.hi	L(loop64)
+ 
+@@ -206,7 +197,8 @@ L(copy_long_backwards):
+ 	stp	D_l, D_h, [dstend, -16]
+ 	ldp	B_l, B_h, [srcend, -32]
+ 	ldp	C_l, C_h, [srcend, -48]
+-	ldp	D_l, D_h, [srcend, -64]!
++	ldp	D_l, D_h, [srcend, -64]
++	sub	srcend, srcend, 64
+ 	sub	dstend, dstend, tmp1
+ 	subs	count, count, 128
+ 	b.ls	L(copy64_from_start)
+@@ -219,13 +211,14 @@ L(loop64_backwards):
+ 	stp	C_l, C_h, [dstend, -48]
+ 	ldp	C_l, C_h, [srcend, -48]
+ 	stp	D_l, D_h, [dstend, -64]!
+-	ldp	D_l, D_h, [srcend, -64]!
++	ldp	D_l, D_h, [srcend, -64]
++	sub	srcend, srcend, 64
+ 	subs	count, count, 64
+ 	b.hi	L(loop64_backwards)
+ 
+ 	/* Write the last iteration and copy 64 bytes from the start.  */
+ L(copy64_from_start):
+-	ldp	G_l, G_h, [src, 48]
++	ldp	F_l, F_h, [src, 48]
+ 	stp	A_l, A_h, [dstend, -16]
+ 	ldp	A_l, A_h, [src, 32]
+ 	stp	B_l, B_h, [dstend, -32]
+@@ -233,10 +226,10 @@ L(copy64_from_start):
+ 	stp	C_l, C_h, [dstend, -48]
+ 	ldp	C_l, C_h, [src]
+ 	stp	D_l, D_h, [dstend, -64]
+-	stp	G_l, G_h, [dstin, 48]
+-	stp	A_l, A_h, [dstin, 32]
+-	stp	B_l, B_h, [dstin, 16]
+ 	stp	C_l, C_h, [dstin]
++	stp	B_l, B_h, [dstin, 16]
++	stp	A_l, A_h, [dstin, 32]
++	stp	F_l, F_h, [dstin, 48]
+ 	ret
+ SYM_FUNC_END(__pi_memcpy)
+ 
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Mon, 5 Sep 2022 13:30:44 +0200
+Subject: [PATCH 08/13] arm64: optimize context switch for Cortex-A72
+
+The Cortex-A72 has a performance errata regarding writing to
+the register file. Therefore we change all the store and load
+addressing to offsets and manually increment the src and dst
+with an add.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ arch/arm64/kernel/entry.S | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm64/kernel/entry.S b/arch/arm64/kernel/entry.S
+index e28137d64b76..23757249bed0 100644
+--- a/arch/arm64/kernel/entry.S
++++ b/arch/arm64/kernel/entry.S
+@@ -826,20 +826,22 @@ SYM_FUNC_START(cpu_switch_to)
+ 	mov	x10, #THREAD_CPU_CONTEXT
+ 	add	x8, x0, x10
+ 	mov	x9, sp
+-	stp	x19, x20, [x8], #16		// store callee-saved registers
+-	stp	x21, x22, [x8], #16
+-	stp	x23, x24, [x8], #16
+-	stp	x25, x26, [x8], #16
+-	stp	x27, x28, [x8], #16
+-	stp	x29, x9, [x8], #16
++	stp	x19, x20, [x8]		// store callee-saved registers
++	stp	x21, x22, [x8, #16]
++	stp	x23, x24, [x8, #32]
++	stp	x25, x26, [x8, #48]
++	stp	x27, x28, [x8, #64]
++	stp	x29, x9, [x8, #80]
++	add	x8, x8, #96
+ 	str	lr, [x8]
+ 	add	x8, x1, x10
+-	ldp	x19, x20, [x8], #16		// restore callee-saved registers
+-	ldp	x21, x22, [x8], #16
+-	ldp	x23, x24, [x8], #16
+-	ldp	x25, x26, [x8], #16
+-	ldp	x27, x28, [x8], #16
+-	ldp	x29, x9, [x8], #16
++	ldp	x19, x20, [x8]		// restore callee-saved registers
++	ldp	x21, x22, [x8, #16]
++	ldp	x23, x24, [x8, #32]
++	ldp	x25, x26, [x8, #48]
++	ldp	x27, x28, [x8, #64]
++	ldp	x29, x9, [x8, #80]
++	add	x8, x8, #96
+ 	ldr	lr, [x8]
+ 	mov	sp, x9
+ 	msr	sp_el0, x1
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Robin Murphy <robin.murphy@arm.com>
+Date: Wed, 28 Sep 2022 12:58:51 +0100
+Subject: [PATCH 09/13] arm64: Update copy_from_user()
+
+Replace the old mangled-beyond-hope copy_from_user() routine with a
+shiny new one based on our newest memcpy() implementation. When plumbed
+into the standalone memcpy benchmark from the Arm Optimized Routines
+library, this routine outperforms the old one by up to ~1.7x for small
+copies, with comparable gains across a range of microarchitectures,
+levelling off once sizes get up to ~2KB and general load/store
+throughput starts to dominate.
+
+Some of this is paid for by pushing more complexity into the fixup
+handlers, but much of that could be recovered again with cleverer
+exception records that can give more information about the original
+access to the handler itself. For now though, the label sleds are at
+least entertaining.
+
+Signed-off-by: Robin Murphy <robin.murphy@arm.com>
+---
+ arch/arm64/lib/copy_from_user.S | 266 ++++++++++++++++++++++++++------
+ 1 file changed, 219 insertions(+), 47 deletions(-)
+
+diff --git a/arch/arm64/lib/copy_from_user.S b/arch/arm64/lib/copy_from_user.S
+index 34e317907524..a4b9bd73a5a8 100644
+--- a/arch/arm64/lib/copy_from_user.S
++++ b/arch/arm64/lib/copy_from_user.S
+@@ -1,73 +1,245 @@
+ /* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * Copyright (C) 2012 ARM Ltd.
++ * Copyright (c) 2012-2022, Arm Limited.
+  */
+ 
+ #include <linux/linkage.h>
+ 
+ #include <asm/asm-uaccess.h>
+ #include <asm/assembler.h>
+-#include <asm/cache.h>
++
++/* Assumptions:
++ *
++ * ARMv8-a, AArch64, unaligned accesses.
++ *
++ */
++
++#define L(label) .L ## label
++
++#define dstin	x0
++#define src	x1
++#define count	x2
++#define dst	x3
++#define srcend	x4
++#define dstend	x5
++#define A_l	x6
++#define A_lw	w6
++#define A_h	x7
++#define B_l	x8
++#define B_lw	w8
++#define B_h	x9
++#define C_l	x10
++#define C_lw	w10
++#define C_h	x11
++#define D_l	x12
++#define D_h	x13
++#define E_l	x14
++#define E_h	x15
++#define F_l	x16
++#define F_h	x17
++#define tmp1	x14
+ 
+ /*
+- * Copy from user space to a kernel buffer (alignment handled by the hardware)
++ * Derived from memcpy with various adjustments:
+  *
+- * Parameters:
+- *	x0 - to
+- *	x1 - from
+- *	x2 - n
+- * Returns:
+- *	x0 - bytes not copied
++ * - memmove parts are removed since user and kernel pointers won't overlap.
++ * - The main loop is scaled down to 48 bytes per iteration since the increase
++ *   in load ops changes the balance; little cores barely notice the difference,
++ *   so big cores can benefit from keeping the loop relatively short.
++ * - Similarly, preferring source rather than destination alignment works out
++ *   better on average.
++ * - The 33-128 byte cases are reworked to better balance the stores with the
++ *   doubled-up load ops, and keep a more consistent access pattern.
++ * - The 0-3 byte sequence is replaced with the one borrowed from clear_user,
++ *   since LDTRB lacks a register-offset addressing mode.
+  */
+ 
+-	.macro ldrb1 reg, ptr, val
+-	user_ldst 9998f, ldtrb, \reg, \ptr, \val
+-	.endm
++#define U_pre(x...)	USER(L(fixup_pre), x)
++#define U_dst(x...)	USER(L(fixup_dst), x)
++#define U_S1(x...)	USER(L(fixup_s1), x)
++#define U_M16(x...)	USER(L(fixup_m16), x)
++#define U_M32(x...)	USER(L(fixup_m32), x)
++#define U_M64(x...)	USER(L(fixup_m64), x)
++#define U_L32(x...)	USER(L(fixup_l32), x)
++#define U_L48(x...)	USER(L(fixup_l48), x)
++#define U_L64(x...)	USER(L(fixup_l64), x)
+ 
+-	.macro strb1 reg, ptr, val
+-	strb \reg, [\ptr], \val
+-	.endm
++SYM_FUNC_START(__arch_copy_from_user)
++	add	srcend, src, count
++	add	dstend, dstin, count
++	cmp	count, 128
++	b.hi	L(copy_long)
++	cmp	count, 32
++	b.hi	L(copy32_128)
+ 
+-	.macro ldrh1 reg, ptr, val
+-	user_ldst 9997f, ldtrh, \reg, \ptr, \val
+-	.endm
++	/* Small copies: 0..32 bytes.  */
++	cmp	count, 16
++	b.lo	L(copy16)
++U_pre(	ldtr	A_l, [src])
++U_pre(	ldtr	A_h, [src, 8])
++U_pre(	ldtr	D_l, [srcend, -16])
++U_pre(	ldtr	D_h, [srcend, -8])
++	stp	A_l, A_h, [dstin]
++	stp	D_l, D_h, [dstend, -16]
++	mov	x0, #0
++	ret
+ 
+-	.macro strh1 reg, ptr, val
+-	strh \reg, [\ptr], \val
+-	.endm
++	/* Copy 8-15 bytes.  */
++L(copy16):
++	tbz	count, 3, L(copy8)
++U_pre(	ldtr	A_l, [src])
++U_pre(	ldtr	A_h, [srcend, -8])
++	str	A_l, [dstin]
++	str	A_h, [dstend, -8]
++	mov	x0, #0
++	ret
+ 
+-	.macro ldr1 reg, ptr, val
+-	user_ldst 9997f, ldtr, \reg, \ptr, \val
+-	.endm
++	.p2align 3
++	/* Copy 4-7 bytes.  */
++L(copy8):
++	tbz	count, 2, L(copy4)
++U_pre(	ldtr	A_lw, [src])
++U_pre(	ldtr	B_lw, [srcend, -4])
++	str	A_lw, [dstin]
++	str	B_lw, [dstend, -4]
++	mov	x0, #0
++	ret
+ 
+-	.macro str1 reg, ptr, val
+-	str \reg, [\ptr], \val
+-	.endm
++	/* Copy 0..3 bytes.  */
++L(copy4):
++	tbz	count, #1, L(copy1)
++U_pre(	ldtrh	A_lw, [src])
++	strh	A_lw, [dstin]
++L(copy1):
++	tbz	count, #0, L(copy0)
++U_S1(	ldtrb	A_lw, [srcend, -1])
++	strb	A_lw, [dstend, -1]
++L(copy0):
++	mov	x0, #0
++	ret
+ 
+-	.macro ldp1 reg1, reg2, ptr, val
+-	user_ldp 9997f, \reg1, \reg2, \ptr, \val
+-	.endm
++	.p2align 4
++	/* Medium copies: 33..128 bytes.  */
++L(copy32_128):
++U_pre(	ldtr	A_l, [src])
++U_pre(	ldtr	A_h, [src, 8])
++U_pre(	ldtr	B_l, [src, 16])
++U_pre(	ldtr	B_h, [src, 24])
++	stp	A_l, A_h, [dstin]
++	stp	B_l, B_h, [dstin, 16]
++U_M32(	ldtr	C_l, [srcend, -32])
++U_M32(	ldtr	C_h, [srcend, -24])
++U_M32(	ldtr	D_l, [srcend, -16])
++U_M32(	ldtr	D_h, [srcend, -8])
++	cmp	count, 64
++	b.ls	L(copy64)
++U_M32(	ldtr	E_l, [src, 32])
++U_M32(	ldtr	E_h, [src, 40])
++U_M32(	ldtr	F_l, [src, 48])
++U_M32(	ldtr	F_h, [src, 56])
++	stp	E_l, E_h, [dstin, 32]
++	stp	F_l, F_h, [dstin, 48]
++U_M64(	ldtr	A_l, [srcend, -64])
++U_M64(	ldtr	A_h, [srcend, -56])
++U_M64(	ldtr	B_l, [srcend, -48])
++U_M64(	ldtr	B_h, [srcend, -40])
++	stp	A_l, A_h, [dstend, -64]
++	stp	B_l, B_h, [dstend, -48]
++L(copy64):
++	stp	C_l, C_h, [dstend, -32]
++	stp	D_l, D_h, [dstend, -16]
++	mov	x0, #0
++	ret
+ 
+-	.macro stp1 reg1, reg2, ptr, val
+-	stp \reg1, \reg2, [\ptr], \val
+-	.endm
++	.p2align 4
++	/* Copy more than 128 bytes.  */
++L(copy_long):
++	/* Copy 16 bytes and then align src to 16-byte alignment.  */
+ 
+-end	.req	x5
+-srcin	.req	x15
+-SYM_FUNC_START(__arch_copy_from_user)
+-	add	end, x0, x2
+-	mov	srcin, x1
+-#include "copy_template.S"
+-	mov	x0, #0				// Nothing to copy
++U_pre(	ldtr	D_l, [src])
++U_pre(	ldtr	D_h, [src, 8])
++	and	tmp1, src, 15
++	bic	src, src, 15
++	sub	dst, dstin, tmp1
++	add	count, count, tmp1	/* Count is now 16 too large.  */
++U_pre(	ldtr	A_l, [src, 16])
++U_pre(	ldtr	A_h, [src, 24])
++	stp	D_l, D_h, [dstin]
++U_M16(	ldtr	B_l, [src, 32])
++U_M16(	ldtr	B_h, [src, 40])
++U_M16(	ldtr	C_l, [src, 48])
++U_M16(	ldtr	C_h, [src, 56])
++	add	src, src, #48
++	subs	count, count, 96 + 16	/* Test and readjust count.  */
++	b.ls	L(copy48_from_end)
++
++L(loop48):
++	stp	A_l, A_h, [dst, 16]
++U_L32(	ldtr	A_l, [src, 16])
++U_L32(	ldtr	A_h, [src, 24])
++	stp	B_l, B_h, [dst, 32]
++U_L48(	ldtr	B_l, [src, 32])
++U_L48(	ldtr	B_h, [src, 40])
++	stp	C_l, C_h, [dst, 48]!
++U_dst(	ldtr	C_l, [src, 48])
++U_dst(	ldtr	C_h, [src, 56])
++	add	src, src, #48
++	subs	count, count, 48
++	b.hi	L(loop48)
++
++	/* Write the last iteration and copy 48 bytes from the end.  */
++L(copy48_from_end):
++	stp	A_l, A_h, [dst, 16]
++U_L32(	ldtr	A_l, [srcend, -48])
++U_L32(	ldtr	A_h, [srcend, -40])
++	stp	B_l, B_h, [dst, 32]
++U_L48(	ldtr	B_l, [srcend, -32])
++U_L48(	ldtr	B_h, [srcend, -24])
++	stp	C_l, C_h, [dst, 48]
++U_L64(	ldtr	C_l, [srcend, -16])
++U_L64(	ldtr	C_h, [srcend, -8])
++	stp	A_l, A_h, [dstend, -48]
++	stp	B_l, B_h, [dstend, -32]
++	stp	C_l, C_h, [dstend, -16]
++	mov	x0, #0
++	ret
++
++	/* Fixups... */
++
++	/*
++	 * Fault before anything has been written, but progress may have
++	 * been possible; realign dst and retry a single byte to confirm.
++	 */
++L(fixup_pre):
++	mov	dst, dstin
++U_dst(	ldtrb	A_lw, [src])
++	strb	A_lw, [dst], #1
++L(fixup_dst):
++	sub	x0, dstend, dst
+ 	ret
+ 
+-	// Exception fixups
+-9997:	cmp	dst, dstin
+-	b.ne	9998f
+-	// Before being absolutely sure we couldn't copy anything, try harder
+-USER(9998f, ldtrb tmp1w, [srcin])
+-	strb	tmp1w, [dst], #1
+-9998:	sub	x0, end, dst			// bytes not copied
++	/* Small: Fault with 1 byte remaining, regardless of count */
++L(fixup_s1):
++	mov	x0, #1
+ 	ret
++
++	/* Medium: Faults after n bytes beyond dstin have been written */
++L(fixup_m64):
++	add	dstin, dstin, #32
++L(fixup_m32):
++	add	dstin, dstin, #16
++L(fixup_m16):
++	add	dst, dstin, #16
++	b	L(fixup_dst)
++
++	/* Large: Faults after n bytes beyond dst have been written */
++L(fixup_l64):
++	add	dst, dst, #16
++L(fixup_l48):
++	add	dst, dst, #16
++L(fixup_l32):
++	add	dst, dst, #32
++	b	L(fixup_dst)
++
+ SYM_FUNC_END(__arch_copy_from_user)
+ EXPORT_SYMBOL(__arch_copy_from_user)
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Robin Murphy <robin.murphy@arm.com>
+Date: Wed, 28 Sep 2022 12:58:52 +0100
+Subject: [PATCH 10/13] arm64: Update copy_to_user()
+
+As with its counterpart, replace copy_to_user() with a new and improved
+version similarly derived from memcpy(). Different tradeoffs from the
+base implementation are made relative to copy_from_user() to get the
+most consistent results across different microarchitectures, but the
+overall shape of the performance gain ends up about the same.
+
+The exception fixups are even more comical this time around, but that's
+down to now needing to reconstruct the faulting address, and cope with
+overlapping stores at various points. Again, improvements to the
+exception mechanism could significantly simplify things in future.
+
+Signed-off-by: Robin Murphy <robin.murphy@arm.com>
+---
+ arch/arm64/lib/copy_to_user.S | 385 +++++++++++++++++++++++++++++-----
+ 1 file changed, 338 insertions(+), 47 deletions(-)
+
+diff --git a/arch/arm64/lib/copy_to_user.S b/arch/arm64/lib/copy_to_user.S
+index 802231772608..b641f00f50d6 100644
+--- a/arch/arm64/lib/copy_to_user.S
++++ b/arch/arm64/lib/copy_to_user.S
+@@ -1,73 +1,364 @@
+ /* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * Copyright (C) 2012 ARM Ltd.
++ * Copyright (c) 2012-2022, Arm Limited.
+  */
+ 
+ #include <linux/linkage.h>
+ 
+ #include <asm/asm-uaccess.h>
+ #include <asm/assembler.h>
+-#include <asm/cache.h>
++
++/* Assumptions:
++ *
++ * ARMv8-a, AArch64, unaligned accesses.
++ *
++ */
++
++#define L(label) .L ## label
++
++#define dstin	x0
++#define src	x1
++#define count	x2
++#define dst	x3
++#define srcend	x4
++#define dstend	x5
++#define A_l	x6
++#define A_lw	w6
++#define A_h	x7
++#define B_l	x8
++#define B_lw	w8
++#define B_h	x9
++#define C_l	x10
++#define C_lw	w10
++#define C_h	x11
++#define D_l	x12
++#define D_h	x13
++#define E_l	x14
++#define E_h	x15
++#define F_l	x16
++#define F_h	x17
++#define tmp1	x14
+ 
+ /*
+- * Copy to user space from a kernel buffer (alignment handled by the hardware)
++ * Derived from memcpy with various adjustments:
+  *
+- * Parameters:
+- *	x0 - to
+- *	x1 - from
+- *	x2 - n
+- * Returns:
+- *	x0 - bytes not copied
++ * - memmove parts are removed since user and kernel pointers won't overlap.
++ * - Contrary to copy_from_user, although big cores still aren't particularly
++ *   keen on the increased instruction count in the main loop, processing fewer
++ *   than 64 bytes per iteration here hurts little cores more.
++ * - The medium-size cases are reworked to better balance the loads with the
++ *   doubled-up store ops, avoid potential out-of-sequence faults, and preserve
++ *   the input arguments for the sake of fault handling.
++ * - The 0-3 byte sequence is replaced with the one borrowed from clear_user,
++ *   since STTRB lacks a register-offset addressing mode.
+  */
+-	.macro ldrb1 reg, ptr, val
+-	ldrb  \reg, [\ptr], \val
+-	.endm
+ 
+-	.macro strb1 reg, ptr, val
+-	user_ldst 9998f, sttrb, \reg, \ptr, \val
+-	.endm
++#define U_pre(x...)	USER(L(fixup_pre), x)
++#define U_dst(x...)	USER(L(fixup_dst), x)
+ 
+-	.macro ldrh1 reg, ptr, val
+-	ldrh  \reg, [\ptr], \val
+-	.endm
++#define U_S1(x...)	USER(L(fixup_s1), x)
++#define U_S4(x...)	USER(L(fixup_s4), x)
++#define U_S8(x...)	USER(L(fixup_s8), x)
++#define U_ST8(x...)	USER(L(fixup_st8), x)
++#define U_S16(x...)	USER(L(fixup_s16), x)
++#define U_M24(x...)	USER(L(fixup_m24), x)
++#define U_M32(x...)	USER(L(fixup_m32), x)
++#define U_M40(x...)	USER(L(fixup_m40), x)
++#define U_M48(x...)	USER(L(fixup_m48), x)
++#define U_M56(x...)	USER(L(fixup_m56), x)
++#define U_M64(x...)	USER(L(fixup_m64), x)
++#define U_MT8(x...)	USER(L(fixup_mt8), x)
++#define U_MT16(x...)	USER(L(fixup_mt16), x)
++#define U_MT24(x...)	USER(L(fixup_mt24), x)
++#define U_MT32(x...)	USER(L(fixup_mt32), x)
++#define U_MT40(x...)	USER(L(fixup_mt40), x)
++#define U_MT48(x...)	USER(L(fixup_mt48), x)
++#define U_MT56(x...)	USER(L(fixup_mt56), x)
+ 
+-	.macro strh1 reg, ptr, val
+-	user_ldst 9997f, sttrh, \reg, \ptr, \val
+-	.endm
++#define U_L16(x...)	USER(L(fixup_l16), x)
++#define U_L24(x...)	USER(L(fixup_l24), x)
++#define U_L32(x...)	USER(L(fixup_l32), x)
++#define U_L40(x...)	USER(L(fixup_l40), x)
++#define U_L48(x...)	USER(L(fixup_l48), x)
++#define U_L56(x...)	USER(L(fixup_l56), x)
++#define U_L64(x...)	USER(L(fixup_l64), x)
++#define U_L72(x...)	USER(L(fixup_l72), x)
++#define U_LT8(x...)	USER(L(fixup_lt8), x)
++#define U_LT16(x...)	USER(L(fixup_lt16), x)
++#define U_LT24(x...)	USER(L(fixup_lt24), x)
++#define U_LT32(x...)	USER(L(fixup_lt32), x)
++#define U_LT40(x...)	USER(L(fixup_lt40), x)
++#define U_LT48(x...)	USER(L(fixup_lt48), x)
++#define U_LT56(x...)	USER(L(fixup_lt56), x)
++#define U_LT64(x...)	USER(L(fixup_lt64), x)
+ 
+-	.macro ldr1 reg, ptr, val
+-	ldr \reg, [\ptr], \val
+-	.endm
++SYM_FUNC_START(__arch_copy_to_user)
++	add	srcend, src, count
++	add	dstend, dstin, count
++	cmp	count, 128
++	b.hi	L(copy_long)
++	cmp	count, 32
++	b.hi	L(copy32_128)
+ 
+-	.macro str1 reg, ptr, val
+-	user_ldst 9997f, sttr, \reg, \ptr, \val
+-	.endm
++	/* Small copies: 0..32 bytes.  */
++	cmp	count, 16
++	b.lo	L(copy16)
++	ldp	A_l, A_h, [src]
++	ldp	D_l, D_h, [srcend, -16]
++U_pre(	sttr	A_l, [dstin])
++U_S8(	sttr	A_h, [dstin, 8])
++U_S16(	sttr	D_l, [dstend, -16])
++U_ST8(	sttr	D_h, [dstend, -8])
++	mov	x0, #0
++	ret
+ 
+-	.macro ldp1 reg1, reg2, ptr, val
+-	ldp \reg1, \reg2, [\ptr], \val
+-	.endm
++	/* Copy 8-15 bytes.  */
++L(copy16):
++	tbz	count, 3, L(copy8)
++	ldr	A_l, [src]
++	ldr	A_h, [srcend, -8]
++U_pre(	sttr	A_l, [dstin])
++U_S8(	sttr	A_h, [dstend, -8])
++	mov	x0, #0
++	ret
+ 
+-	.macro stp1 reg1, reg2, ptr, val
+-	user_stp 9997f, \reg1, \reg2, \ptr, \val
+-	.endm
++	.p2align 3
++	/* Copy 4-7 bytes.  */
++L(copy8):
++	tbz	count, 2, L(copy4)
++	ldr	A_lw, [src]
++	ldr	B_lw, [srcend, -4]
++U_pre(	sttr	A_lw, [dstin])
++U_S4(	sttr	B_lw, [dstend, -4])
++	mov	x0, #0
++	ret
+ 
+-end	.req	x5
+-srcin	.req	x15
+-SYM_FUNC_START(__arch_copy_to_user)
+-	add	end, x0, x2
+-	mov	srcin, x1
+-#include "copy_template.S"
++	/* Copy 0..3 bytes.  */
++L(copy4):
++	tbz	count, #1, L(copy1)
++	ldrh	A_lw, [src]
++U_pre(	sttrh	A_lw, [dstin])
++L(copy1):
++	tbz	count, #0, L(copy0)
++	ldrb	A_lw, [srcend, -1]
++U_S1(	sttrb	A_lw, [dstend, -1])
++L(copy0):
+ 	mov	x0, #0
+ 	ret
+ 
+-	// Exception fixups
+-9997:	cmp	dst, dstin
+-	b.ne	9998f
+-	// Before being absolutely sure we couldn't copy anything, try harder
+-	ldrb	tmp1w, [srcin]
+-USER(9998f, sttrb tmp1w, [dst])
+-	add	dst, dst, #1
+-9998:	sub	x0, end, dst			// bytes not copied
++	.p2align 4
++	/* Medium copies: 33..128 bytes.  */
++L(copy32_128):
++	ldp	A_l, A_h, [src]
++	ldp	B_l, B_h, [src, 16]
++U_pre(	sttr	A_l, [dstin])
++U_S8(	sttr	A_h, [dstin, 8])
++U_S16(	sttr	B_l, [dstin, 16])
++U_M24(	sttr	B_h, [dstin, 24])
++	ldp	C_l, C_h, [srcend, -32]
++	ldp	D_l, D_h, [srcend, -16]
++	cmp	count, 64
++	b.ls	L(copy64)
++	ldp	E_l, E_h, [src, 32]
++	ldp	F_l, F_h, [src, 48]
++U_M32(	sttr	E_l, [dstin, 32])
++U_M40(	sttr	E_h, [dstin, 40])
++U_M48(	sttr	F_l, [dstin, 48])
++U_M56(	sttr	F_h, [dstin, 56])
++	ldp	A_l, A_h, [srcend, -64]
++	ldp	B_l, B_h, [srcend, -48]
++U_M64(	sttr	A_l, [dstend, -64])
++U_MT56(	sttr	A_h, [dstend, -56])
++U_MT48(	sttr	B_l, [dstend, -48])
++U_MT40(	sttr	B_h, [dstend, -40])
++L(copy64):
++U_MT32(	sttr	C_l, [dstend, -32])
++U_MT24(	sttr	C_h, [dstend, -24])
++U_MT16(	sttr	D_l, [dstend, -16])
++U_MT8(	sttr	D_h, [dstend, -8])
++	mov	x0, #0
+ 	ret
++
++	.p2align 4
++	nop
++	nop
++	nop
++	/* Copy more than 128 bytes.  */
++L(copy_long):
++	/* Copy 16 bytes and then align dst to 16-byte alignment.  */
++
++	ldp	D_l, D_h, [src]
++	and	tmp1, dstin, 15
++	bic	dst, dstin, 15
++	sub	src, src, tmp1
++	add	count, count, tmp1	/* Count is now 16 too large.  */
++	ldp	A_l, A_h, [src, 16]
++U_pre(	sttr	D_l, [dstin])
++U_S8(	sttr	D_h, [dstin, 8])
++	ldp	B_l, B_h, [src, 32]
++	ldp	C_l, C_h, [src, 48]
++	ldp	D_l, D_h, [src, 64]!
++	subs	count, count, 128 + 16	/* Test and readjust count.  */
++	b.ls	L(copy64_from_end)
++
++L(loop64):
++U_L16(	sttr	A_l, [dst, 16])
++U_L24(	sttr	A_h, [dst, 24])
++	ldp	A_l, A_h, [src, 16]
++U_L32(	sttr	B_l, [dst, 32])
++U_L40(	sttr	B_h, [dst, 40])
++	ldp	B_l, B_h, [src, 32]
++U_L48(	sttr	C_l, [dst, 48])
++U_L56(	sttr	C_h, [dst, 56])
++	ldp	C_l, C_h, [src, 48]
++U_L64(	sttr	D_l, [dst, 64])
++U_L72(	sttr	D_h, [dst, 72])
++	add	dst, dst, #64
++	ldp	D_l, D_h, [src, 64]!
++	subs	count, count, 64
++	b.hi	L(loop64)
++
++	/* Write the last iteration and copy 64 bytes from the end.  */
++L(copy64_from_end):
++	ldp	E_l, E_h, [srcend, -64]
++U_L16(	sttr	A_l, [dst, 16])
++U_L24(	sttr	A_h, [dst, 24])
++	ldp	A_l, A_h, [srcend, -48]
++U_L32(	sttr	B_l, [dst, 32])
++U_L40(	sttr	B_h, [dst, 40])
++	ldp	B_l, B_h, [srcend, -32]
++U_L48(	sttr	C_l, [dst, 48])
++U_L56(	sttr	C_h, [dst, 56])
++	ldp	C_l, C_h, [srcend, -16]
++U_L64(	sttr	D_l, [dst, 64])
++U_L72(	sttr	D_h, [dst, 72])
++U_LT64(	sttr	E_l, [dstend, -64])
++U_LT56(	sttr	E_h, [dstend, -56])
++U_LT48(	sttr	A_l, [dstend, -48])
++U_LT40(	sttr	A_h, [dstend, -40])
++U_LT32(	sttr	B_l, [dstend, -32])
++U_LT24(	sttr	B_h, [dstend, -24])
++U_LT16(	sttr	C_l, [dstend, -16])
++U_LT8(	sttr	C_h, [dstend, -8])
++	mov	x0, #0
++	ret
++
++	/* Fixups... */
++
++	/*
++	 * Fault on the first write, but progress may have been possible;
++	 * realign dst and retry a single byte to confirm.
++	 */
++L(fixup_pre):
++	mov	dst, dstin
++U_dst(	ldtrb	A_lw, [src])
++	strb	A_lw, [dst], #1
++L(fixup_dst):
++	sub	x0, dstend, dst
++	ret
++
++	/* Small: Fault with 1 byte remaining, regardless of count */
++L(fixup_s1):
++	mov	x0, #1
++	ret
++
++	/* Small tail case: Fault 8 bytes before dstend, >=16 bytes written */
++L(fixup_st8):
++	sub	dst, dstend, #8
++	add	dstin, dstin, #16
++L(fixup_tail):
++	cmp	dst, dstin
++	csel	dst, dst, dstin, hi
++	b	L(fixup_dst)
++
++	/* Small/medium: Faults n bytes past dtsin, that much written */
++L(fixup_m64):
++	add	dstin, dstin, #8
++L(fixup_m56):
++	add	dstin, dstin, #8
++L(fixup_m48):
++	add	dstin, dstin, #8
++L(fixup_m40):
++	add	dstin, dstin, #8
++L(fixup_m32):
++	add	dstin, dstin, #8
++L(fixup_m24):
++	add	dstin, dstin, #8
++L(fixup_s16):
++	add	dstin, dstin, #8
++L(fixup_s8):
++	add	dstin, dstin, #4
++L(fixup_s4):
++	add	dst, dstin, #4
++	b	L(fixup_dst)
++
++	/*
++	 * Medium tail cases: Faults n bytes before dstend, 64 or 32 bytes
++	 * past dstin written, depending on original count
++	 */
++L(fixup_mt56):
++	sub	count, count, #8
++L(fixup_mt48):
++	sub	count, count, #8
++L(fixup_mt40):
++	sub	count, count, #8
++L(fixup_mt32):
++	sub	count, count, #8
++L(fixup_mt24):
++	sub	count, count, #8
++L(fixup_mt16):
++	sub	count, count, #8
++L(fixup_mt8):
++	add	count, count, #8
++	add	dst, dstin, count
++
++	sub	tmp1, dstend, dstin
++	cmp	tmp1, #64
++	add	tmp1, dstin, #64
++	add	dstin, dstin, #32
++	csel	dstin, dstin, tmp1, ls
++	b	L(fixup_tail)
++
++	/* Large: Faults n bytes past dst, at least 16 bytes past dstin written */
++L(fixup_l72):
++	add	dst, dst, #8
++L(fixup_l64):
++	add	dst, dst, #8
++L(fixup_l56):
++	add	dst, dst, #8
++L(fixup_l48):
++	add	dst, dst, #8
++L(fixup_l40):
++	add	dst, dst, #8
++L(fixup_l32):
++	add	dst, dst, #8
++L(fixup_l24):
++	add	dst, dst, #8
++L(fixup_l16):
++	add	dst, dst, #16
++	add	dstin, dstin, #16
++	b	L(fixup_tail)
++
++	/* Large tail: Faults n bytes before dstend, 80 bytes past dst written */
++L(fixup_lt64):
++	sub	count, count, #8
++L(fixup_lt56):
++	sub	count, count, #8
++L(fixup_lt48):
++	sub	count, count, #8
++L(fixup_lt40):
++	sub	count, count, #8
++L(fixup_lt32):
++	sub	count, count, #8
++L(fixup_lt24):
++	sub	count, count, #8
++L(fixup_lt16):
++	sub	count, count, #8
++L(fixup_lt8):
++	add	count, count, #56	/* Count was also off by 64 */
++	add	dstin, dst, #80
++	add	dst, dst, count
++	b	L(fixup_tail)
++
+ SYM_FUNC_END(__arch_copy_to_user)
+ EXPORT_SYMBOL(__arch_copy_to_user)
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Robin Murphy <robin.murphy@arm.com>
+Date: Wed, 28 Sep 2022 12:58:53 +0100
+Subject: [PATCH 11/13] arm64: Garbage-collect usercopy leftovers
+
+With both usercopy routines replaced, remove the now-unused template
+and supporting macros.
+
+Signed-off-by: Robin Murphy <robin.murphy@arm.com>
+---
+ arch/arm64/include/asm/asm-uaccess.h |  30 -----
+ arch/arm64/lib/copy_template.S       | 181 ---------------------------
+ 2 files changed, 211 deletions(-)
+ delete mode 100644 arch/arm64/lib/copy_template.S
+
+diff --git a/arch/arm64/include/asm/asm-uaccess.h b/arch/arm64/include/asm/asm-uaccess.h
+index 75b211c98dea..c2dea9b6b9e9 100644
+--- a/arch/arm64/include/asm/asm-uaccess.h
++++ b/arch/arm64/include/asm/asm-uaccess.h
+@@ -62,34 +62,4 @@ alternative_else_nop_endif
+ #define USER(l, x...)				\
+ 9999:	x;					\
+ 	_asm_extable_uaccess	9999b, l
+-
+-/*
+- * Generate the assembly for LDTR/STTR with exception table entries.
+- * This is complicated as there is no post-increment or pair versions of the
+- * unprivileged instructions, and USER() only works for single instructions.
+- */
+-	.macro user_ldp l, reg1, reg2, addr, post_inc
+-8888:		ldtr	\reg1, [\addr];
+-8889:		ldtr	\reg2, [\addr, #8];
+-		add	\addr, \addr, \post_inc;
+-
+-		_asm_extable_uaccess	8888b, \l;
+-		_asm_extable_uaccess	8889b, \l;
+-	.endm
+-
+-	.macro user_stp l, reg1, reg2, addr, post_inc
+-8888:		sttr	\reg1, [\addr];
+-8889:		sttr	\reg2, [\addr, #8];
+-		add	\addr, \addr, \post_inc;
+-
+-		_asm_extable_uaccess	8888b,\l;
+-		_asm_extable_uaccess	8889b,\l;
+-	.endm
+-
+-	.macro user_ldst l, inst, reg, addr, post_inc
+-8888:		\inst		\reg, [\addr];
+-		add		\addr, \addr, \post_inc;
+-
+-		_asm_extable_uaccess	8888b, \l;
+-	.endm
+ #endif
+diff --git a/arch/arm64/lib/copy_template.S b/arch/arm64/lib/copy_template.S
+deleted file mode 100644
+index 488df234c49a..000000000000
+--- a/arch/arm64/lib/copy_template.S
++++ /dev/null
+@@ -1,181 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-/*
+- * Copyright (C) 2013 ARM Ltd.
+- * Copyright (C) 2013 Linaro.
+- *
+- * This code is based on glibc cortex strings work originally authored by Linaro
+- * be found @
+- *
+- * http://bazaar.launchpad.net/~linaro-toolchain-dev/cortex-strings/trunk/
+- * files/head:/src/aarch64/
+- */
+-
+-
+-/*
+- * Copy a buffer from src to dest (alignment handled by the hardware)
+- *
+- * Parameters:
+- *	x0 - dest
+- *	x1 - src
+- *	x2 - n
+- * Returns:
+- *	x0 - dest
+- */
+-dstin	.req	x0
+-src	.req	x1
+-count	.req	x2
+-tmp1	.req	x3
+-tmp1w	.req	w3
+-tmp2	.req	x4
+-tmp2w	.req	w4
+-dst	.req	x6
+-
+-A_l	.req	x7
+-A_h	.req	x8
+-B_l	.req	x9
+-B_h	.req	x10
+-C_l	.req	x11
+-C_h	.req	x12
+-D_l	.req	x13
+-D_h	.req	x14
+-
+-	mov	dst, dstin
+-	cmp	count, #16
+-	/*When memory length is less than 16, the accessed are not aligned.*/
+-	b.lo	.Ltiny15
+-
+-	neg	tmp2, src
+-	ands	tmp2, tmp2, #15/* Bytes to reach alignment. */
+-	b.eq	.LSrcAligned
+-	sub	count, count, tmp2
+-	/*
+-	* Copy the leading memory data from src to dst in an increasing
+-	* address order.By this way,the risk of overwriting the source
+-	* memory data is eliminated when the distance between src and
+-	* dst is less than 16. The memory accesses here are alignment.
+-	*/
+-	tbz	tmp2, #0, 1f
+-	ldrb1	tmp1w, src, #1
+-	strb1	tmp1w, dst, #1
+-1:
+-	tbz	tmp2, #1, 2f
+-	ldrh1	tmp1w, src, #2
+-	strh1	tmp1w, dst, #2
+-2:
+-	tbz	tmp2, #2, 3f
+-	ldr1	tmp1w, src, #4
+-	str1	tmp1w, dst, #4
+-3:
+-	tbz	tmp2, #3, .LSrcAligned
+-	ldr1	tmp1, src, #8
+-	str1	tmp1, dst, #8
+-
+-.LSrcAligned:
+-	cmp	count, #64
+-	b.ge	.Lcpy_over64
+-	/*
+-	* Deal with small copies quickly by dropping straight into the
+-	* exit block.
+-	*/
+-.Ltail63:
+-	/*
+-	* Copy up to 48 bytes of data. At this point we only need the
+-	* bottom 6 bits of count to be accurate.
+-	*/
+-	ands	tmp1, count, #0x30
+-	b.eq	.Ltiny15
+-	cmp	tmp1w, #0x20
+-	b.eq	1f
+-	b.lt	2f
+-	ldp1	A_l, A_h, src, #16
+-	stp1	A_l, A_h, dst, #16
+-1:
+-	ldp1	A_l, A_h, src, #16
+-	stp1	A_l, A_h, dst, #16
+-2:
+-	ldp1	A_l, A_h, src, #16
+-	stp1	A_l, A_h, dst, #16
+-.Ltiny15:
+-	/*
+-	* Prefer to break one ldp/stp into several load/store to access
+-	* memory in an increasing address order,rather than to load/store 16
+-	* bytes from (src-16) to (dst-16) and to backward the src to aligned
+-	* address,which way is used in original cortex memcpy. If keeping
+-	* the original memcpy process here, memmove need to satisfy the
+-	* precondition that src address is at least 16 bytes bigger than dst
+-	* address,otherwise some source data will be overwritten when memove
+-	* call memcpy directly. To make memmove simpler and decouple the
+-	* memcpy's dependency on memmove, withdrew the original process.
+-	*/
+-	tbz	count, #3, 1f
+-	ldr1	tmp1, src, #8
+-	str1	tmp1, dst, #8
+-1:
+-	tbz	count, #2, 2f
+-	ldr1	tmp1w, src, #4
+-	str1	tmp1w, dst, #4
+-2:
+-	tbz	count, #1, 3f
+-	ldrh1	tmp1w, src, #2
+-	strh1	tmp1w, dst, #2
+-3:
+-	tbz	count, #0, .Lexitfunc
+-	ldrb1	tmp1w, src, #1
+-	strb1	tmp1w, dst, #1
+-
+-	b	.Lexitfunc
+-
+-.Lcpy_over64:
+-	subs	count, count, #128
+-	b.ge	.Lcpy_body_large
+-	/*
+-	* Less than 128 bytes to copy, so handle 64 here and then jump
+-	* to the tail.
+-	*/
+-	ldp1	A_l, A_h, src, #16
+-	stp1	A_l, A_h, dst, #16
+-	ldp1	B_l, B_h, src, #16
+-	ldp1	C_l, C_h, src, #16
+-	stp1	B_l, B_h, dst, #16
+-	stp1	C_l, C_h, dst, #16
+-	ldp1	D_l, D_h, src, #16
+-	stp1	D_l, D_h, dst, #16
+-
+-	tst	count, #0x3f
+-	b.ne	.Ltail63
+-	b	.Lexitfunc
+-
+-	/*
+-	* Critical loop.  Start at a new cache line boundary.  Assuming
+-	* 64 bytes per line this ensures the entire loop is in one line.
+-	*/
+-	.p2align	L1_CACHE_SHIFT
+-.Lcpy_body_large:
+-	/* pre-get 64 bytes data. */
+-	ldp1	A_l, A_h, src, #16
+-	ldp1	B_l, B_h, src, #16
+-	ldp1	C_l, C_h, src, #16
+-	ldp1	D_l, D_h, src, #16
+-1:
+-	/*
+-	* interlace the load of next 64 bytes data block with store of the last
+-	* loaded 64 bytes data.
+-	*/
+-	stp1	A_l, A_h, dst, #16
+-	ldp1	A_l, A_h, src, #16
+-	stp1	B_l, B_h, dst, #16
+-	ldp1	B_l, B_h, src, #16
+-	stp1	C_l, C_h, dst, #16
+-	ldp1	C_l, C_h, src, #16
+-	stp1	D_l, D_h, dst, #16
+-	ldp1	D_l, D_h, src, #16
+-	subs	count, count, #64
+-	b.ge	1b
+-	stp1	A_l, A_h, dst, #16
+-	stp1	B_l, B_h, dst, #16
+-	stp1	C_l, C_h, dst, #16
+-	stp1	D_l, D_h, dst, #16
+-
+-	tst	count, #0x3f
+-	b.ne	.Ltail63
+-.Lexitfunc:
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Tue, 22 Nov 2022 13:31:13 +0100
+Subject: [PATCH 12/13] soc: fsl: dpio: Update for better ACPI support
+
+Update the lx2160a_soc to match on the soc_id provided by
+TF-A via the SMCCC_ID request. This allows the DPIO driver
+to be configured correctly without patches the fsl-guts driver
+for ACPI support using an in kernel standard mechanism.
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ drivers/soc/fsl/dpio/dpio-driver.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/soc/fsl/dpio/dpio-driver.c b/drivers/soc/fsl/dpio/dpio-driver.c
+index 5a2edc48dd79..6c99d20f9d8d 100644
+--- a/drivers/soc/fsl/dpio/dpio-driver.c
++++ b/drivers/soc/fsl/dpio/dpio-driver.c
+@@ -50,6 +50,7 @@ static const struct soc_device_attribute ls2088a_soc[] = {
+ 
+ static const struct soc_device_attribute lx2160a_soc[] = {
+ 	{.family = "QorIQ LX2160A"},
++	{.soc_id = "jep106:0015:8736"},
+ 	{ /* sentinel */ }
+ };
+ 
+-- 
+2.39.1
+
+
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Thu, 5 Jan 2023 20:20:35 +0100
+Subject: [PATCH 13/13] bus: fsl-mc-bus: fix dma error message for dpio devices
+
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+---
+ drivers/bus/fsl-mc/fsl-mc-bus.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/bus/fsl-mc/fsl-mc-bus.c b/drivers/bus/fsl-mc/fsl-mc-bus.c
+index 6143dbf31f31..1a89b9e7ff7c 100644
+--- a/drivers/bus/fsl-mc/fsl-mc-bus.c
++++ b/drivers/bus/fsl-mc/fsl-mc-bus.c
+@@ -819,6 +819,9 @@ int fsl_mc_device_add(struct fsl_mc_obj_desc *obj_desc,
+ 
+ 	mc_dev->obj_desc = *obj_desc;
+ 	mc_dev->mc_io = mc_io;
++	mc_dev->dma_mask = FSL_MC_DEFAULT_DMA_MASK;
++	mc_dev->dev.dma_mask = &mc_dev->dma_mask;
++	mc_dev->dev.coherent_dma_mask = mc_dev->dma_mask;
+ 	device_initialize(&mc_dev->dev);
+ 	mc_dev->dev.parent = parent_dev;
+ 	mc_dev->dev.bus = &fsl_mc_bus_type;
+@@ -872,9 +875,6 @@ int fsl_mc_device_add(struct fsl_mc_obj_desc *obj_desc,
+ 		 * parent's ICID and interrupt domain.
+ 		 */
+ 		mc_dev->icid = parent_mc_dev->icid;
+-		mc_dev->dma_mask = FSL_MC_DEFAULT_DMA_MASK;
+-		mc_dev->dev.dma_mask = &mc_dev->dma_mask;
+-		mc_dev->dev.coherent_dma_mask = mc_dev->dma_mask;
+ 		dev_set_msi_domain(&mc_dev->dev,
+ 				   dev_get_msi_domain(&parent_mc_dev->dev));
+ 	}
+-- 
+2.39.1
+
