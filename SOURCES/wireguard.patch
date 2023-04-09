@@ -127,7 +127,7 @@ index 9d7feabacd1d..7b12d4b46158 100644
 +libblake2s-y					+= blake2s-selftest.o
  endif
 -- 
-2.18.4
+2.39.0
 
 
 From 63608ea731e714a509c6bed8d2b46763af6bd0fb Mon Sep 17 00:00:00 2001
@@ -655,7 +655,7 @@ index 000000000000..dabc3accae05
 +
 +MODULE_LICENSE("GPL");
 -- 
-2.18.4
+2.39.0
 
 
 From e26ad65e01d68816d6d75a9f95ec0957f763ac6c Mon Sep 17 00:00:00 2001
@@ -856,7 +856,7 @@ index 34a74bdc2d65..ef7b0110ee75 100644
  	  SSSE3, AVX2, and AVX-512VL optimized implementations of the ChaCha20,
  	  XChaCha20, and XChaCha12 stream ciphers.
 -- 
-2.18.4
+2.39.0
 
 
 From 910eb3cc6e7ab7b92dc3322c6900cc10922dbe52 Mon Sep 17 00:00:00 2001
@@ -1072,7 +1072,7 @@ index fa3b7f47b267..d4bfc9cb770e 100644
  #define XCHACHA_IV_SIZE		32
  
 -- 
-2.18.4
+2.39.0
 
 
 From 82cf3241863176cd5338124172b5c1d8e0127a84 Mon Sep 17 00:00:00 2001
@@ -1209,7 +1209,7 @@ index d4cc61bfe79d..cae2cb92eca8 100644
  		.decrypt		= xchacha_neon,
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 6302eefd8c9c12640989c49d2736edfd353d2c0b Mon Sep 17 00:00:00 2001
@@ -1355,7 +1355,7 @@ index cae2cb92eca8..46cd4297761c 100644
  
  module_init(chacha_simd_mod_init);
 -- 
-2.18.4
+2.39.0
 
 
 From 45601c241d1f22ce8fb94608c293a8e18bc87711 Mon Sep 17 00:00:00 2001
@@ -1842,7 +1842,7 @@ index 000000000000..2140319b64a0
 +	pop		{r4-r11,pc}
 +ENDPROC(hchacha20_arm)
 -- 
-2.18.4
+2.39.0
 
 
 From 66c4eae71cffbdc9d84028b9617f779259dc05e6 Mon Sep 17 00:00:00 2001
@@ -2551,7 +2551,7 @@ index 46cd4297761c..b08029d7bde6 100644
   *
   * Copyright (C) 2016 - 2017 Linaro, Ltd. <ard.biesheuvel@linaro.org>
 -- 
-2.18.4
+2.39.0
 
 
 From 237c477712f6351e578a831aab6baf993f09ce6c Mon Sep 17 00:00:00 2001
@@ -2667,7 +2667,7 @@ index eb40efb3eb34..3f0c057aa050 100644
  
  		err = crypto_register_skciphers(neon_algs, ARRAY_SIZE(neon_algs));
 -- 
-2.18.4
+2.39.0
 
 
 From d73849fbdb27043d9ffea77bb368c5421ebdd9cc Mon Sep 17 00:00:00 2001
@@ -3126,7 +3126,7 @@ index 000000000000..a81e02db95e7
 +.end chacha20_mips
 +.set at
 -- 
-2.18.4
+2.39.0
 
 
 From 1d90821eb5ca171dbd004f528068a07060c269ef Mon Sep 17 00:00:00 2001
@@ -3701,7 +3701,7 @@ index 1c470ea34e47..9650afc2107c 100644
  	tristate "SEED cipher algorithm"
  	select CRYPTO_ALGAPI
 -- 
-2.18.4
+2.39.0
 
 
 From 26d657fdaf16d4bd06cef08cddab2dca11f07aba Mon Sep 17 00:00:00 2001
@@ -3824,7 +3824,7 @@ index c0e40b245431..aa5d4a16aac5 100644
 -
  #endif /* _CRYPTO_CHACHA_H */
 -- 
-2.18.4
+2.39.0
 
 
 From 35f00e31789629264dd81ae2495c2f60cd6dd2bf Mon Sep 17 00:00:00 2001
@@ -4501,7 +4501,7 @@ index 000000000000..f019a57dbc1b
 +MODULE_LICENSE("GPL");
 +MODULE_AUTHOR("Martin Willi <martin@strongswan.org>");
 -- 
-2.18.4
+2.39.0
 
 
 From 65a250733d9f417aa4b07fa34d3567e206eb0361 Mon Sep 17 00:00:00 2001
@@ -4764,7 +4764,7 @@ index f5a4319c2a1f..36b5886cb50c 100644
  
  #endif
 -- 
-2.18.4
+2.39.0
 
 
 From 736a79f0abda715d48ee554a616b4333fd8cf62a Mon Sep 17 00:00:00 2001
@@ -5001,7 +5001,7 @@ index f019a57dbc1b..32ec293c65ae 100644
  MODULE_LICENSE("GPL");
  MODULE_AUTHOR("Martin Willi <martin@strongswan.org>");
 -- 
-2.18.4
+2.39.0
 
 
 From d1c1933f7f7e1e84165014c09e12da33a5e42263 Mon Sep 17 00:00:00 2001
@@ -5230,7 +5230,7 @@ index 04fa269e5534..479b0cab2a1a 100644
   * Poly1305 requires a unique key for each tag, which implies that we can't set
   * it on the tfm that gets accessed by multiple users simultaneously. Instead we
 -- 
-2.18.4
+2.39.0
 
 
 From b0eb1b3efc6686087869acb696d7b57067681454 Mon Sep 17 00:00:00 2001
@@ -5404,7 +5404,7 @@ index a731ea36bd5c..181754615f73 100644
  
  config CRYPTO_ARCH_HAVE_LIB_POLY1305
 -- 
-2.18.4
+2.39.0
 
 
 From f3594ba06652816a55614f215c82e07e179f4042 Mon Sep 17 00:00:00 2001
@@ -7506,7 +7506,7 @@ index 181754615f73..9923445e8225 100644
  
  config CRYPTO_ARCH_HAVE_LIB_POLY1305
 -- 
-2.18.4
+2.39.0
 
 
 From c0ae38fbf844be2cf99f559f98ef3e9d10664b92 Mon Sep 17 00:00:00 2001
@@ -10301,7 +10301,7 @@ index 9923445e8225..9bd15b227e78 100644
  
  config CRYPTO_ARCH_HAVE_LIB_POLY1305
 -- 
-2.18.4
+2.39.0
 
 
 From 08dc11e3b4803725e11b5ea23d4a3d751a02aa4c Mon Sep 17 00:00:00 2001
@@ -11880,7 +11880,7 @@ index 9bd15b227e78..d15ec5382986 100644
  	default 9 if ARM || ARM64
  	default 1
 -- 
-2.18.4
+2.39.0
 
 
 From 94e8427c0cd9be8d665ae5d5a0b9a7d2cfd0cffd Mon Sep 17 00:00:00 2001
@@ -13750,7 +13750,7 @@ index 000000000000..0106bebe6900
 +MODULE_DESCRIPTION("Curve25519 scalar multiplication");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From b5994d65bd04553a35635f0d35768b3bfaacd8c8 Mon Sep 17 00:00:00 2001
@@ -15026,7 +15026,7 @@ index ef7d21f39d4a..66c1920e50df 100644
  	{
  #ifndef CONFIG_CRYPTO_FIPS
 -- 
-2.18.4
+2.39.0
 
 
 From 8d4dff3cece52e2c975c82e59dc0bc93034b8cae Mon Sep 17 00:00:00 2001
@@ -15173,7 +15173,7 @@ index 000000000000..bd88fd571393
 +MODULE_ALIAS_CRYPTO("curve25519-generic");
 +MODULE_LICENSE("GPL");
 -- 
-2.18.4
+2.39.0
 
 
 From e78176cb1880b2ef1558d2b3eb05494f71be9486 Mon Sep 17 00:00:00 2001
@@ -15254,7 +15254,7 @@ index 1c455207341d..2fde0ec33dbd 100644
  	unsigned i;
  	b = 0 - b;
 -- 
-2.18.4
+2.39.0
 
 
 From 9d5fd7aced165669be9a82664f2aae6e7c237338 Mon Sep 17 00:00:00 2001
@@ -17802,7 +17802,7 @@ index 22ca95980c57..5bf4537cab23 100644
  
  config CRYPTO_CCM
 -- 
-2.18.4
+2.39.0
 
 
 From 59b7654e0f95eb4e1e988a343551a8bfeb054667 Mon Sep 17 00:00:00 2001
@@ -19944,7 +19944,7 @@ index 000000000000..f33b85fef382
 +	vpop		{q4, q5, q6, q7}
 +	bx		lr
 -- 
-2.18.4
+2.39.0
 
 
 From 4f0755a2b9406f0b6289525bc583f2615312dc13 Mon Sep 17 00:00:00 2001
@@ -21015,7 +21015,7 @@ index 000000000000..2e9e12d2f642
 +MODULE_ALIAS_CRYPTO("curve25519-neon");
 +MODULE_LICENSE("GPL v2");
 -- 
-2.18.4
+2.39.0
 
 
 From 67ff55b2a15859dd9fcdd3829a09b4be48eb5e5f Mon Sep 17 00:00:00 2001
@@ -28709,7 +28709,7 @@ index 000000000000..c12ddbe9eb92
 +MODULE_DESCRIPTION("ChaCha20Poly1305 AEAD construction");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From d4f107d9d4d980662bda005e95c886ce2d32617b Mon Sep 17 00:00:00 2001
@@ -29014,7 +29014,7 @@ index c12ddbe9eb92..821e5cc9b14e 100644
  {
  	if (!IS_ENABLED(CONFIG_CRYPTO_MANAGER_DISABLE_TESTS) &&
 -- 
-2.18.4
+2.39.0
 
 
 From 54dca6aa6773b119aa13d09e9dacdd99aeb6f1ea Mon Sep 17 00:00:00 2001
@@ -29088,7 +29088,7 @@ index c1b147318393..8beea79ab117 100644
  		.decrypt		= crypto_xchacha_crypt,
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From e5b004bc65c9bec4423eb5238e6cac222da4426e Mon Sep 17 00:00:00 2001
@@ -29126,7 +29126,7 @@ index b391e13a9e41..a94e30b6f941 100644
  
  module_init(chacha_simd_mod_init);
 -- 
-2.18.4
+2.39.0
 
 
 From 3366eb9191fd5eb2301f0930995863be6ce15527 Mon Sep 17 00:00:00 2001
@@ -29215,7 +29215,7 @@ index 821e5cc9b14e..6d83cafebc69 100644
  			partial = length;
  		}
 -- 
-2.18.4
+2.39.0
 
 
 From 4d580570f81e6aee2a75167f39bf6c93f976a752 Mon Sep 17 00:00:00 2001
@@ -29494,7 +29494,7 @@ index 370cd88068ec..0cc4537e6617 100644
  
  module_init(poly1305_simd_mod_init);
 -- 
-2.18.4
+2.39.0
 
 
 From 0b61941c407c137ec1b6a166a21099e923415780 Mon Sep 17 00:00:00 2001
@@ -29535,7 +29535,7 @@ index aa5d4a16aac5..b085dc1ac151 100644
  {
  	return chacha_setkey(tfm, key, keysize, 12);
 -- 
-2.18.4
+2.39.0
 
 
 From 141d6b2c92e17fb94f1da500982f8345ef5d9f76 Mon Sep 17 00:00:00 2001
@@ -29579,7 +29579,7 @@ index f3f42cf3b893..776ae07e0469 100644
  				 unsigned int len)
  {
 -- 
-2.18.4
+2.39.0
 
 
 From 84bdddf25c340764bde8d8024ad364c8eee2301e Mon Sep 17 00:00:00 2001
@@ -30977,7 +30977,7 @@ index 0106bebe6900..c03ccdb99434 100644
  MODULE_DESCRIPTION("Curve25519 scalar multiplication");
  MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From 400c9d28db60f47835dae533359b3662254d0f09 Mon Sep 17 00:00:00 2001
@@ -32172,7 +32172,7 @@ index 32ec293c65ae..9d2d14df0fee 100644
  }
  EXPORT_SYMBOL_GPL(poly1305_final_generic);
 -- 
-2.18.4
+2.39.0
 
 
 From e04084b205175ac3589f084377a8fe3af9ca978e Mon Sep 17 00:00:00 2001
@@ -36362,7 +36362,7 @@ index 000000000000..342ad7f18aa7
 +}
 +close STDOUT;
 -- 
-2.18.4
+2.39.0
 
 
 From 0749af66da4a39b38466bd73f9c09f8969036429 Mon Sep 17 00:00:00 2001
@@ -39299,7 +39299,7 @@ index fe6b36e9a336..ba816599dc06 100644
  	default 1
  
 -- 
-2.18.4
+2.39.0
 
 
 From 12b3f0f13a0b8539e553d2ed896967875bc7c7a5 Mon Sep 17 00:00:00 2001
@@ -39480,7 +39480,7 @@ index b37d29cf5d0a..fc881b46d911 100644
  }
  EXPORT_SYMBOL(poly1305_final_arch);
 -- 
-2.18.4
+2.39.0
 
 
 From 8db1bcc5baa0fb2de00c5296cfaf777aa269b18d Mon Sep 17 00:00:00 2001
@@ -39593,7 +39593,7 @@ index c03ccdb99434..288a62cd29b2 100644
  {
  	if (!IS_ENABLED(CONFIG_CRYPTO_MANAGER_DISABLE_TESTS) &&
 -- 
-2.18.4
+2.39.0
 
 
 From a1bec4a57a3a96125310b164f38696ed3fc93cd0 Mon Sep 17 00:00:00 2001
@@ -39622,7 +39622,7 @@ index c406ea6571fa..30be0400a439 100644
 -poly1305-x86_64.S
 +poly1305-x86_64-cryptogams.S
 -- 
-2.18.4
+2.39.0
 
 
 From bb4ff3c340a89baa39b18b45b92cc70261f1b9a4 Mon Sep 17 00:00:00 2001
@@ -41486,7 +41486,7 @@ index 465de46dbdef..c391a91364e9 100644
  	return success;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 924f2ce76a61dd65011e48e736bd81a728422478 Mon Sep 17 00:00:00 2001
@@ -41529,7 +41529,7 @@ index 657363588e0c..79bb58737d52 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From bf90da3e02047d8d33b440af2ab9820feae037fe Mon Sep 17 00:00:00 2001
@@ -41593,7 +41593,7 @@ index 7bdf8823066d..893692ed12b7 100644
  	} else {
  		kernel_neon_begin();
 -- 
-2.18.4
+2.39.0
 
 
 From dba3a21fc4785c286063a712f19127b2b172c5b2 Mon Sep 17 00:00:00 2001
@@ -41639,7 +41639,7 @@ index 5bf4537cab23..d655647f4c75 100644
  	tristate
  
 -- 
-2.18.4
+2.39.0
 
 
 From 3db72f7774c9d49144323bb79e43cb428f7cf12f Mon Sep 17 00:00:00 2001
@@ -41685,7 +41685,7 @@ index 6d83cafebc69..ad0699ce702f 100644
  
  	b.iv[0] = 0;
 -- 
-2.18.4
+2.39.0
 
 
 From ee68cb24a236b8d2530647167209d684db98cd1f Mon Sep 17 00:00:00 2001
@@ -41779,7 +41779,7 @@ index 4e6dc840b159..9ecb3c1f0f15 100644
  	else
  		curve25519_generic(pub, secret, curve25519_base_point);
 -- 
-2.18.4
+2.39.0
 
 
 From 698a304c5b7856b2442e6eaabd6b57775a608bd3 Mon Sep 17 00:00:00 2001
@@ -41855,7 +41855,7 @@ index c391a91364e9..fa43deda2660 100644
  				memset(input, 0, total_len);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 3976a3ecebfa2682609dc6d4f9d39a151be2e966 Mon Sep 17 00:00:00 2001
@@ -45612,7 +45612,7 @@ index eec7d2d24239..e4e58b8e9afe 100644
  MODULE_LICENSE("GPL v2");
 +MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From e97d0091e8a08e54ff7685f9a4b2b7e5c2ac9d41 Mon Sep 17 00:00:00 2001
@@ -45994,7 +45994,7 @@ index e4e58b8e9afe..8a17621f7d3a 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From f507c3bdf0896a4b01578fbdf597f4838e36725f Mon Sep 17 00:00:00 2001
@@ -46038,7 +46038,7 @@ index 879df8781ed5..e403b1343328 100644
  sha512-core.S
 +poly1305-core.S
 -- 
-2.18.4
+2.39.0
 
 
 From 3058815a5f37bd5931847a4dacc547b1e2191576 Mon Sep 17 00:00:00 2001
@@ -46262,7 +46262,7 @@ index 79bb58737d52..61b2bc8b6986 100644
  
  static void poly1305_simd_emit(void *ctx, u8 mac[POLY1305_DIGEST_SIZE],
 -- 
-2.18.4
+2.39.0
 
 
 From f0bcb2d835a733aae12eb156a976e9acec149bb1 Mon Sep 17 00:00:00 2001
@@ -46308,7 +46308,7 @@ index ad0699ce702f..431e04280332 100644
  {
  	k[0] = get_unaligned_le32(in);
 -- 
-2.18.4
+2.39.0
 
 
 From 806d2055c44a2c56cbf7598f8a86ec3262a7834e Mon Sep 17 00:00:00 2001
@@ -46466,7 +46466,7 @@ index d4bfc9cb770e..b73c9931f943 100644
  /* 192-bit nonce, then 64-bit stream position */
  #define XCHACHA_IV_SIZE		32
 -- 
-2.18.4
+2.39.0
 
 
 From df3bd7f95ba2a63ce9298054d8c8ac1867f55982 Mon Sep 17 00:00:00 2001
@@ -46519,7 +46519,7 @@ index 8a17621f7d3a..8acbb6584a37 100644
  	f1 = f[1U];
  	f2 = f[2U];
 -- 
-2.18.4
+2.39.0
 
 
 From 725f1a8d966368e6f3afa40b585acb55f6f955ff Mon Sep 17 00:00:00 2001
@@ -46562,7 +46562,7 @@ index 776ae07e0469..31eb75b6002f 100644
  
  asmlinkage void curve25519_neon(u8 mypublic[CURVE25519_KEY_SIZE],
 -- 
-2.18.4
+2.39.0
 
 
 From 2bf284a82ba0a87787de6a7efc0c9cca3322a613 Mon Sep 17 00:00:00 2001
@@ -46602,7 +46602,7 @@ index 13cfef4ae22e..3023c1acfa19 100644
  
  void __weak poly1305_blocks_neon(void *state, const u8 *src, u32 len, u32 hibit)
 -- 
-2.18.4
+2.39.0
 
 
 From 57953fa9e426e4ddea5af1fc86a8fe2f82f3267a Mon Sep 17 00:00:00 2001
@@ -46869,7 +46869,7 @@ index 8acbb6584a37..a9edb6f8a0ba 100644
  		"  mulxq 104(%1), %%r9, %%rbx;"
  		"  adcx %%r13, %%r9;"
 -- 
-2.18.4
+2.39.0
 
 
 From 25ab2f98a60c7016d6b3145da385453f3a0d6df4 Mon Sep 17 00:00:00 2001
@@ -46934,7 +46934,7 @@ index 80061bea6b16..5b593990501d 100644
  	mov	0(%rsi),%r8		# arg3, disp->ControlPc
  	mov	16(%rsi),%r9		# arg4, disp->FunctionEntry
 -- 
-2.18.4
+2.39.0
 
 
 From f2ff7ad9516f862670b023b9237e2408fa1b666d Mon Sep 17 00:00:00 2001
@@ -46970,7 +46970,7 @@ index 61b2bc8b6986..7de5046fe583 100644
  		}
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From bb5e5613531fe420203f8a7bf7a7cae5493fa070 Mon Sep 17 00:00:00 2001
@@ -47009,7 +47009,7 @@ index 7de5046fe583..b69e362730d0 100644
  		}
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 42177d7f0eaf5d152bb20ce309523aa79a757db4 Mon Sep 17 00:00:00 2001
@@ -47048,7 +47048,7 @@ index d655647f4c75..deb98b9484de 100644
  	  Enable extra run-time self tests of registered crypto algorithms,
  	  including randomized fuzz tests.
 -- 
-2.18.4
+2.39.0
 
 
 From eb941d0201c2f35b85ee067dd49a17c5480ae284 Mon Sep 17 00:00:00 2001
@@ -47328,7 +47328,7 @@ index eb22926d4912..13d12f672656 100644
 +	.byte		0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17
 +	.byte		0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
 -- 
-2.18.4
+2.39.0
 
 
 From 9833fb53c1de34119c26dbf1fd8ddd8bafd35d06 Mon Sep 17 00:00:00 2001
@@ -47658,7 +47658,7 @@ index 706c4e10e9e2..50d9dd173be7 100644
  	.set		.Li, .Li + 1
  	.endr
 -- 
-2.18.4
+2.39.0
 
 
 From d1463b0e37da7954a63075dc4a27ee0ba8656e2a Mon Sep 17 00:00:00 2001
@@ -47701,7 +47701,7 @@ index 431e04280332..1fec56e5dd51 100644
  MODULE_DESCRIPTION("ChaCha20Poly1305 AEAD construction");
  MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From 68fcc72c9541742b4f52c14874e9b12e9e45f0cd Mon Sep 17 00:00:00 2001
@@ -47746,7 +47746,7 @@ index f603184dc0f5..a408f4bcfd62 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From be7049e60c52477a696f68558e2efe00bac89ca4 Mon Sep 17 00:00:00 2001
@@ -55957,7 +55957,7 @@ index 000000000000..e7310d9390f7
 +[[ $alldeleted -eq 1 ]]
 +pretty "" "Objects that were created were also destroyed."
 -- 
-2.18.4
+2.39.0
 
 
 From 780920c4e22164c317bcce78bcf8ec0948961619 Mon Sep 17 00:00:00 2001
@@ -57094,7 +57094,7 @@ index 000000000000..9cca30206014
 +CONFIG_WIREGUARD=y
 +CONFIG_WIREGUARD_DEBUG=y
 -- 
-2.18.4
+2.39.0
 
 
 From 9c8594812ba101bc32d52162c9afd637122e41d8 Mon Sep 17 00:00:00 2001
@@ -57131,7 +57131,7 @@ index ce59889f0da7..2fefe588edf7 100644
  	select CRYPTO_POLY1305_NEON if ARM64 && KERNEL_MODE_NEON
  	select CRYPTO_POLY1305_ARM if ARM
 -- 
-2.18.4
+2.39.0
 
 
 From ca56d1c6b44157a41e28b9d01932c61d9299f896 Mon Sep 17 00:00:00 2001
@@ -57205,7 +57205,7 @@ index dd8a47c4ad11..ae88be14c947 100644
   * of a peer, it likely should not be specified in subsequent fragments.
   *
 -- 
-2.18.4
+2.39.0
 
 
 From 665aba5314a36133afd94e9b0bb39b1716452fd2 Mon Sep 17 00:00:00 2001
@@ -57240,7 +57240,7 @@ index 10c0a40f6a9e..7a7d5f1a80fc 100644
  #include <linux/module.h>
  #include <linux/genetlink.h>
 -- 
-2.18.4
+2.39.0
 
 
 From 7e08991b1fe9675b8a92335d2af87c3e338fc7c4 Mon Sep 17 00:00:00 2001
@@ -57288,7 +57288,7 @@ index 72667d5399c3..121d9ea0f135 100644
  				}
  			}
 -- 
-2.18.4
+2.39.0
 
 
 From b9b9879dc9b1ed15634d3ed163db8068e7d730e2 Mon Sep 17 00:00:00 2001
@@ -57675,7 +57675,7 @@ index 9cca30206014..af9323a0b6e0 100644
  CONFIG_FILE_LOCKING=y
  CONFIG_POSIX_TIMERS=y
 -- 
-2.18.4
+2.39.0
 
 
 From ae5ae94a2eb93d61ae7787fb1c68193034aa5a37 Mon Sep 17 00:00:00 2001
@@ -57720,7 +57720,7 @@ index 58fdd630b246..e62c714a548e 100644
  	skb->nohdr = 0;
  	skb->peeked = 0;
 -- 
-2.18.4
+2.39.0
 
 
 From 52432e276d8e3fb3d05b2847235f7c3965013deb Mon Sep 17 00:00:00 2001
@@ -57760,7 +57760,7 @@ index c46256d0d81c..262f3b5c819d 100644
  	return 0;
  
 -- 
-2.18.4
+2.39.0
 
 
 From 9040be2e7caf3768153f17e65cb884ed02225e74 Mon Sep 17 00:00:00 2001
@@ -57930,7 +57930,7 @@ index 121d9ea0f135..3725e9cd85f4 100644
  			return -ENOMEM;
  		}
 -- 
-2.18.4
+2.39.0
 
 
 From 8a633a6cd4d5ed51038e6f1a68c04640a3f73c72 Mon Sep 17 00:00:00 2001
@@ -58172,7 +58172,7 @@ index 26470134a33c..d16d60077e09 100644
  	return ret;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0598579518cddfb3a1ec7456846cd5afce688d30 Mon Sep 17 00:00:00 2001
@@ -58212,7 +58212,7 @@ index d5c85c7494f2..b03647d1bbf6 100755
  
  declare -A objects
 -- 
-2.18.4
+2.39.0
 
 
 From 7a299307ec711df8f76819495b44d6d5e98175df Mon Sep 17 00:00:00 2001
@@ -58296,7 +58296,7 @@ index b03647d1bbf6..f5ab1cda8bb5 100755
  ! read -r -N 1 -t 1 out <&4 || false
  kill $ncat_pid
 -- 
-2.18.4
+2.39.0
 
 
 From c5805fe71758e959cb64af9332c5dc1d8c83769b Mon Sep 17 00:00:00 2001
@@ -58368,7 +58368,7 @@ index f5ab1cda8bb5..138d46b3f330 100755
  ip0 link del vethrs
  ip1 link del wg0
 -- 
-2.18.4
+2.39.0
 
 
 From 92d2e39be8de73e9962ce74fc823b218c205d0a3 Mon Sep 17 00:00:00 2001
@@ -58478,7 +58478,7 @@ index f10aa3590adc..28d477683e8a 100644
  	$(STRIP) -s $@
  
 -- 
-2.18.4
+2.39.0
 
 
 From bc38ce88114a20cc3db44adcc1865741df6e4294 Mon Sep 17 00:00:00 2001
@@ -58522,7 +58522,7 @@ index 9c6bab9c981f..4a153894cee2 100644
  					      under_load);
  	if ((under_load && mac_state == VALID_MAC_WITH_COOKIE) ||
 -- 
-2.18.4
+2.39.0
 
 
 From f93c7ffeb9e9ec9d060c4edd94cbd581f0c566fd Mon Sep 17 00:00:00 2001
@@ -58625,7 +58625,7 @@ index c13260563446..7348c10cbae3 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 81a05559f0f9634b9f0dc0b7217842b54eac486b Mon Sep 17 00:00:00 2001
@@ -58664,7 +58664,7 @@ index 262f3b5c819d..b0d6541582d3 100644
  	sock_free(old6);
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 1bc5b20a693f67c04904b0389adcf777cb7bc2bb Mon Sep 17 00:00:00 2001
@@ -58698,7 +58698,7 @@ index 90bc9813cadc..c9698120ac9d 100644
  #include <sys/types.h>
  #include <sys/io.h>
 -- 
-2.18.4
+2.39.0
 
 
 From f8a92fdcdf94986167e14791426acf44b63df719 Mon Sep 17 00:00:00 2001
@@ -58808,7 +58808,7 @@ index 4a153894cee2..243ed7172dd2 100644
  		len = ntohs(ip_hdr(skb)->tot_len);
  		if (unlikely(len < sizeof(struct iphdr)))
 -- 
-2.18.4
+2.39.0
 
 
 From 8f3c8ba1fd1e5fd3b4abb93af863622661cd450f Mon Sep 17 00:00:00 2001
@@ -58849,7 +58849,7 @@ index 243ed7172dd2..da3b782ab7d3 100644
  	}
  	return;
 -- 
-2.18.4
+2.39.0
 
 
 From 1cde4a22adcad86c0bc7746a8df602f8b17b3170 Mon Sep 17 00:00:00 2001
@@ -59087,7 +59087,7 @@ index 138d46b3f330..936e1ca9410e 100755
  
  declare -A objects
 -- 
-2.18.4
+2.39.0
 
 
 From bdca07db6695d45842dd5172b82c6640c2ad6d06 Mon Sep 17 00:00:00 2001
@@ -59122,7 +59122,7 @@ index 7348c10cbae3..3e030d614df5 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 1c86662d9e8563009bc8cec17d5c4d89e6aba57b Mon Sep 17 00:00:00 2001
@@ -59163,7 +59163,7 @@ index 5c964fcb994e..71b8e80b58e1 100644
  			INIT_WORK(&queue->work, function);
  		}
 -- 
-2.18.4
+2.39.0
 
 
 From dc68a601065f7b002d65db8b0a7648e904650277 Mon Sep 17 00:00:00 2001
@@ -59219,7 +59219,7 @@ index da3b782ab7d3..267f202f1931 100644
  		goto dishonest_packet_type;
  	}
 -- 
-2.18.4
+2.39.0
 
 
 From 4d3b402999d36520e18acebb07eb626d669c4074 Mon Sep 17 00:00:00 2001
@@ -59254,7 +59254,7 @@ index 990c510a9cfa..f52f1e2bc7f6 100644
  CONFIG_FRAME_WARN=1280
 +CONFIG_THREAD_SHIFT=14
 -- 
-2.18.4
+2.39.0
 
 
 From 3d05f300717fa3e5eb005d3caea18da827d51703 Mon Sep 17 00:00:00 2001
@@ -59424,7 +59424,7 @@ index 936e1ca9410e..17a1f53ceba0 100755
  ip1 -6 addr add fc00::9/96 dev vethc
  ip1 -6 route add default via fc00::1
 -- 
-2.18.4
+2.39.0
 
 
 From ccf029b122b81fb0cfe572a7f2ded28642c513ce Mon Sep 17 00:00:00 2001
@@ -59490,7 +59490,7 @@ index 3e030d614df5..dc3079e17c7f 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From adebeedaa32265006ce31415800d25a40522c04a Mon Sep 17 00:00:00 2001
@@ -59547,7 +59547,7 @@ index bcd6462e4540..007cd4457c5f 100644
  	if (IS_ENABLED(CONFIG_KASAN) || IS_ENABLED(CONFIG_UBSAN))
  		return true;
 -- 
-2.18.4
+2.39.0
 
 
 From 45894ecebf5f3552b3b0b854c1138081aceecf7c Mon Sep 17 00:00:00 2001
@@ -59643,7 +59643,7 @@ index dc3079e17c7f..6687db699803 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 5842e9e2879fef40ec745257b60d57f66f3d9364 Mon Sep 17 00:00:00 2001
@@ -59680,7 +59680,7 @@ index 28d477683e8a..2dab4f57516d 100644
  $(eval $(call tar_download,NMAP,nmap,7.80,.tar.bz2,https://nmap.org/dist/,fcfa5a0e42099e12e4bf7a68ebe6fde05553383a682e816a7ec9256ab4773faa))
  $(eval $(call tar_download,IPUTILS,iputils,s20190709,.tar.gz,https://github.com/iputils/iputils/archive/s20190709.tar.gz/#,a15720dd741d7538dd2645f9f516d193636ae4300ff7dbc8bfca757bf166490a))
 -- 
-2.18.4
+2.39.0
 
 
 From ae3432a7b979f335af2dc566e9fb44e080dd47ab Mon Sep 17 00:00:00 2001
@@ -59748,7 +59748,7 @@ index c9ae946918fc..7c9d853e8725 100644
  	return ret_peer;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From adc428f2c3c859b7e36c987b75a21815268cf035 Mon Sep 17 00:00:00 2001
@@ -59876,7 +59876,7 @@ index 6687db699803..2f5119ff93d8 100644
  				state = PACKET_STATE_DEAD;
  				break;
 -- 
-2.18.4
+2.39.0
 
 
 From fa47c7fcd6354e12d4ad60979ac480ccffc88498 Mon Sep 17 00:00:00 2001
@@ -60221,7 +60221,7 @@ index 2f5119ff93d8..f74b9341ab0f 100644
  	wg_noise_keypair_put(keypair, false);
  
 -- 
-2.18.4
+2.39.0
 
 
 From 97426523d8ab23b0f9680d5a4f84fdd7a42c3caa Mon Sep 17 00:00:00 2001
@@ -60260,7 +60260,7 @@ index f14fd065916d..caabe90c3d05 100644
  	handshake->state = HANDSHAKE_CONSUMED_INITIATION;
  	up_write(&handshake->lock);
 -- 
-2.18.4
+2.39.0
 
 
 From 27b68a9e1ace9c4a9fcf09e0d8f509b86fea6448 Mon Sep 17 00:00:00 2001
@@ -60570,7 +60570,7 @@ index 17a1f53ceba0..d77f4829f1e0 100755
  done < /dev/kmsg
  alldeleted=1
 -- 
-2.18.4
+2.39.0
 
 
 From 6ecd8f560c58f83b0e9d8932daca21e48b2d205c Mon Sep 17 00:00:00 2001
@@ -60618,7 +60618,7 @@ index 91438144e4f7..9b2ab6fc91cd 100644
  
  dishonest_packet_peer:
 -- 
-2.18.4
+2.39.0
 
 
 From 50e6630ef2021a4614c915aa704fea46d01db7ae Mon Sep 17 00:00:00 2001
@@ -60684,7 +60684,7 @@ index 1452a97914a0..cfe21c3ddfc2 100644
 +const struct header_ops ip_tunnel_header_ops = { .parse_protocol = ip_tunnel_parse_protocol };
 +EXPORT_SYMBOL(ip_tunnel_header_ops);
 -- 
-2.18.4
+2.39.0
 
 
 From 41bc209d8f095b15cbd5e8a87a12c0ef9753202b Mon Sep 17 00:00:00 2001
@@ -60727,7 +60727,7 @@ index a8f151b1b5fa..c9f65e96ccb0 100644
  	dev->addr_len = 0;
  	dev->needed_headroom = DATA_PACKET_HEAD_ROOM;
 -- 
-2.18.4
+2.39.0
 
 
 From 2cde3cd09dd90c04a8ac84db36a953f5d78e1d11 Mon Sep 17 00:00:00 2001
@@ -60804,7 +60804,7 @@ index 9b2ab6fc91cd..2c9551ea6dc7 100644
  		len = ntohs(ip_hdr(skb)->tot_len);
  		if (unlikely(len < sizeof(struct iphdr)))
 -- 
-2.18.4
+2.39.0
 
 
 From 70a3158cfbc98276f368d46e96d23c30d57af0e3 Mon Sep 17 00:00:00 2001
@@ -60859,7 +60859,7 @@ index 9756239416fd..2a14f564033a 100644
  	[WGPEER_A_TX_BYTES]				= { .type = NLA_U64 },
  	[WGPEER_A_ALLOWEDIPS]				= { .type = NLA_NESTED },
 -- 
-2.18.4
+2.39.0
 
 
 From 7c66c32c34e5cf50b3a52cf177c9a6d138e21dd2 Mon Sep 17 00:00:00 2001
@@ -60904,7 +60904,7 @@ index 2a14f564033a..1c69eb8735d5 100644
  };
  
 -- 
-2.18.4
+2.39.0
 
 
 From dcac70adaa29880f20972bd88e046740279bff23 Mon Sep 17 00:00:00 2001
@@ -61037,7 +61037,7 @@ index caabe90c3d05..849dda712782 100644
  
  static struct noise_keypair *keypair_create(struct wg_peer *peer)
 -- 
-2.18.4
+2.39.0
 
 
 From 6076d6786ca79c28ff2488f069e6bd1e96a6b361 Mon Sep 17 00:00:00 2001
@@ -61105,7 +61105,7 @@ index e4deb331476b..f2783aa7a88f 100644
  
  void wg_index_hashtable_remove(struct index_hashtable *table,
 -- 
-2.18.4
+2.39.0
 
 
 From d2c662cf5b0f693410e958ba54bd9f0e7e7bc7e5 Mon Sep 17 00:00:00 2001
@@ -61169,7 +61169,7 @@ index af9323a0b6e0..9864d106e818 100644
  CONFIG_IP_ADVANCED_ROUTER=y
  CONFIG_IP_MULTIPLE_TABLES=y
 -- 
-2.18.4
+2.39.0
 
 
 From 896f59efea3a1e672c78e038953d9b939faa7806 Mon Sep 17 00:00:00 2001
@@ -61232,7 +61232,7 @@ index c33e2c81635f..e9c35130846c 100644
  			net_dbg_ratelimited("%s: No route to %pISpfsc, error %d\n",
  					    wg->dev->name, &endpoint->addr, ret);
 -- 
-2.18.4
+2.39.0
 
 
 From 0460b6d2fc28192713f22d037cbe615a5da2d016 Mon Sep 17 00:00:00 2001
@@ -61290,7 +61290,7 @@ index e9c35130846c..e8eceeb0b62a 100644
  			if (cache)
  				dst_cache_reset(cache);
 -- 
-2.18.4
+2.39.0
 
 
 From a3223b08c14c246ba045350657fa715ee78759e8 Mon Sep 17 00:00:00 2001
@@ -61348,7 +61348,7 @@ index 74c69b75f6f5..7ed7cd95e58f 100755
  
  [[ $(ip1 link show dev wg0) =~ mtu\ ([0-9]+) ]] && orig_mtu="${BASH_REMATCH[1]}"
 -- 
-2.18.4
+2.39.0
 
 
 From b73388a4352c4cb46e9135962108e052ccccc78a Mon Sep 17 00:00:00 2001
@@ -61396,7 +61396,7 @@ index 23af40922997..aaff8de6e34b 100644
  
  struct wg_peer *wg_peer_create(struct wg_device *wg,
 -- 
-2.18.4
+2.39.0
 
 
 From be196fcfbfb4f046aec4967bc6c6b025c83cb5e7 Mon Sep 17 00:00:00 2001
@@ -61450,7 +61450,7 @@ index 46ecec72f214..5aeef63c4393 100644
  	return ret;
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 16187357726c595dd72a79668227f4e05f596e8f Mon Sep 17 00:00:00 2001
@@ -62030,7 +62030,7 @@ index f74b9341ab0f..5368f7c35b4b 100644
  
  out_invalid:
 -- 
-2.18.4
+2.39.0
 
 
 From d8cffccf2c02ab70dbb4ce3cab95b2ada9e09da5 Mon Sep 17 00:00:00 2001
@@ -62066,7 +62066,7 @@ index 2fefe588edf7..0dae5c60d1a8 100644
  	select CRYPTO_POLY1305_ARM if ARM
  	select CRYPTO_CURVE25519_NEON if ARM && KERNEL_MODE_NEON
 -- 
-2.18.4
+2.39.0
 
 
 From 19e027d0cc3627919a49aa2c9faa122ffc5ac987 Mon Sep 17 00:00:00 2001
@@ -62137,7 +62137,7 @@ index 0dae5c60d1a8..c96f8611ce11 100644
  	  WireGuard is a secure, fast, and easy to use replacement for IPSec
  	  that uses modern cryptography and clever networking tricks. It's
 -- 
-2.18.4
+2.39.0
 
 
 From 282daa8202c1f781f36adefd0d46ada56b2a054b Mon Sep 17 00:00:00 2001
@@ -62168,7 +62168,7 @@ index 000000000000..0d47d4f21c6d
 +# SPDX-License-Identifier: GPL-2.0-only
 +poly1305-core.S
 -- 
-2.18.4
+2.39.0
 
 
 From 5c1c971b6f19f5d34710aec8017974ad0dfa2395 Mon Sep 17 00:00:00 2001
@@ -62363,7 +62363,7 @@ index 9d2d14df0fee..26d87fc3823e 100644
  	poly1305_core_setkey(&desc->core_r, key);
  	desc->s[0] = get_unaligned_le32(key + 16);
 -- 
-2.18.4
+2.39.0
 
 
 From 30d71616ded35c244a17820d7a71d204a737546f Mon Sep 17 00:00:00 2001
@@ -62399,7 +62399,7 @@ index 9864d106e818..9e413e0ffa3f 100644
  CONFIG_IP_NF_IPTABLES=y
  CONFIG_IP_NF_FILTER=y
 -- 
-2.18.4
+2.39.0
 
 
 From d9159eb570dc34230246e0edc062620c15189c9c Mon Sep 17 00:00:00 2001
@@ -62436,7 +62436,7 @@ index 7ed7cd95e58f..ebc4ee0fe179 100755
  n1 ping -W 1 -c 100 -f 192.168.99.7
  n1 ping -W 1 -c 100 -f abab::1111
 -- 
-2.18.4
+2.39.0
 
 
 From bfe183ed8e4e09e9006a9bb0c324c58c050cd2bb Mon Sep 17 00:00:00 2001
@@ -62475,7 +62475,7 @@ index fc52b2cb500b..dbe1f8514efc 100644
  wireguard-y := main.o
  wireguard-y += noise.o
 -- 
-2.18.4
+2.39.0
 
 
 From 6d881a4b9fcc5af701b7f3999528b73375f073f2 Mon Sep 17 00:00:00 2001
@@ -62550,7 +62550,7 @@ index e8eceeb0b62a..04739763e303 100644
  	sock_free(old6);
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 0b6f56a494f975a20767e58cb7e43d329aefce9c Mon Sep 17 00:00:00 2001
@@ -62685,7 +62685,7 @@ index 8d53b687a1d1..76e4d3128ad4 100644
 +
  #endif /* _WG_PEER_H */
 -- 
-2.18.4
+2.39.0
 
 
 From 6b5aac16564eeab9c4d76f1c3dd595e1c5e05316 Mon Sep 17 00:00:00 2001
@@ -62735,7 +62735,7 @@ index 846db14cb046..0d2a43a2d400 100644
  			}
  			if (horrible_allowedips_insert_v4(&h,
 -- 
-2.18.4
+2.39.0
 
 
 From 23709a1259c170ace9d9a2c147c028c6460148ba Mon Sep 17 00:00:00 2001
@@ -62981,7 +62981,7 @@ index e5c83cafcef4..f08f552e6852 100644
  		struct list_head peer_list;
  		struct rcu_head rcu;
 -- 
-2.18.4
+2.39.0
 
 
 From e9580a5556a43565c663a3bc007574eebdfbc275 Mon Sep 17 00:00:00 2001
@@ -63164,7 +63164,7 @@ index 0a3ebfdac794..75dbe77b0b4b 100644
  
  module_init(mod_init);
 -- 
-2.18.4
+2.39.0
 
 
 From dee08175a4a5429f78790fa8a653eefa3a027edc Mon Sep 17 00:00:00 2001
@@ -63695,7 +63695,7 @@ index 0d2a43a2d400..e173204ae7d7 100644
  
  free:
 -- 
-2.18.4
+2.39.0
 
 
 From 428ca3d8f9ace2f02f38a4bb945603ba171cb28a Mon Sep 17 00:00:00 2001
@@ -63736,7 +63736,7 @@ index a9edb6f8a0ba..3fcbe873f2f5 100644
  }
  
 -- 
-2.18.4
+2.39.0
 
 
 From 9298138b30f7f5045814215dba1d35067b7adf6e Mon Sep 17 00:00:00 2001
@@ -63772,7 +63772,7 @@ index b7197e80f226..9a4c8ff32d9d 100644
  	node->parent_bit_packed = (unsigned long)parent | bit;
  	rcu_assign_pointer(*parent, node);
 -- 
-2.18.4
+2.39.0
 
 
 From ce7f9d78d8d74ec00b5911b137a084cd4eec51f2 Mon Sep 17 00:00:00 2001
@@ -63809,7 +63809,7 @@ index 9e413e0ffa3f..30925b799b77 100644
  CONFIG_BLK_DEV_INITRD=y
  CONFIG_LEGACY_VSYSCALL_NONE=y
 -- 
-2.18.4
+2.39.0
 
 
 From e28bb21f8bf05144c997fc9ec84f019115423db4 Mon Sep 17 00:00:00 2001
@@ -63854,7 +63854,7 @@ index ebc4ee0fe179..2e5c1630885e 100755
  ip0 link del wg1
  ip1 link del wg0
 -- 
-2.18.4
+2.39.0
 
 
 From 84042297e06e182072fb77335a5904ae590e8b1a Mon Sep 17 00:00:00 2001
@@ -63915,7 +63915,7 @@ index 75dbe77b0b4b..ee4da9ab8013 100644
  MODULE_DESCRIPTION("WireGuard secure network tunnel");
  MODULE_AUTHOR("Jason A. Donenfeld <Jason@zx2c4.com>");
 -- 
-2.18.4
+2.39.0
 
 
 From 221e51c4b4f4db4a46973faffec43aaf209338c2 Mon Sep 17 00:00:00 2001
@@ -63952,7 +63952,7 @@ index b9c72706fe4d..80501d4e6ae3 100644
  CONFIG_SPARSE_RCU_POINTER=y
  CONFIG_RCU_CPU_STALL_TIMEOUT=21
 -- 
-2.18.4
+2.39.0
 
 
 From 52bcdce4ea30f4d9150b7039f708a0742c233961 Mon Sep 17 00:00:00 2001
@@ -64130,7 +64130,7 @@ index 2e5c1630885e..8a9461aa0878 100755
  		alldeleted=0
  	fi
 -- 
-2.18.4
+2.39.0
 
 
 From 520b1ef571c97638ee5049bbb800751519812059 Mon Sep 17 00:00:00 2001
@@ -64394,7 +64394,7 @@ index 7dc84bcca261..f4e537e3e8ec 100644
  	}
  	case cpu_to_le32(MESSAGE_DATA):
 -- 
-2.18.4
+2.39.0
 
 
 From a66b4743c97cb584c40efbd7d6afbca63e46ced6 Mon Sep 17 00:00:00 2001
@@ -64449,7 +64449,7 @@ index f4e537e3e8ec..7b8df406c773 100644
  						wg->dev->name, skb);
  			goto err;
 -- 
-2.18.4
+2.39.0
 
 
 From e019190b1489b1c708a3e6d3abf6f327aad8d715 Mon Sep 17 00:00:00 2001
@@ -64495,7 +64495,7 @@ index 3fedd1d21f5e..dd55e5c26f46 100644
  		kvfree(table_v4);
  		goto err_kmemcache;
 -- 
-2.18.4
+2.39.0
 
 
 From 73b272f90dd91ed4e03aeb317f496b59a536cd89 Mon Sep 17 00:00:00 2001
@@ -65566,7 +65566,7 @@ index 3fcbe873f2f5..d55fa9e9b9e6 100644
  
  static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
 -- 
-2.18.4
+2.39.0
 
 
 From e8c909fc21a7a5f699eaa5c450f6a5beeb270488 Mon Sep 17 00:00:00 2001
@@ -65615,7 +65615,7 @@ index 1de413b19e34..8084e7408c0a 100644
  
  #define NEXT(skb) ((skb)->prev)
 -- 
-2.18.4
+2.39.0
 
 
 From 70202561dcabb3031ce42079de118826cba0862a Mon Sep 17 00:00:00 2001
@@ -65686,7 +65686,7 @@ index c9698120ac9d..0b45055d9de0 100644
  	enable_logging();
  	clear_leaks();
 -- 
-2.18.4
+2.39.0
 
 
 From 0e9725840f931ae3e3098c90c19eac8069a35788 Mon Sep 17 00:00:00 2001
@@ -65743,7 +65743,7 @@ index bd887f33a3a8..db0d61e77d40 100644
  #endif
  }
 -- 
-2.18.4
+2.39.0
 
 
 From 44f1d90bed83ea07497435fcab1c066c683d710e Mon Sep 17 00:00:00 2001
@@ -65793,7 +65793,7 @@ index db0d61e77d40..9e0af9320c6b 100644
  		peer->endpoint.src6 = endpoint->src6;
  	} else {
 -- 
-2.18.4
+2.39.0
 
 
 From 0cda875126ddc39774f76e30939974e4e3d4b02c Mon Sep 17 00:00:00 2001
@@ -65835,7 +65835,7 @@ index 00a1ef4869d5..45dd53a0d760 100644
  CONFIG_SERIAL_8250_CONSOLE=y
  CONFIG_CMDLINE_BOOL=y
 -- 
-2.18.4
+2.39.0
 
 
 From 5ea67e6bc9fa50223d3ef6348866af23ed39c297 Mon Sep 17 00:00:00 2001
@@ -65938,7 +65938,7 @@ index efe5ace9d340..6f1edb22d900 100644
  	__skb_queue_head_init(&packets);
  	if (!skb_is_gso(skb)) {
 -- 
-2.18.4
+2.39.0
 
 
 From 4fa8bc1fdd6d843f8d6a1d6a78dda2cf8baab0c2 Mon Sep 17 00:00:00 2001
@@ -65991,7 +65991,7 @@ index 8a9461aa0878..8a543200a61a 100755
  ip0 link del wg1
  ip1 link del wg0
 -- 
-2.18.4
+2.39.0
 
 
 From 3df15ef0911a727f0a0b7d89bcaf4ab583498884 Mon Sep 17 00:00:00 2001
@@ -66060,7 +66060,7 @@ index 8a543200a61a..69c7796c7ca9 100755
  
  [[ $(ip1 link show dev wg0) =~ mtu\ ([0-9]+) ]] && orig_mtu="${BASH_REMATCH[1]}"
 -- 
-2.18.4
+2.39.0
 
 
 From 7bae33e788ef78f8b93b32545d4395addb70d375 Mon Sep 17 00:00:00 2001
@@ -66531,7 +66531,7 @@ index 000000000000..274a44f4e49c
 +CONFIG_S390_GUEST=y
 +CONFIG_CMDLINE="console=ttysclp0 wg.success=vport0p1"
 -- 
-2.18.4
+2.39.0
 
 
 From b16c995fe5656941cdab37ac6fea252f5cebf83b Mon Sep 17 00:00:00 2001
@@ -66607,7 +66607,7 @@ index 1031477d2d88..987eb2f952a0 100644
 +.PHONY: qemu build clean distclean cacheclean menuconfig
  .DELETE_ON_ERROR:
 -- 
-2.18.4
+2.39.0
 
 
 From 19b81aa9ed3358d08e4b691d8dd2ad88d38b3e34 Mon Sep 17 00:00:00 2001
@@ -66672,7 +66672,7 @@ index 987eb2f952a0..51649cffc06d 100644
  
  $(IPROUTE2_PATH)/ip/ip: | $(IPROUTE2_PATH)/.installed $(USERSPACE_DEPS)
 -- 
-2.18.4
+2.39.0
 
 
 From b33b459a4c28a40e53c812afd8e40caff2e436ed Mon Sep 17 00:00:00 2001
@@ -66896,7 +66896,7 @@ index 0b45055d9de0..2a0f48fac925 100644
  
  static void kmod_selftests(void)
 -- 
-2.18.4
+2.39.0
 
 
 From d0d610c254ea3e8b0ced33a2853efb3a2e8ee9f9 Mon Sep 17 00:00:00 2001
@@ -67049,7 +67049,7 @@ index 2a0f48fac925..542c34b00eb0 100644
  	enable_logging();
  	clear_leaks();
 -- 
-2.18.4
+2.39.0
 
 
 From d464ac26e127868e565fbcdff0d3cb048a18be67 Mon Sep 17 00:00:00 2001
@@ -67095,7 +67095,7 @@ index 51649cffc06d..8e053d0a3560 100644
  $(TOOLCHAIN_PATH)/$(CHOST)/include/linux/.installed: | $(KERNEL_BUILD_PATH)/.config $(TOOLCHAIN_PATH)/.installed
  	rm -rf $(TOOLCHAIN_PATH)/$(CHOST)/include/linux
 -- 
-2.18.4
+2.39.0
 
 
 From 75b996084918a6c2877ccb4808ecf715c6cfb438 Mon Sep 17 00:00:00 2001
@@ -67184,5 +67184,5 @@ index efa00693e08b..cf2d1376d121 100644
 +CONFIG_CMDLINE="console=ttyS0 wg.success=vport0p1 panic_on_warn=1 reboot=t"
  CONFIG_FRAME_WARN=1280
 -- 
-2.18.4
+2.39.0
 
