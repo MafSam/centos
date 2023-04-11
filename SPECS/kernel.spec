@@ -3017,6 +3017,9 @@ fi
 #
 #
 %changelog
+* Tue Apr 11 2023 CentOS Sources <bugs@centos.org> - 5.14.0-162.23.1.el9.centos
+- Apply debranding changes
+
 * Thu Mar 23 2023 Patrick Talbert <ptalbert@redhat.com> [5.14.0-162.23.1.el9_1]
 - ovl: fail on invalid uid/gid mapping at copy up (Miklos Szeredi) [2165344 2165345] {CVE-2023-0386}
 - intel_idle: make SPR C1 and C1E be independent (David Arcari) [2168361 2125352]
