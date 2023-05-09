@@ -3437,6 +3437,9 @@ fi
 #
 #
 %changelog
+* Tue May 09 2023 CentOS Sources <bugs@centos.org> - 5.14.0-284.11.1.el9.centos
+- Apply debranding changes
+
 * Wed Apr 12 2023 Herton R. Krzesinski <herton@redhat.com> [5.14.0-284.11.1.el9_2]
 - vfio: Make the group FD disassociate from the iommu_group (Alex Williamson) [2180649]
 - vfio: Hold a reference to the iommu_group in kvm for SPAPR (Alex Williamson) [2180649]
