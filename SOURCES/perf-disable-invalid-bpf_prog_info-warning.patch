@@ -1,0 +1,14 @@
+--- a/tools/perf/util/header.c
++++ b/tools/perf/util/header.c
+@@ -3044,11 +3044,6 @@ static int process_bpf_prog_info(struct
+ 		if (do_read_u32(ff, &data_len))
+ 			goto out;
+ 
+-		if (info_len > sizeof(struct bpf_prog_info)) {
+-			pr_warning("detected invalid bpf_prog_info\n");
+-			goto out;
+-		}
+-
+ 		info_linear = malloc(sizeof(struct bpf_prog_info_linear) +
+ 				     data_len);
+ 		if (!info_linear)

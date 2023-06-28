@@ -115,7 +115,7 @@ Summary: The Linux kernel
 %define patchlevel 14
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 76.hs2%{?buildid}%{?dist}
+%define specrelease 76.hs3%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}
 
@@ -799,6 +799,10 @@ Source4000: README.rst
 %if !%{nopatches}
 
 Patch1: patch-%{stableversion}-redhat.patch
+
+Patch100: perf-disable-invalid-bpf_prog_info-warning.patch
+Patch101: fix-for-pahole-1-24.patch
+
 %endif
 
 # empty final patch to facilitate testing of kernel patches
@@ -1312,6 +1316,11 @@ ApplyOptionalPatch patch-%{stableversion}-redhat.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
+
+# this causes perf to abort; disable it
+ApplyPatch perf-disable-invalid-bpf_prog_info-warning.patch
+# support building with pahole >= 1.24
+ApplyPatch fix-for-pahole-1-24.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2833,6 +2842,11 @@ fi
 #
 #
 %changelog
+* Wed Jun 28 2023 Michel Alexandre Salim <salimma@centosproject.org> - 5.14.0-76.hs3.el8
+- Hotfix build
+- Disable invalid bpf_prog_info check as it causes perf to abort
+- Support building with pahole >= 1.24
+
 * Wed Jul 06 2022 Davide Cavalca <dcavalca@centosproject.org> - 5.14.0-76.hs2.el8
 - Hotfix build
 - Drop perl dependency for perf on el8 to avoid modularity issues
