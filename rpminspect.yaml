@@ -2,8 +2,6 @@
 
 ---
 inspections:
-    abidiff: off
-    kmidiff: off
     upstream: off
 
 badfuncs:
@@ -25,7 +23,7 @@ emptyrpm:
 patches:
     ignore_list:
         - linux-kernel-test.patch
-        - patch-5.14-redhat.patch
+        - patch-6.7-redhat.patch
 
 runpath:
     ignore:
