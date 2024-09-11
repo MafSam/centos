@@ -159,19 +159,19 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid 2
+%define buildid 3
 %define specrpmversion 6.10.9
 %define specversion 6.10.9
 %define patchversion 6.10
-%define pkgrelease 0.hs2
+%define pkgrelease 0.hs3
 %define kversion 6
-%define tarfile_release 6.10.9-0.hs2.el10
+%define tarfile_release 6.10.9-0.hs3.el10
 # This is needed to do merge window version magic
 %define patchlevel 10
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 0.hs%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.10.9-0.hs2.el10
+%define kabiversion 6.10.9-0.hs3.el10
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -2909,10 +2909,12 @@ fi
 %global perf_build_extra_opts CORESIGHT=1
 %endif
 %if 0%{?facebook}
-%global perf_build_extra_opts %{perf_build_extra_opts} NO_LIBPERL=1
+%global perf_build_extra_opts_ex %{perf_build_extra_opts} NO_LIBPERL=1
+%else
+%global perf_build_extra_opts_ex %{perf_build_extra_opts}
 %endif
 %global perf_make \
-  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 %{?perf_libbpf_dynamic} LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
+  %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 %{?perf_libbpf_dynamic} LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts_ex} prefix=%{_prefix} PYTHON=%{__python3}
 %if %{with_perf}
 %{log_msg "Build perf"}
 # perf
@@ -4059,6 +4061,9 @@ fi\
 #
 #
 %changelog
+* Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs3]
+- redhat/kernel: fix macro infinite recursion issue (Davide Cavalca)
+
 * Tue Sep 10 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs2]
 - redhat/kernel: disable perl support in perf for Hyperscale Facebook (Davide Cavalca)
 

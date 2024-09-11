@@ -1,3 +1,7 @@
+* Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs3]
+- redhat/kernel: fix macro infinite recursion issue (Davide Cavalca)
+Resolves: 
+
 * Tue Sep 10 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs2]
 - redhat/kernel: disable perl support in perf for Hyperscale Facebook (Davide Cavalca)
 Resolves: 
