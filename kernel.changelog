@@ -1,3 +1,7 @@
+* Tue Sep 10 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs2]
+- redhat/kernel: disable perl support in perf for Hyperscale Facebook (Davide Cavalca)
+Resolves: 
+
 * Mon Sep 09 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs1]
 - sign-file,extract-cert: use pkcs11 provider for OPENSSL MAJOR >= 3 (Jan Stancek)
 - sign-file,extract-cert: avoid using deprecated ERR_get_error_line() (Jan Stancek)

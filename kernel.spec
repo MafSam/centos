@@ -159,19 +159,19 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid 1
+%define buildid 2
 %define specrpmversion 6.10.9
 %define specversion 6.10.9
 %define patchversion 6.10
-%define pkgrelease 0.hs1
+%define pkgrelease 0.hs2
 %define kversion 6
-%define tarfile_release 6.10.9-0.hs1.el10
+%define tarfile_release 6.10.9-0.hs2.el10
 # This is needed to do merge window version magic
 %define patchlevel 10
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 0.hs%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.10.9-0.hs1.el10
+%define kabiversion 6.10.9-0.hs2.el10
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -685,7 +685,10 @@ BuildRequires: xmlto, asciidoc, python3-sphinx, python3-sphinx_rtd_theme
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: zlib-devel binutils-devel newt-devel perl(ExtUtils::Embed) bison flex xz-devel
+BuildRequires: zlib-devel binutils-devel newt-devel bison flex xz-devel
+%if ! 0%{?facebook}
+BuildRequires: perl(ExtUtils::Embed)
+%endif
 BuildRequires: audit-libs-devel python3-setuptools
 BuildRequires: java-devel
 BuildRequires: libbpf-devel >= 0.6.0-1
@@ -2905,6 +2908,9 @@ fi
 %ifarch aarch64
 %global perf_build_extra_opts CORESIGHT=1
 %endif
+%if 0%{?facebook}
+%global perf_build_extra_opts %{perf_build_extra_opts} NO_LIBPERL=1
+%endif
 %global perf_make \
   %{__make} %{?make_opts} EXTRA_CFLAGS="${RPM_OPT_FLAGS}" EXTRA_CXXFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags} -Wl,-E" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 %{?perf_libbpf_dynamic} LIBTRACEEVENT_DYNAMIC=1 %{?perf_build_extra_opts} prefix=%{_prefix} PYTHON=%{__python3}
 %if %{with_perf}
@@ -3235,6 +3241,12 @@ mkdir -p %{buildroot}/%{_mandir}/man1
 # LIBTRACEEVENT_DYNAMIC=1 above in perf_make macro). Those files should already
 # ship with libtraceevent package.
 rm -rf %{buildroot}%{_libdir}/traceevent
+
+%if 0%{?facebook}
+rm %{buildroot}%{_libexecdir}/perf-core/tests/shell/common/check_all_lines_matched.pl
+rm %{buildroot}%{_libexecdir}/perf-core/tests/shell/common/check_all_patterns_found.pl
+rm %{buildroot}%{_libexecdir}/perf-core/tests/shell/common/check_no_patterns_found.pl
+%endif
 %endif
 
 %if %{with_libperf}
@@ -4047,6 +4059,9 @@ fi\
 #
 #
 %changelog
+* Tue Sep 10 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs2]
+- redhat/kernel: disable perl support in perf for Hyperscale Facebook (Davide Cavalca)
+
 * Mon Sep 09 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs1]
 - sign-file,extract-cert: use pkcs11 provider for OPENSSL MAJOR >= 3 (Jan Stancek)
 - sign-file,extract-cert: avoid using deprecated ERR_get_error_line() (Jan Stancek)
