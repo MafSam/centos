@@ -1,3 +1,7 @@
+* Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs4]
+- redhat/kernel: fix macro infinite recursion issue (take 2) (Davide Cavalca)
+Resolves: 
+
 * Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs3]
 - redhat/kernel: fix macro infinite recursion issue (Davide Cavalca)
 Resolves: 

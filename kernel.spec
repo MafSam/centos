@@ -159,19 +159,19 @@ Summary: The Linux kernel
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
-%define buildid 3
+%define buildid 4
 %define specrpmversion 6.10.9
 %define specversion 6.10.9
 %define patchversion 6.10
-%define pkgrelease 0.hs3
+%define pkgrelease 0.hs4
 %define kversion 6
-%define tarfile_release 6.10.9-0.hs3.el10
+%define tarfile_release 6.10.9-0.hs4.el10
 # This is needed to do merge window version magic
 %define patchlevel 10
 # This allows pkg_release to have configurable %%{?dist} tag
 %define specrelease 0.hs%{?buildid}%{?dist}
 # This defines the kabi tarball version
-%define kabiversion 6.10.9-0.hs3.el10
+%define kabiversion 6.10.9-0.hs4.el10
 
 # If this variable is set to 1, a bpf selftests build failure will cause a
 # fatal kernel package build error
@@ -2907,6 +2907,8 @@ fi
 
 %ifarch aarch64
 %global perf_build_extra_opts CORESIGHT=1
+%else
+%global perf_build_extra_opts %{nil}
 %endif
 %if 0%{?facebook}
 %global perf_build_extra_opts_ex %{perf_build_extra_opts} NO_LIBPERL=1
@@ -4061,6 +4063,9 @@ fi\
 #
 #
 %changelog
+* Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs4]
+- redhat/kernel: fix macro infinite recursion issue (take 2) (Davide Cavalca)
+
 * Wed Sep 11 2024 Neal Gompa <ngompa@centosproject.org> [6.10.9-0.hs3]
 - redhat/kernel: fix macro infinite recursion issue (Davide Cavalca)
 
